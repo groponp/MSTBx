@@ -1,0 +1,78 @@
+################### Structure ###################
+structure               ../01build/ubq.psf
+coordinates             ../01build/ubq.pdb
+
+################### Variables ###################
+set temp  310.0
+set outputname npt
+outputName              $outputname
+
+################### Output Parameters ###################
+binaryoutput    no
+outputenergies  500
+outputtiming    500
+outputpressure  500
+binaryrestart   yes
+dcdfile         $outputname.dcd
+dcdfreq         5000
+XSTFreq         5000
+restartfreq     5000
+restartname     $outputname.restart
+
+################### Harmonic constriants ###################
+
+constraints     on
+consref         ../restraints/prot_posres.ref
+conskfile       ../restraints/prot_posres.ref
+constraintScaling 1.0
+conskcol         B
+
+################### Thermostat and Barostat ###################
+langevin        on
+langevintemp    $temp
+langevinHydrogen off
+langevindamping  1
+
+usegrouppressure    yes
+useflexiblecell     no
+useConstantArea     no
+
+langevinpiston      on
+langevinpistontarget 1.01325
+langevinpistonperiod 50.0
+langevinpistondecay 25.0
+langevinpistontemp  $temp
+
+################### Integrator ###################
+timestep    2.0
+firstTimestep 0
+fullElectFrequency 1
+nonbondedfreq 1
+cutoff      12.0
+pairlistdist 14.0
+switching   on
+vdwForceSwitching on
+switchdist  10.0
+PME         on
+PMEGridspacing 1
+wrapAll     on
+wrapWater   on
+exclude scaled1-4
+1-4scaling 1.0
+rigidbonds all
+
+################### FF ###################
+paraTypeCharmm          on;                 # We're using charmm type parameter file(s)
+set files [glob "../toppar/*"]
+foreach file $files {
+   parameters		$file 
+}
+
+################### Running Script ###################
+set inputname  ../02nvt/nvt
+binCoordinates $inputname.restart.coor
+extendedSystem $inputname.restart.xsc
+binvelocities  $inputname.restart.vel
+
+# equilibration with constraint during 5 ns 
+run 2500000

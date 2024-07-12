@@ -1,0 +1,373 @@
+Info) VMD for LINUXAMD64, version 1.9.4a57 (April 27, 2022)
+Info) http://www.ks.uiuc.edu/Research/vmd/                         
+Info) Email questions and bug reports to vmd@ks.uiuc.edu           
+Info) Please include this reference in published work using VMD:   
+Info)    Humphrey, W., Dalke, A. and Schulten, K., `VMD - Visual   
+Info)    Molecular Dynamics', J. Molec. Graphics 1996, 14.1, 33-38.
+Info) -------------------------------------------------------------
+Info) Multithreading available, 12 CPUs.
+Info)   CPU features: SSE2 SSE4.1 AVX AVX2 FMA F16 HT 
+Info) Free system memory: 18GB (57%)
+Info) No CUDA accelerator devices available.
+Info) Dynamically loaded 3 plugins in directory:
+Info) /usr/local/lib/vmd/plugins/LINUXAMD64/molfile
+Invalid axes location: on
+FLTK
+step4_lipid.psf
+step4_lipid.pdb
+solvated
+aqp
+0.15
+0
+psfplugin) Detected a Charmm PSF file
+psfplugin) Detected a Charmm PSF EXTEnded file
+Info) Using plugin psf for structure file step4_lipid.psf
+Info) Analyzing structure ...
+Info)    Atoms: 48572
+Info)    Bonds: 48522
+Info)    Angles: 91604  Dihedrals: 129492  Impropers: 2840  Cross-terms: 960
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 1218
+Info)    Waters: 0
+Info)    Segments: 5
+Info)    Fragments: 254   Protein: 4   Nucleic: 0
+0
+Info) Using plugin pdb for coordinates from file step4_lipid.pdb
+Info) Finished with coordinate file step4_lipid.pdb.
+0
+psfplugin) Detected a Charmm PSF file
+psfplugin) Detected a Charmm PSF EXTEnded file
+Info) Using plugin psf for structure file step4_lipid.psf
+Info) Analyzing structure ...
+Info)    Atoms: 48572
+Info)    Bonds: 48522
+Info)    Angles: 91604  Dihedrals: 129492  Impropers: 2840  Cross-terms: 960
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 1218
+Info)    Waters: 0
+Info)    Segments: 5
+Info)    Fragments: 254   Protein: 4   Nucleic: 0
+1
+Info) Using plugin pdb for coordinates from file step4_lipid.pdb
+Info) Finished with coordinate file step4_lipid.pdb.
+1
+atomselect0
+{-56.487998962402344 -56.96500015258789 -25.134000778198242} {57.54499816894531 57.91899871826172 27.916000366210938}
+114.03299713134766 114.88399887084961 53.05000114440918
+114.03299713134766
+57.01649856567383
+114.03299713134766 114.88399887084961 53.05000114440918
+48.52500057220459
+-57.01649856567383
+-57.01649856567383
+-48.52500057220459
+-57.01649856567383 -57.01649856567383 -48.52500057220459
+57.01649856567383
+57.01649856567383
+48.52500057220459
+57.01649856567383 57.01649856567383 48.52500057220459
+1.7
+Info) generating solute plus one replica of water...
+psfgen) reading structure from psf file step4_lipid.psf
+psfgen) reading coordinates, insertion codes, and element symbols from pdb file step4_lipid.pdb
+psfgen) reading structure from psf file /usr/local/lib/vmd/plugins/noarch/tcl/solvate1.7/wat.psf
+psfgen) reading coordinates, insertion codes, and element symbols from pdb file /usr/local/lib/vmd/plugins/noarch/tcl/solvate1.7/wat.pdb
+psfgen) psf file does not contain cross-terms
+psfgen) Info: writing psf file combine.psf
+psfgen) total of 76355 atoms
+psfgen) total of 67044 bonds
+psfgen) total of 110126 angles
+psfgen) total of 129492 dihedrals
+psfgen) total of 2840 impropers
+psfgen) total of 0 explicit exclusions
+psfgen) total of 960 cross-terms
+psfgen) Info: psf file complete.
+psfgen) Info: writing pdb file combine.pdb
+psfgen) Info: pdb file complete.
+psfplugin) Detected a Charmm PSF file
+Info) Using plugin psf for structure file combine.psf
+Info) Analyzing structure ...
+Info)    Atoms: 76355
+Info)    Bonds: 67044
+Info)    Angles: 110126  Dihedrals: 129492  Impropers: 2840  Cross-terms: 960
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 10479
+Info)    Waters: 9261
+Info)    Segments: 6
+Info)    Fragments: 9515   Protein: 4   Nucleic: 0
+Info) Using plugin pdb for coordinates from file combine.pdb
+Info) Finished with coordinate file combine.pdb.
+Info) generating water residue lists...
+Info) single water residue type, creating residue list...
+Info) replicating 8 water segments, 2 by 2 by 2
+psfgen) reading topology file /usr/local/lib/vmd/plugins/noarch/tcl/solvate1.7/wat.top
+
+psfgen) >>>>>> Combined CHARMM All-Hydrogen Topology File for <<<<<<<<<
+psfgen) >>>>>>>>> CHARMM22 Proteins and CHARMM27 Lipids <<<<<<<<<<
+psfgen) from
+psfgen) >>>>>>>>CHARMM22 All-Hydrogen Topology File for Proteins <<<<<<
+psfgen) >>>>>>>>>>>>>>>>>>>>> August 1999 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+psfgen) >>>>>>> Direct comments to Alexander D. MacKerell Jr. <<<<<<<<<
+psfgen) >>>>>> 410-706-7442 or email: alex,mmiris.ab.umd.edu  <<<<<<<<<
+psfgen) and
+psfgen)   \\\\\\\ CHARMM27 All-Hydrogen Lipid Topology File ///////
+psfgen)   \\\\\\\\\\\\\\\\\\ Developmental /////////////////////////
+psfgen) 		Alexander D. MacKerell Jr.
+psfgen) 			August 1999
+psfgen)  All comments to ADM jr.  email: alex,mmiris.ab.umd.edu
+psfgen) 		telephone: 410-706-7442
+psfgen) 
+psfgen) Created by CHARMM version 27 1
+psfgen) building segment W1
+psfgen) setting patch for first residue to NONE
+psfgen) setting patch for last residue to NONE
+Info: generating structure...
+segment complete.
+psfgen) building segment W2
+psfgen) setting patch for first residue to NONE
+psfgen) setting patch for last residue to NONE
+Info: generating structure...
+segment complete.
+psfgen) building segment W3
+psfgen) setting patch for first residue to NONE
+psfgen) setting patch for last residue to NONE
+Info: generating structure...
+segment complete.
+psfgen) building segment W4
+psfgen) setting patch for first residue to NONE
+psfgen) setting patch for last residue to NONE
+Info: generating structure...
+segment complete.
+psfgen) building segment W5
+psfgen) setting patch for first residue to NONE
+psfgen) setting patch for last residue to NONE
+Info: generating structure...
+segment complete.
+psfgen) building segment W6
+psfgen) setting patch for first residue to NONE
+psfgen) setting patch for last residue to NONE
+Info: generating structure...
+segment complete.
+psfgen) building segment W7
+psfgen) setting patch for first residue to NONE
+psfgen) setting patch for last residue to NONE
+Info: generating structure...
+segment complete.
+psfgen) building segment W8
+psfgen) setting patch for first residue to NONE
+psfgen) setting patch for last residue to NONE
+Info: generating structure...
+segment complete.
+psfgen) Info: writing psf file solvated.psf
+psfgen) total of 115871 atoms
+psfgen) total of 93388 bonds
+psfgen) total of 114037 angles
+psfgen) total of 129492 dihedrals
+psfgen) total of 2840 impropers
+psfgen) total of 0 explicit exclusions
+psfgen) total of 960 cross-terms
+psfgen) Info: psf file complete.
+psfgen) Info: writing pdb file solvated.pdb
+psfgen) Info: pdb file complete.
+psfgen) clearing structure, preserving topology and aliases
+psfplugin) Detected a Charmm PSF file
+Info) Using plugin psf for structure file solvated.psf
+Info) Analyzing structure ...
+Info)    Atoms: 115871
+Info)    Bonds: 93388
+Info)    Angles: 114037  Dihedrals: 129492  Impropers: 2840  Cross-terms: 960
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 23651
+Info)    Waters: 22433
+Info)    Segments: 13
+Info)    Fragments: 22687   Protein: 4   Nucleic: 0
+Info) Using plugin pdb for coordinates from file solvated.pdb
+Info) Finished with coordinate file solvated.pdb.
+Info) Opened coordinate file solvated.pdb for writing.
+Info) Finished with coordinate file solvated.pdb.
+Info) Extra structure overlap safety check...
+Info) Solvate completed successfully.
+psfplugin) Detected a Charmm PSF file
+Info) Using plugin psf for structure file solvated.psf
+Info) Analyzing structure ...
+Info)    Atoms: 115871
+Info)    Bonds: 93388
+Info)    Angles: 114037  Dihedrals: 129492  Impropers: 2840  Cross-terms: 960
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 23651
+Info)    Waters: 22433
+Info)    Segments: 13
+Info)    Fragments: 22687   Protein: 4   Nucleic: 0
+4
+Info) Using plugin pdb for coordinates from file solvated.pdb
+Info) Finished with coordinate file solvated.pdb.
+4
+atomselect13
+atomselect14
+atomselect15
+1035
+2856
+atomselect16
+W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W1 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W2 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W3 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W4 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W5 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W6 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W7 W8 W8 W8 W8 W8 W8 W8 W8 W8 W8 W8 W8 W8 W8 W8 W8 W8 W8 W8 W8
+17 38 42 98 101 103 123 159 168 219 275 301 345 352 360 373 380 393 394 399 405 410 418 475 516 536 538 545 589 629 637 650 723 737 790 812 815 818 820 844 856 860 871 884 904 920 938 979 1000 1038 1060 1070 1071 1083 1125 1170 1172 1173 1249 1264 1274 1288 1289 1319 1362 1380 1434 1483 1619 1671 1682 1692 1697 1700 1754 1758 1761 1763 1780 1843 1941 1951 1963 2012 2089 2139 2157 2197 2215 2410 2493 2495 2549 2551 2585 2662 2666 2671 2684 2730 2749 2855 2962 3001 3024 3055 3106 3148 3149 3170 3171 3191 3209 3291 3370 3391 3416 3448 3475 3487 3500 3507 3524 3540 3686 3710 3834 3872 3877 3887 3900 3915 3922 3944 3960 3970 3990 4008 4065 4092 4125 4126 4127 4228 4260 4316 4318 4331 4390 4402 4418 4428 4433 4439 4443 4449 4472 4483 4494 4555 4598 4640 4698 4739 4758 4799 4800 4862 4891 4900 4932 4947 4970 5026 5047 5056 5098 5112 5176 5199 5212 5217 5220 5252 5261 5262 5282 5322 5327 5330 5347 5361 5451 5454 5509 5572 5594 5657 5660 5663 5699 5718 5722 5766 5783 5851 5858 5908 5930 5954 5974 5984 6033 6039 6127 6140 6172 6208 6244 6262 6298 6415 6434 6503 6544 6560 6581 6604 6608 6634 6635 6697 6711 6712 6717 6736 6777 6820 6837 6843 6862 6897 6899 6917 6922 6990 7016 7026 7046 7047 7060 7093 7172 7217 7231 7233 7281 7329 7332 7338 7424 7442 7445 7458 7469 7472 7514 7540 7548 7620 7621 7624 7672 7680 7683 7699 7723 7760 7783 7826 7845 7867 7885 7889 7896 7906 7908 7924 7955 7958 7978 8016 8036 8059 8102 8105 8134 8144 8179 8266 8282 8293 8294 8303 8306 8330 8335 8348 8371 8390 8412 8483 8494 8497 8502 8523 8552 8566 8577 8639 8729 8730 8740 8750 8753 8771 8773 8810 8825 8828 8833 8837 8876 8880 8918 8934 8955 8957 9000 9040 9061 9062 9101 9104 9109 9121 9148 9164 9188 9197 9212 9218 273 341 562 735 1119 1227 1764 2059 2084 2170 2378 2547 2983 3409 3429 3488 3492 3650 3804 3875 3994 4246 4492 4833 4956 5063 5064 5108 5128 5275 5315 5357 5483 5486 5510 6091 6092 6110 6112 6132 6177 6471 6656 6762 6866 7014 7017 7107 7207 7229 7269 7287 7353 7395 7793 7796 8047 8211 8506 8572 8590 8797 8863 9219 9223 19 75 81 122 127 158 168 200 209 213 246 284 292 462 487 501 504 539 555 563 586 726 798 919 986 1008 1065 1082 1126 1128 1148 1211 1213 1238 1382 1383 1397 1399 1434 1448 1469 1507 1527 1637 1672 1678 1682 1718 1756 1779 1817 1909 1929 1989 1996 2011 2053 2116 2130 2136 2145 2195 2249 2268 2303 2326 2363 2371 2412 2437 2516 2561 2579 2585 2618 2705 2721 2808 2870 2879 2933 2999 3045 3066 3104 3125 3160 3191 3259 3318 3421 3602 3699 3712 3713 3742 3781 3815 3830 3839 3918 4106 4155 4170 4196 4270 4285 4442 4547 4556 4557 4594 4595 4601 4607 4724 4742 4757 4815 4974 5051 5102 5115 5120 5124 5302 5334 5447 5519 5744 5848 5849 5953 5995 6007 6205 6232 6249 6262 6279 6327 6346 6362 6363 6687 6707 6718 6723 6749 6772 6780 6799 6804 6847 6860 6898 6917 7114 7132 7201 7244 7256 7327 7375 7547 7551 7606 7622 7627 7636 7639 7674 7709 7819 7901 7923 7929 7991 8011 8057 8158 8180 8205 8230 8238 8266 8286 8399 8423 8469 8542 8547 8586 8608 8625 8639 8649 8729 8735 8856 8879 8942 9040 9070 9135 9224 9252 9255 23 87 109 144 424 484 823 993 1051 1617 1764 1978 2582 3085 3612 3993 4835 4915 5193 5271 5442 5461 5692 5764 5819 5836 5841 5905 5920 6176 6303 6328 6357 6575 6786 6826 7143 7229 7267 7435 7455 7480 7493 8004 8084 8092 8129 8319 8425 8447 17 242 442 448 501 523 544 606 668 687 701 712 727 756 761 767 810 830 870 934 941 1020 1068 1087 1099 1164 1191 1234 1280 1289 1309 1316 1362 1467 1485 1550 1566 1591 1649 1755 1777 1802 1899 1923 1932 1947 1981 2067 2098 2107 2134 2153 2237 2248 2263 2301 2387 2425 2427 2432 2453 2455 2462 2487 2495 2536 2592 2594 2626 2641 2683 2688 2711 2879 2929 2953 2965 3024 3032 3098 3145 3147 3245 3292 3338 3355 3375 3412 3432 3434 3436 3440 3456 3519 3543 3546 3547 3552 3565 3589 3746 3749 3752 3817 3839 3855 3906 3910 3964 3967 3968 3982 3985 3989 4050 4061 4134 4151 4189 4217 4230 4232 4255 4286 4333 4364 4412 4441 4475 4476 4486 4527 4531 4568 4634 4636 4639 4677 4683 4733 4739 4745 4783 4799 4803 4844 4886 4900 4947 4955 4992 5024 5072 5103 5114 5116 5135 5157 5160 5273 5289 5306 5327 5328 5338 5349 5351 5353 5361 5397 5407 5411 5412 5477 5503 5517 5542 5560 5598 5722 5727 5786 5809 5814 5873 5912 5931 5937 5980 6032 6038 6063 6196 6208 6250 6254 6260 6265 6278 6312 6315 6334 6356 6360 6395 6482 6489 6546 6570 6589 6604 6617 6666 6714 6716 6728 6738 6905 6921 6989 7029 7050 7071 7088 7110 7176 7257 7285 7286 7326 7412 7456 7472 7508 7614 7693 7697 7768 7896 7925 7953 7996 8010 8013 8142 8148 8251 8356 8651 8727 8776 8815 8851 8898 8923 9044 9174 9182 2 146 149 196 258 335 344 801 846 1284 1326 1605 1701 1784 1791 1824 1918 2037 2539 2563 2565 2960 2983 3086 3424 3531 3594 3737 3885 3907 4473 4934 5189 6068 7200 7979 8173 8908 8927 9035 9198 116 207 311 534 598 615 671 777 878 917 949 962 975 1073 1090 1111 1125 1216 1221 1237 1257 1272 1275 1473 1502 1602 1651 1652 1682 1794 1842 1926 1945 1985 2017 2080 2121 2127 2141 2162 2266 2278 2291 2299 2321 2344 2350 2384 2428 2455 2488 2507 2603 2660 2750 2811 2835 2892 2937 3107 3167 3191 3194 3212 3228 3245 3313 3315 3352 3378 3379 3436 3611 3666 3813 3815 3838 3854 4000 4061 4088 4124 4156 4221 4222 4526 4527 4531 4574 4650 4696 4799 4884 4928 4929 4993 5018 5103 5105 5144 5167 5273 5306 5314 5325 5368 5479 5492 5599 5601 5668 5727 5916 6017 6032 6124 6193 6224 6250 6265 6306 6308 6489 6604 6644 6669 6714 6728 6878 6909 7082 7096 7098 7154 7202 7238 7259 7266 7280 7285 7308 7361 7432 7677 7722 7873 7896 7973 8013 8058 8149 8195 8206 8222 8247 8312 8314 8356 8370 8575 8612 8651 8658 8756 8956 9023 9044 9071 9118 125 255 507 634 1451 1771 1831 2123 2231 2395 2582 3073 3129 4037 4890 7707 7853 8466 8528 8691
+2.0
+psfgen) clearing structure, preserving topology and aliases
+psfgen) reading structure from psf file solvated.psf
+psfgen) reading coordinates from pdb file solvated.pdb
+psfgen) Info: writing psf file solvated_removeW.psf
+psfgen) total of 112382 atoms
+psfgen) total of 91062 bonds
+psfgen) total of 112874 angles
+psfgen) total of 129492 dihedrals
+psfgen) total of 2840 impropers
+psfgen) total of 0 explicit exclusions
+psfgen) total of 960 cross-terms
+psfgen) Info: psf file complete.
+psfgen) Info: writing pdb file solvated_removeW.pdb
+psfgen) Info: pdb file complete.
+1.5
+Autoionize) Reading solvated_removeW.psf/solvated_removeW.pdb...
+psfgen) clearing structure, preserving topology and aliases
+psfgen) reading structure from psf file solvated_removeW.psf
+psfgen) reading coordinates, insertion codes, and element symbols from pdb file solvated_removeW.pdb
+psfplugin) Detected a Charmm PSF file
+Info) Using plugin psf for structure file solvated_removeW.psf
+Info) Analyzing structure ...
+Info)    Atoms: 112382
+Info)    Bonds: 91062
+Info)    Angles: 112874  Dihedrals: 129492  Impropers: 2840  Cross-terms: 960
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 22488
+Info)    Waters: 21270
+Info)    Segments: 13
+Info)    Fragments: 21524   Protein: 4   Nucleic: 0
+Info) Using plugin pdb for coordinates from file solvated_removeW.pdb
+Info) Finished with coordinate file solvated_removeW.pdb.
+Autoionize) System net charge before adding ions: 8.000021174550056e.
+Autoionize) Number of ions required for neutralizing the system: 0 SOD and 8 CLA.
+Autoionize) Desired salt concentration: 0.15 mol/L.
+Autoionize) Ions to be placed:
+Autoionize)   60 SOD
+Autoionize)   68 CLA
+Autoionize) Required min distance from molecule: 5A.
+Autoionize) Required min distance between ions: 5A.
+Autoionize) Output file prefix 'ionized'.
+Autoionize) Ions will be added to segname ION.
+Autoionize) Obtained positions for 128 ions.
+Autoionize) Tagged 128 water molecules for deletion.
+Autoionize) Deleted 128 water molecules.
+Autoionize) Reading CHARMM topology file...
+psfgen) reading topology file /usr/local/lib/vmd/plugins/noarch/tcl/readcharmmtop1.2/toppar_water_ions_namd.str
+
+psfgen)  Toplogy and parameter information for water and ions.
+psfgen) 
+psfgen) reading topology from stream file
+psfgen)  Topology for water and ions
+psfgen) 
+psfgen) Created by CHARMM version 31 1
+psfgen) skipping parameters in stream file
+psfgen)  Parameters for water and ions
+psfgen) 
+psfgen) skipping parameters in stream file
+psfgen)  NBFix between carboxylate and sodium
+psfgen) 
+psfgen) building segment ION
+psfgen) setting patch for first residue to NONE
+psfgen) setting patch for last residue to NONE
+Info: generating structure...
+segment complete.
+Autoionize) Randomizing ion positions...
+Autoionize) Assigning ion coordinates...
+psfgen) Info: writing psf file ionized.psf
+psfgen) total of 112126 atoms
+psfgen) total of 90806 bonds
+psfgen) total of 112746 angles
+psfgen) total of 129492 dihedrals
+psfgen) total of 2840 impropers
+psfgen) total of 0 explicit exclusions
+psfgen) total of 960 cross-terms
+psfgen) Info: psf file complete.
+psfgen) Info: writing pdb file ionized.pdb
+psfgen) Info: pdb file complete.
+Autoionize) Loading new system with added ions...
+psfplugin) Detected a Charmm PSF file
+Info) Using plugin psf for structure file ionized.psf
+Info) Analyzing structure ...
+Info)    Atoms: 112126
+Info)    Bonds: 90806
+Info)    Angles: 112746  Dihedrals: 129492  Impropers: 2840  Cross-terms: 960
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 22488
+Info)    Waters: 21142
+Info)    Segments: 14
+Info)    Fragments: 21524   Protein: 4   Nucleic: 0
+Info) Using plugin pdb for coordinates from file ionized.pdb
+Info) Finished with coordinate file ionized.pdb.
+Info) Opened coordinate file ionized.pdb for writing.
+Info) Finished with coordinate file ionized.pdb.
+Autoionize) System net charge after adding ions: 2.117455005645752e-5e.
+Autoionize) All done.
+psfplugin) Detected a Charmm PSF file
+Info) Using plugin psf for structure file ionized.psf
+Info) Analyzing structure ...
+Info)    Atoms: 112126
+Info)    Bonds: 90806
+Info)    Angles: 112746  Dihedrals: 129492  Impropers: 2840  Cross-terms: 960
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 22488
+Info)    Waters: 21142
+Info)    Segments: 14
+Info)    Fragments: 21524   Protein: 4   Nucleic: 0
+7
+Info) Using plugin pdb for coordinates from file ionized.pdb
+Info) Finished with coordinate file ionized.pdb.
+7
+atomselect162
+-0.13805335760116577 0.020556852221488953 0.013405615463852882
+{1.0 0.0 0.0 0.13805335760116577} {0.0 1.0 0.0 -0.020556852221488953} {0.0 0.0 1.0 -0.013405615463852882} {0.0 0.0 0.0 1.0}
+Info) Opened coordinate file aqp.pdb for writing.
+Info) Finished with coordinate file aqp.pdb.
+psfplugin) Writing angles/dihedrals/impropers...
+Info) Opened coordinate file aqp.psf for writing.
+Info) Finished with coordinate file aqp.psf.
+Info) Using plugin pdb for structure file aqp.pdb
+Info) Using plugin pdb for coordinates from file aqp.pdb
+Info) Determining bond structure from distance search ...
+Info) Analyzing structure ...
+Info)    Atoms: 112126
+Info)    Bonds: 93501
+Info)    Angles: 0  Dihedrals: 0  Impropers: 0  Cross-terms: 0
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 22489
+Info)    Waters: 21142
+Info)    Segments: 14
+Info)    Fragments: 21295   Protein: 4   Nucleic: 0
+Info) Finished with coordinate file aqp.pdb.
+8
+psfplugin) Detected a Charmm PSF file
+Info) Analyzing structure ...
+Info)    Atoms: 112126
+Info)    Bonds: 90806
+Info)    Angles: 112746  Dihedrals: 129492  Impropers: 2840  Cross-terms: 960
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 22488
+Info)    Waters: 21142
+Info)    Segments: 14
+Info)    Fragments: 21524   Protein: 4   Nucleic: 0
+8
+atomselect163
+atomselect164
+{-56.875999450683594 -56.979000091552734 -48.534000396728516} {57.132999420166016 56.9640007019043 48.507999420166016}
+114.00899887084961 113.94300079345703 97.04199981689453
+114.00899887084961
+113.94300079345703
+97.04199981689453
+114.00899887084961
+-5.33562597411219e-5 -0.00044314342085272074 0.0004056007892359048
+-5.33562597411219e-5
+-0.00044314342085272074
+0.0004056007892359048
+file4
+Info) VMD for LINUXAMD64, version 1.9.4a57 (April 27, 2022)
+Info) Exiting normally.
+vmd > 

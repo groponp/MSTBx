@@ -1,0 +1,78 @@
+################### Structure ###################
+structure               ../01build/ubq.psf
+coordinates             ../01build/ubq.pdb
+
+################### Variables ###################
+set temp  310.0
+temperature $temp
+set outputname nvt 
+outputName              $outputname
+
+################### Output Parameters ###################
+binaryoutput    no
+outputenergies  500
+outputtiming    500
+outputpressure  500
+binaryrestart   yes
+dcdfile         $outputname.dcd
+dcdfreq         5000
+XSTFreq         5000
+restartfreq     5000
+restartname     $outputname.restart
+
+################### Harmonic constriants ###################
+
+constraints     on
+consref         ../restraints/prot_posres.ref
+conskfile       ../restraints/prot_posres.ref
+constraintScaling 1.0
+conskcol         B
+
+################### Thermostat and Barostat ###################
+langevin        on
+langevintemp    $temp
+langevinHydrogen off
+langevindamping  1.0
+
+################### Integrator ###################
+timestep    2.0
+firstTimestep 0
+
+fullElectFrequency 1
+nonbondedfreq 1
+
+cutoff      12.0
+pairlistdist 14.0
+
+switching   on
+vdwForceSwitching on
+switchdist  10.0
+
+PME         on
+PMEGridspacing 1
+wrapAll     on
+wrapWater   on
+exclude scaled1-4
+1-4scaling 1.0
+rigidbonds all
+
+################### FF ###################
+paraTypeCharmm          on;                 # We're using charmm type parameter file(s)
+set files [glob "../toppar/*"]
+foreach file $files {
+   parameters		$file 
+}
+
+################### Running Script ###################
+exec tr "\[:upper:\]" "\[:lower:\]" < ../01build/step3_pbcsetup.str | sed -e "s/ =//g" > step3_input.str
+source                  step3_input.str
+
+cellBasisVector1     $a   0.0   0.0;        # vector to the next image
+cellBasisVector2    0.0    $b   0.0;
+cellBasisVector3    0.0   0.0    $c;
+cellOrigin          $xcen $ycen $zcen;        # the *center* of the cell
+
+minimize 50000
+reinitvels $temp 
+
+run 1000000    ;# 2 ns

@@ -1,0 +1,39 @@
+Info) VMD for LINUXAMD64, version 1.9.4a57 (April 27, 2022)
+Info) http://www.ks.uiuc.edu/Research/vmd/                         
+Info) Email questions and bug reports to vmd@ks.uiuc.edu           
+Info) Please include this reference in published work using VMD:   
+Info)    Humphrey, W., Dalke, A. and Schulten, K., `VMD - Visual   
+Info)    Molecular Dynamics', J. Molec. Graphics 1996, 14.1, 33-38.
+Info) -------------------------------------------------------------
+Info) Multithreading available, 12 CPUs.
+Info)   CPU features: SSE2 SSE4.1 AVX AVX2 FMA F16 HT 
+Info) Free system memory: 18GB (57%)
+Info) No CUDA accelerator devices available.
+Info) Dynamically loaded 3 plugins in directory:
+Info) /usr/local/lib/vmd/plugins/LINUXAMD64/molfile
+Invalid axes location: on
+FLTK
+01build/ubq.psf
+01build/ubq.pdb
+psfplugin) Detected a Charmm PSF file
+Info) Using plugin psf for structure file 01build/ubq.psf
+Info) Analyzing structure ...
+Info)    Atoms: 29354
+Info)    Bonds: 19951
+Info)    Angles: 11614  Dihedrals: 3293  Impropers: 212  Cross-terms: 74
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 9485
+Info)    Waters: 9357
+Info)    Segments: 10
+Info)    Fragments: 9410   Protein: 1   Nucleic: 0
+0
+Info) Using plugin pdb for coordinates from file 01build/ubq.pdb
+Info) Finished with coordinate file 01build/ubq.pdb.
+0
+atomselect0
+atomselect1
+Info) Opened coordinate file restraints/prot_posres.ref for writing.
+Info) Finished with coordinate file restraints/prot_posres.ref.
+Info) VMD for LINUXAMD64, version 1.9.4a57 (April 27, 2022)
+Info) Exiting normally.
+vmd > 
