@@ -3,7 +3,7 @@
   <img src="logo_adjust.png" width="350" height="250" style="flex: 1;"> 
   <div style="margin-left: 20px;">
     <p style="text-align: justify;">
-      Este repositorio contém o MSTBx, um código in house que permite preparar e gerar arquivos de configuração para realizar simulações de dinâmica molecular de moléculas em solução ou em membrana. No momento, esta ferramenta só gera sistemas compatíveis com NAMD2 ou NAMD3, mas no futuro, facilitará a interpolação dos sistemas para GROMACS, AMBER e openMM. Atualmente, a Dinâmica Molecular Guiada (Steered Molecular Dynamics -SMD) está implementada. Em breve, os métodos de ABF, US, GaMD e FEP serão adicionados. A principal diferença de nosso código para aqueles que existem ja, é que faz uso das capacidades de PSFGen e VMD para generar "Big Systems", de milhões de átomos. Se você tiver alguma dúvida ou erro para relatar, por favor, abra um Issue.
+      Este repositorio contém o MSTBx, um código in house que permite preparar e gerar arquivos de configuração para realizar simulações de dinâmica molecular de moléculas em solução ou em membrana. No momento, esta ferramenta só gera sistemas compatíveis com NAMD2 ou NAMD3, mas no futuro, facilitará a interpolação dos sistemas para GROMACS, AMBER e openMM. Atualmente, a Dinâmica Molecular Guiada (Steered Molecular Dynamics -SMD) está implementada. Em breve, os métodos de ABF, US, GaMD e FEP serão adicionados. A principal diferença de nosso código para aqueles que existem ja, é que faz uso das capacidades de PSFGen e VMD para generar "Big Systems", de milhões de átomos. Se você tiver alguma dúvida ou erro para relatar, por favor, abra um <a href="https://github.com/groponp/MSTBx/issues">Issue</a>.
     </p>
   </div>
 </div>
@@ -11,6 +11,13 @@
 ### Instalação
 
 ```bash
+git clone git@github.com:groponp/MSTBx.git 
+cd MSTBx/ 
+conda env create -f mstbx.yml
+conda activate mstbx
+rota=$(pwd)            #! Obtenha a rota completa, copy o ob
+echo "export MSTBx=/$rota:$PAHT" >> ~/.zshrc # se tem zsh shell
+echo "export MSTBx=/$rota:$PAHT" >> ~/.bashrc # se tem bash shell
 
 
 ```
@@ -79,7 +86,7 @@ X Extent: -41 to 41\
 Y Extent: -41 to 41\
 Z Extent: -25 to 28
 
-Neste caso, esta informação pode nós fornecer una idea, de como escolher o tamanho da membrana no plano xy. Como regra de thumb, escolhemos o valor de X ou Y mais longo, neste caso é o a soma dos valores (min e max) do x ou y, tem o mesmo valor, que é 82 Angstroms. Por tanto podemos escolher qualquer um. Embora, em outro casos, e sempre melhor escolher o valor mais longo, i.e se eu tenho valores de 82 e 90, então usar 90. Agora a este valor, adicionamos 30 Angstrom adicionais, que agregam 15 $\AA$ adicionais a cada lado no plato XY. Esse valor é seleccionado para evitar que ás moléculas interagem com elas mesmas.  Então o valor do plano XY final é 112 $\AA$, e) Seleccione o fofolipídeo POPC, com valores 1 e 1 para upper e lower monocapa. (Para mais detalhe revise <a href="https://www.charmm-gui.org/?doc=demo&id=membrane_builder&lesson=2">here</a>). Finalmente, avance até o STEP 4, deixando todos os valores por default e descarregue o PSF/PDB. 
+Neste caso, esta informação pode nós fornecer una idea, de como escolher o tamanho da membrana no plano xy. Como regra de thumb, escolhemos o valor de X ou Y mais longo, neste caso é o a soma dos valores (min e max) do x ou y, tem o mesmo valor, que é 82 Angstroms. Por tanto podemos escolher qualquer um. Embora, em outro casos, e sempre melhor escolher o valor mais longo, i.e se eu tenho valores de 82 e 90, então usar 90. Agora a este valor, adicionamos 30 Angstrom adicionais, que agregam 15 Angstroms adicionais a cada lado no plato XY. Esse valor é seleccionado para evitar que ás moléculas interagem com elas mesmas.  Então o valor do plano XY final é 112 Angstroms, e) Seleccione o fofolipídeo POPC, com valores 1 e 1 para upper e lower monocapa. (Para mais detalhe revise <a href="https://www.charmm-gui.org/?doc=demo&id=membrane_builder&lesson=2">here</a>). Finalmente, avance até o STEP 4, deixando todos os valores por default e descarregue o PSF/PDB. 
 
 Alter: Charmm-gui pode fazer todos estos pasos, mas a diferença é que a medida que o tamanho do sistema crece, charmm-gui toma mais tempo, para solvatar e adicionar os iones, o que não e eficiente, se quiser preparar multiples sistemas, por exemplo, para preparar todo o sistema da proteína spyke de sars-cov-2 este poderia tomar 8 hrs de tempo, com nossa ferramenta, ele toma so 30 min. 
 
@@ -108,3 +115,16 @@ python $MSTBx/GenMDMembConfg.py --psf 01build/aqp.psf \
 --temperature 310 \
 --mdtime 1
 ```
+
+## Authors 
+Main Developer: 
+
+**Ropón-Palacios G.**  
+Departamento de Física,   
+Instituto de Biociências, Letras e Ciências Exatas - IBILCE,   
+Universidade Estadual Paulista "Júlio de Mesquita Filho" - UNESP,   
+Rua Cristóvão Colombo, 2265 - Jardim Nazareth - São José do Rio Preto/SP - CEP 15054-000  
+E-mail: georcki.ropon@unesp.br
+
+## License
+[GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
