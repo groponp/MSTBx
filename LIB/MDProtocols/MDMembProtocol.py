@@ -306,8 +306,8 @@ outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
 dcdfreq         5000
-XSTFreq         5000
-restartfreq     5000
+XSTFreq         500
+restartfreq     500
 restartname     $outputname.restart
 
 ################### Thermostat and Barostat ###################
@@ -441,5 +441,9 @@ quit
 
     def copytoppar(self):
         #shutil.copytree("../../TestLIB/toppar/", "./")
-        os.system("cp -r ../../TestLIB/toppar/ .")
+        f = open("copy.sh", "w")
+        f.write("cp -r $MSTBx/LIB/toppar .")
+        f.close()
+        os.system("bash copy.sh")
+        os.system("rm copy.sh")
 
