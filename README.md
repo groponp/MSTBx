@@ -19,7 +19,11 @@ rota=$(pwd)            #! Obtenha a rota completa, copy o ob
 echo "export MSTBx=/$rota:$PAHT" >> ~/.zshrc # se tem zsh shell
 echo "export MSTBx=/$rota:$PAHT" >> ~/.bashrc # se tem bash shell
 
+# Se você tem zshrc use
+source ~/.zshrc
 
+# Se você tem bashrc use
+source ~/.zshrc 
 ```
 
 ### Exemplos 
