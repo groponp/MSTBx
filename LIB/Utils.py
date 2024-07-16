@@ -43,7 +43,7 @@ class UnixMessage:
         for j in dirs: 
             if not os.path.exists(j):
                 os.mkdir(j)
-                UnixMessage().message(message=f"Making the folder: {dir}", type="info")
+                UnixMessage().message(message=f"Making the folder: {j}", type="info")
     
     def message(sel, message: str, type: str):
         ''' Este método permite imprimir no terminal determinados 
