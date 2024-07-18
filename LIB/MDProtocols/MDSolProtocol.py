@@ -491,7 +491,7 @@ if {$npt} {
     reinitvels $dotemp
 } 
 run                     $currenttime;     #  %s ns
-""" % (self.psf, self.pdb, self.temperature, self.mdsteps, self.mdtime)
+""" % (self.psf, self.pdb, self.temperature, int(self.mdsteps), self.mdtime)
         f.write(smd)
         f.close()
 
@@ -529,7 +529,7 @@ harmonic {
     outputCenters   on       #! Print o centers do atoms pulling durante a simulação. 
     outputAccumulatedWork yes #! Print o trabalho acumulado, necessário para o jarzynski.
 }
-""" % (self.kforce, self.mdsteps)
+""" % (self.kforce, int(self.mdsteps))
         f.write(colvars)
         f.close()
 
