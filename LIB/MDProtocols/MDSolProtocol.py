@@ -348,6 +348,9 @@ quit
         os.system("rm copy.sh")
         #os.system("cp -r \$MSTBx/LIB/toppar .")
 
+#-------------------------------------------------------------------#
+# STEERED MOLECULAR DYNAMICS                                        #
+#-------------------------------------------------------------------#
 class SMDProtocolSol:
     def __init__(self, psf, pdb, temperature, mdtime, selpull, selanchor, targetCenter,
                  kforce=1.5):
@@ -355,7 +358,7 @@ class SMDProtocolSol:
         self.pdb = pdb 
         self.temperature = temperature
         self.mdtime = mdtime 
-        self.mdsteps = (self.mdtime * 1000)/0.002 # mdtime is em nanosegundos e converte para mdsteps. 
+        self.mdsteps = int((self.mdtime * 1000)/0.002) # mdtime is em nanosegundos e converte para mdsteps. 
         #self.speed  = speed          # 10 A/ns for pulling.  
         self.kforce = kforce         # 1.5 kcal/mol/A² é equivalente para ~ 600 kJ/mol/nm².
         self.selpull = selpull       # Seleção dos atomos para fazer pulling.
@@ -491,7 +494,7 @@ if {$npt} {
     reinitvels $dotemp
 } 
 run                     $currenttime;     #  %s ns
-""" % (self.psf, self.pdb, self.temperature, int(self.mdsteps), self.mdtime)
+""" % (self.psf, self.pdb, self.temperature, self.mdsteps, self.mdtime)
         f.write(smd)
         f.close()
 
