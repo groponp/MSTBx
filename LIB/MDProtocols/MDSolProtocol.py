@@ -573,3 +573,267 @@ quit
         f.close()
         os.system("vmd -dispdev text -e makePDBcolvars.tcl 2>&1 | tee colvars.log")
 
+#-------------------------------------------------------------------#
+# WELL TEMPERED METADYNAMICS                                        #
+#-------------------------------------------------------------------#
+
+class WTMetaDProtocolSol:
+    def __init__(self, psf, pdb, temperature, mdtime, hill=0.01, hillfreq=500, width=1.0,
+                 biasT=15, sel1="segid PROA and name CA", sel2="segid PROB and name CA", dunbind=50.0):
+        self.psf = psf 
+        self.pdb = pdb 
+        self.temperature = temperature
+        self.mdtime = mdtime 
+        self.mdsteps = int((self.mdtime * 1000)/0.002) # mdtime is em nanosegundos e converte para mdsteps. 
+        self.hill = hill         
+        self.hillfreq = int(hillfreq)      
+        self.width = width               # Este é o desvió padrão, que pode ser obtenido de rodar uma simulãcao unbias, e calcular 
+                                         # o desvió padrão da variable collectiva. É uma boa regra de thumb. 
+        self.biasT = biasT
+        self.biasTemperature = int((self.biasT * temperature) - temperature)  # Permite obtener a temperatura para o bias definido pelo usuario. 
+        self.sel1 = sel1            # No meu caso particular o sel1 pode ser PROA ou PROC. 
+        self.sel2 = sel2            # Este é só PROB. 
+        self.dunbind = dunbind      # Esta é a distância, que o usuario quer usar para separar as duas moléculas. 
+
+
+    def wtmetad(self):
+        f = open("04md/md.confg", "w")
+        metad = """\
+################### Structure ###################
+structure               ../%s
+coordinates             ../%s
+
+################### Variables ###################
+set dotemp %s
+set outputname md0
+outputName              $outputname
+
+################### Output Parameters ###################
+binaryoutput    no
+outputenergies  500
+outputtiming    500
+outputpressure  500
+binaryrestart   yes
+dcdfile         $outputname.dcd
+dcdfreq         5000
+XSTFreq         500
+restartfreq     500
+restartname     $outputname.restart
+
+################### Thermostat and Barostat ###################
+langevin        on
+langevintemp    $dotemp
+langevinHydrogen off
+langevindamping  1.0
+
+usegrouppressure    yes
+useflexiblecell     no
+useConstantArea     no
+
+langevinpiston      on
+langevinpistontarget 1.01325
+langevinpistonperiod 200.0
+langevinpistondecay  100.0
+langevinpistontemp  $dotemp
+
+################### Integrator ###################
+timestep    2
+
+fullElectFrequency 1
+nonbondedfreq 1
+cutoff      12.0
+pairlistdist 14.0
+switching   on
+
+vdwForceSwitching on
+
+switchdist  10.0
+PME         on
+PMEGridspacing 1
+#wrapAll     on          ;# Deixar em off este parâmetro para evitar erros na continuação do CV. 
+wrapWater   on
+exclude scaled1-4
+1-4scaling 1.0
+rigidbonds all
+
+################### FF ###################
+# Nota: Se você tem um ligando, coloque em toppar pasta o archivo prm ou str de seu 
+#       ligando, para evitar erros. 
+paraTypeCharmm          on;                 # We're using charmm type parameter file(s)
+set files [glob "../toppar/*"]
+foreach file $files {
+   parameters		$file 
+}
+
+################ WTMetaD  ##################
+colvars on 
+colvarsConfig wtmetad.in 
+
+################### Running ###################
+# Continuing a job from the restart files
+set npt 1
+set restart off
+set num 0
+set count [expr $num - 1]
+
+if {$npt} {
+    set inputname  ../03npt/npt
+    binCoordinates $inputname.restart.coor
+    extendedSystem $inputname.restart.xsc
+    binvelocities  $inputname.restart.vel
+} else {
+    set inputname md$count
+    binCoordinates $inputname.restart.coor
+    extendedSystem $inputname.restart.xsc
+    binvelocities  $inputname.restart.vel
+    colvarsInput   $inputname.restart.colvars.state
+}
+
+proc get_first_ts {xscfile} {
+    set fd [open $xscfile r]
+    gets $fd
+    gets $fd
+    gets $fd line
+    set ts [lindex $line 0]
+    close $fd
+    return $ts
+}
+
+if { $restart == "on" } {
+    firsttimestep       [get_first_ts md$count.restart.xsc]
+    set ft              [get_first_ts md$count.restart.xsc]
+} else {
+    set ft 0
+    firsttimestep $ft
+}
+
+set totaltime   %s
+set currenttime [expr $totaltime - $ft]
+
+# run
+if {$npt} {
+    reinitvels $dotemp
+} 
+numsteps                $totaltime;       # para cuando chega aos steps total aqui. 
+run                     $currenttime;     # %s ns
+
+""" % (self.psf, self.pdb, self.temperature, self.mdsteps, self.mdtime)
+        f.write(metad)
+        f.close()
+        
+    def colvars(self):
+        '''
+            O colvar aquí é a distância medida entre os centros de massa de duas molẽculas. 
+            Neste caso particular, é de proteína e proteína. 
+        '''
+        f = open("04md/wtmetad.in", "w")
+        colvars = """\
+colvarsTrajFrequency      500   
+colvarsRestartFrequency   500  
+
+colvar {
+    name AtomDistance
+    width 0.10              # Mesmo do que CHARMM-GUI and também BFEE2. Não considere lower/upperWall.
+    lowerboundary xa        # O valor é zero, porque a diferencia de distanciaentre os dímeros é 0.0. 
+    upperboundary xb        # O valor máximo para evaluar o PMF. 
+    expandboundaries  on   
+
+
+    distance {
+        forceNoPBC       yes  
+        group1 {
+                atomsFile  P1.pdb    # PROA ou PROC. 
+                atomsCol B 
+                atomsColValue 1.0 
+        }
+
+        group2 { 
+                atomsFile  P2.pdb  # PROB.
+                atomsCol B 
+                atomsColValue 1.0  
+        }
+
+    }
+}
+
+harmonicWalls {
+    name WTMetaD-Walls
+    colvars AtomDistance
+    lowerWalls xc          # lowerboundary. 
+    upperWalls xd         # upperboundary.
+    lowerWallConstant 10.0  # Força mesma como em charmm-gui. 
+    upperWallConstant 10.0  # Força mesma como em charmm-gui. 
+
+
+}
+
+metadynamics {
+    name     WTMetaD-Distance
+    colvars  AtomDistance 
+    hillWeight              %s       # Valor padrão é 0.01 kcal/mol.  
+    newHillFrequency        %s   # Valor padrão. 500.     
+    hillwidth               %s        # Mesmo no que BFEE2. valores recomendados no manual entre 1 e 3. 
+    writeHillsTrajectory    on         # Escreve un arquivo para armazenar os Hills (kcal/mol)
+    wellTempered            on         # Favorece WellTempered Metadynamics.
+    biasTemperature         %s      # Mesmo no que BFEE2. O Bias factor é calculado como:
+                                       # biasFactor = (TemperatureMD + biasTemperature) / TemperatureMD
+                                       # Onde TemperatureMD é a temperatura escolhida da simulação.
+                                       # e biasTemperature é a temperatura escolhida aquí, na metadinâmica, biasFactor 15 cá. 
+} 
+""" % (self.hill, self.hillfreq, self.width, self.biasTemperature) 
+        f.write(colvars)
+        f.close()
+
+    def makecolvarspdb(self):
+        f = open("makePDBcolvars.tcl", "w")
+        script = f"""\
+set psf %s 
+set pdb %s 
+set selp1 \"%s\"
+set selp2 \"%s\"
+set dunbind %s
+
+
+mol new $psf
+mol addfile $pdb 
+
+set all [atomselect top \"all\"] 
+$all set beta 0 
+set p1 [atomselect top \"$selp1\"]
+$p1 set beta 1.0
+$all writepdb 04md/P1.pdb 
+
+set all [atomselect top \"all\"]
+$all set beta 0 
+set p2 [atomselect top \"$selp2\"]
+$p2 set beta 1.0      
+$all writepdb 04md/P2.pdb 
+
+# Calcular a distância entre as duas moléculas
+set p1cm [atomselect top $selp1]
+set p2cm [atomselect top $selp2]
+
+set cm1 [measure center $p1cm]
+set cm2 [measure center $p2cm]
+set d [vecdist $cm1 $cm2]
+
+# lower and upper boundaries. 
+set lb [format "%%.2f" [expr $d - 1.0]]              ;# Eu subtraio -1 ou adiciono + 1 para dar um espaço extra na variável coletiva. 
+set ub [format "%%.2f" [expr $d + $dunbind + 1.0]]
+
+
+exec sed -i -e \"s/xa/$lb/g\" 04md/wtmetad.in
+exec sed -i -e \"s/xb/$ub/g\" 04md/wtmetad.in
+exec sed -i -e \"s/xc/$lb/g\" 04md/wtmetad.in
+exec sed -i -e \"s/xd/$ub/g\" 04md/wtmetad.in
+
+quit 
+""" % (self.psf, self.pdb, self.sel1, self.sel2, self.dunbind) 
+        f.write(script)
+        f.close()
+        os.system("vmd -dispdev text -e makePDBcolvars.tcl 2>&1 | tee colvars.log")
+        
+            
+
+
+

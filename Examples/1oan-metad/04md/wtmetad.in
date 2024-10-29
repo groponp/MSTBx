@@ -1,0 +1,52 @@
+colvarsTrajFrequency      500   
+colvarsRestartFrequency   500  
+
+colvar {
+    name AtomDistance
+    width 0.10              # Mesmo do que CHARMM-GUI and também BFEE2. Não considere lower/upperWall.
+    lowerboundary 52.68        # O valor é zero, porque a diferencia de distanciaentre os dímeros é 0.0. 
+    upperboundary 104.68        # O valor máximo para evaluar o PMF. 
+    expandboundaries  on   
+
+
+    distance {
+        forceNoPBC       yes  
+        group1 {
+                atomsFile  P1.pdb    # PROA ou PROC. 
+                atomsCol B 
+                atomsColValue 1.0 
+        }
+
+        group2 { 
+                atomsFile  P2.pdb  # PROB.
+                atomsCol B 
+                atomsColValue 1.0  
+        }
+
+    }
+}
+
+harmonicWalls {
+    name WTMetaD-Walls
+    colvars AtomDistance
+    lowerWalls 52.68          # lowerboundary. 
+    upperWalls 104.68         # upperboundary.
+    lowerWallConstant 10.0  # Força mesma como em charmm-gui. 
+    upperWallConstant 10.0  # Força mesma como em charmm-gui. 
+
+
+}
+
+metadynamics {
+    name     WTMetaD-Distance
+    colvars  AtomDistance 
+    hillWeight              0.01       # Valor padrão é 0.01 kcal/mol.  
+    newHillFrequency        500   # Valor padrão. 500.     
+    hillwidth               1.0        # Mesmo no que BFEE2. valores recomendados no manual entre 1 e 3. 
+    writeHillsTrajectory    on         # Escreve un arquivo para armazenar os Hills (kcal/mol)
+    wellTempered            on         # Favorece WellTempered Metadynamics.
+    biasTemperature         4340      # Mesmo no que BFEE2. O Bias factor é calculado como:
+                                       # biasFactor = (TemperatureMD + biasTemperature) / TemperatureMD
+                                       # Onde TemperatureMD é a temperatura escolhida da simulação.
+                                       # e biasTemperature é a temperatura escolhida aquí, na metadinâmica, biasFactor 15 cá. 
+} 
