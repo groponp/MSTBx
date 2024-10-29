@@ -13,6 +13,10 @@
 ```bash
 git clone git@github.com:groponp/MSTBx.git 
 cd MSTBx/ 
+
+!Atençao antes de rodar o comando em baixo, se asegura de trocar :
+prefix: /home/groponp/miniconda3/envs/mstbx --> ela sua rota onde tem instalado conda. 
+
 conda env create -f mstbx.yml
 conda activate mstbx
 rota=$(pwd)            #! Obtenha a rota completa, copy o ob
