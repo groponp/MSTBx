@@ -427,7 +427,7 @@ $all writepdb restraints/protein.ref
 
 set all [atomselect top \"all\"]
 $all set beta 0
-set backbone [atomselect top \"(protein and backbone) or (segid HETA and noh)\"]
+set backbone [atomselect top \"protein and backbone or (segid HETA and noh) or (segname \\\"CAR.*\\\" and noh)\"]
 $backbone set beta 5
 $all writepdb restraints/backbone.ref 
 
