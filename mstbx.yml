@@ -134,4 +134,4 @@ dependencies:
       - stack-data==0.6.3
       - traitlets==5.14.3
       - wcwidth==0.2.13
-prefix: /home/groponp/miniconda3/envs/mstbx
+
