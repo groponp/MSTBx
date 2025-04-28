@@ -27,7 +27,7 @@ echo "export MSTBx=/$rota:$PAHT" >> ~/.bashrc # se tem bash shell
 source ~/.zshrc
 
 # Se você tem bashrc use
-source ~/.zshrc 
+source ~/.bashrc
 ```
 
 ### Exemplos 
