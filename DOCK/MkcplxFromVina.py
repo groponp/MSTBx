@@ -41,13 +41,14 @@ def extract_pose1(src: Path, dst: Path) -> None:
 
 
 def pdbqt_to_pdb(src: Path, dst: Path) -> None:
-    run(f"obabel -ipdbqt {src} -opdb -O {dst} --log-level 2")
+    # Adicionei -d, remover os h extras que vem de pdbqt
+    run(f"obabel -ipdbqt {src} -opdb -O {dst} --log-level 2 -d")
 
 
-def pdb_to_mol2(src: Path, dst: Path) -> None:
+def pdb_to_mol2(src: Path, dst: Path, pH: float) -> None:
     run(
         f"obabel -ipdb {src} -omol2 -O {dst} "
-        f"--partialcharge gasteiger -p 7.4 --log-level 2"
+        f"--partialcharge gasteiger -p {pH} --log-level 2"
     )
 
 def ensure_chain(u: mda.Universe, chain_id: str) -> None:
@@ -86,6 +87,7 @@ def get_args() -> argparse.Namespace:
     )
     ap.add_argument("-d", "--dock",    required=True, help="PDBQT con varias poses")
     ap.add_argument("-p", "--protein", required=True, help="PDB de la proteína")
+    ap.add_argument("-l", "--ligandpH",  required=True, help="pH para adicionar hidrogênios ao ligando")
     ap.add_argument("-o", "--output",  required=True, help="Nombre del PDB final")
     return ap.parse_args()
 
@@ -95,6 +97,7 @@ def main() -> None:
     dock      = Path(args.dock).resolve()
     protein   = Path(args.protein).resolve()
     complex_p = Path(args.output).resolve()
+    pHLigando = args.ligandpH 
 
     # intermedios
     pose1_qt = Path("pose1.pdbqt")
@@ -108,7 +111,7 @@ def main() -> None:
     pdbqt_to_pdb(pose1_qt, lig_pdb)
 
     print("• Añadiendo H y cargas (MOL2) …")
-    pdb_to_mol2(lig_pdb, lig_mol2)
+    pdb_to_mol2(lig_pdb, lig_mol2, pHLigando)
 
     # Fusionar con MDAnalysis
     warnings.filterwarnings(
