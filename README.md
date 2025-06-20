@@ -344,15 +344,15 @@ source ~/.zshrc   # ou source ~/.bashrc
 ### 📚 Ejemplos de Uso
 
 <details>
-<summary><b>Ubiquitina en Solução</b></summary>
+<summary><b>Ubiquitina em Solução</b></summary>
 
-1. Crie uma pasta chamada `ubiquitin` para armazenar os arquivos.
-2. Use o <b>PDBReader</b> do CHARMM-GUI para gerar os arquivos PSF/PDB (tutorial <a href="https://www.charmm-gui.org/?doc=demo&id=pdb_reader&lesson=1">aqui</a>).
-3. Baixe `step1_pdbreader.pdb` e `step1_pdbreader.psf` e coloque-os na pasta.
-4. Monte o sistema e gere os arquivos de configuração para NAMD2/NAMD3.
+1. Crea una carpeta llamada `ubiquitin` para almacenar los archivos.
+2. Usa el <b>PDBReader</b> de CHARMM-GUI para generar los archivos PSF/PDB (tutorial <a href="https://www.charmm-gui.org/?doc=demo&id=pdb_reader&lesson=1">aquí</a>).
+3. Descarga `step1_pdbreader.pdb` y `step1_pdbreader.psf` y colócalos en la carpeta.
+4. Monta el sistema y genera los archivos de configuración para NAMD2/NAMD3.
 
 <p align="justify">
-O protocolo padrão inclui: NVT (2 ns, restrição em heavy atoms), NPT (5 ns, mesma restrição) e produção NPT (sem restrições). Ajuste o tempo de simulação conforme necessário.
+El protocolo por defecto incluye: NVT (2 ns, restrição em átomos pesados), NPT (5 ns, mesma restrição) e produção NPT (sem restrições). Ajusta el tiempo de simulación según sea necesario.
 </p>
 
 ```bash
@@ -360,13 +360,13 @@ mkdir ubiquitin
 conda activate mstbx
 python $MSTBx/GenSol.py --help
 
-# Montar o sistema
+# Montar el sistema
 python $MSTBx/GenSol.py --psf step1_pdbreader.psf \
                         --pdb step1_pdbreader.pdb \
                         --salt 0.150 \
                         --ofile ubq
 
-# Gerar arquivos de configuração
+# Generar archivos de configuración
 python $MSTBx/GenMDSolConfg.py --psf 01build/ubq.psf \
                                --pdb 01build/ubq.pdb \
                                --temperature 310 \
@@ -375,24 +375,24 @@ python $MSTBx/GenMDSolConfg.py --psf 01build/ubq.psf \
 </details>
 
 <details>
-<summary><b>Proteína-Ligante</b></summary>
+<summary><b>Proteína-Ligando</b></summary>
 
-1. Gere PSF/PDB e parâmetros do ligante com o PDBReader do CHARMM-GUI (<a href="https://www.charmm-gui.org/?doc=demo&id=protein_ligand&lesson=1">tutorial</a>).
-2. Baixe os arquivos e coloque-os na pasta.
-3. Monte o sistema e adicione os parâmetros do ligante ao gerar os arquivos de configuração.
+1. Genera los archivos PSF/PDB y los parámetros del ligando con el PDBReader de CHARMM-GUI (<a href="https://www.charmm-gui.org/?doc=demo&id=protein_ligand&lesson=1">tutorial</a>).
+2. Descarga los archivos y colócalos en la carpeta.
+3. Monta el sistema y añade los parámetros del ligando al generar los archivos de configuración.
 
 ```bash
 mkdir baat 
 conda activate mstbx 
 python $MSTBx/GenSol.py --help
 
-# Montar o sistema
+# Montar el sistema
 python $MSTBx/GenSol.py --psf step1_pdbreader.psf \
                         --pdb step1_pdbreader.pdb \
                         --salt 0.150 \
                         --ofile baat 
 
-# Gerar arquivos de configuração (incluindo parâmetros do ligante)
+# Generar archivos de configuración (incluyendo parâmetros del ligando)
 python $MSTBx/GenMDSolConfg.py --psf 01build/baat.psf \
                                --pdb 01build/baat.pdb \
                                --lparm tyl.prm \
@@ -402,37 +402,37 @@ python $MSTBx/GenMDSolConfg.py --psf 01build/baat.psf \
 </details>
 
 <details>
-<summary><b>Tetramero de Acuaporina em Membrana POPC</b></summary>
+<summary><b>Tetrámero de Acuaporina em Membrana POPC</b></summary>
 
-1. Use o Membrane Builder do CHARMM-GUI (<a href="https://www.charmm-gui.org/?doc=demo&id=membrane_builder&lesson=2">tutorial</a>) para gerar o sistema.
-2. Ajuste o tamanho da membrana conforme a extensão da proteína (soma dos valores de X ou Y + 30 Å).
-3. Baixe os arquivos `step4_lipid.psf` e `step4_lipid.pdb`.
-4. Monte o sistema e gere os arquivos de configuração.
+1. Usa el Membrane Builder de CHARMM-GUI (<a href="https://www.charmm-gui.org/?doc=demo&id=membrane_builder&lesson=2">tutorial</a>) para generar el sistema.
+2. Ajusta el tamaño de la membrana según la extensión de la proteína (suma de los valores de X o Y + 30 Å).
+3. Descarga los archivos `step4_lipid.psf` y `step4_lipid.pdb`.
+4. Monta el sistema y genera los archivos de configuración.
 
 ```bash
 mkdir aqp 
 conda activate mstbx 
 python $MSTBx/GenMemb.py --help
 
-# Descompacte e copie os arquivos do CHARMM-GUI
+# Descomprime y copia los archivos de CHARMM-GUI
 tar -xvzf charmm-gui.tgz
 cp charmm-gui-*/step4_lipid.psf  . 
 cp charmm-gui-*/step4_lipid.pdb  . 
 
-# Montar o sistema
+# Montar el sistema
 python $MSTBx/GenMemb.py --psf step4_lipid.psf \
                          --pdb step4_lipid.pdb \
                          --salt 0.150 \
                          --ofile aqp
 
-# Gerar arquivos de configuração
+# Generar archivos de configuración
 python $MSTBx/GenMDMembConfg.py --psf 01build/aqp.psf \
                                 --pdb 01build/aqp.pdb \
                                 --temperature 310 \
                                 --mdtime 1
 ```
 <p align="justify">
-<b>Nota:</b> O MSTBx é muito mais eficiente que o CHARMM-GUI para sistemas grandes. Por exemplo, sistemas como a proteína spike do SARS-CoV-2 podem ser preparados em ~30 min, enquanto no CHARMM-GUI podem levar até 8 horas.
+<b>Nota:</b> MSTBx es mucho más eficiente que CHARMM-GUI para sistemas grandes. Por ejemplo, sistemas como la proteína spike del SARS-CoV-2 pueden prepararse en ~30 min, mientras que en CHARMM-GUI pueden tardar hasta 8 horas.
 </p>
 </details>
 
