@@ -29,7 +29,7 @@ warnings.filterwarnings("ignore")
 #// ****************************************************************************************//#
 from LIB.Build.PSFGenSol import BuildSolution
 from LIB.MDProtocols.MDSolProtocol import MDProtocolSol
-from LIB.Utils import UnixMessage 
+from LIB.Utils.Utils import UnixMessage 
 
 #// ****************************************************************************************//#
 # Configurando a informação das opções                                                        #

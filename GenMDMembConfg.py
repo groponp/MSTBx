@@ -27,7 +27,7 @@ warnings.filterwarnings("ignore")
 #// ****************************************************************************************//#
 # Importando meus módulos                                                                     #
 #// ****************************************************************************************//#
-from LIB.Utils import UnixMessage 
+from LIB.Utils.Utils import UnixMessage 
 from LIB.MDProtocols.MDMembProtocol import MDProtocolMemb 
 
 #// ****************************************************************************************//#
