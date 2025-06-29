@@ -373,6 +373,7 @@ def main():
     parser.add_argument("--write_mdp", action="store_true", help="Write a production MDP file (pro.mdp) in the output directory")
     parser.add_argument("--temperature", type=float, default=310, help="Temperature in Kelvin for MDP file (default: 310)")
     parser.add_argument("--mdtime", type=float, default=1.0, help="Simulation time in nanoseconds for MDP file (default: 1.0)")
+    parser.add_argument("--comm_groups", required=False, help="Groups for comm.ndx as a dict string. Example: \"{'SOLU': 'protein', 'SOLV': 'resname SOL CL'}\"")
     args = parser.parse_args()
 
     # Check VMD and input files
@@ -425,6 +426,19 @@ def main():
         )
         if not os.path.isfile(mdp_path):
             logger.error(f"MDP file was not generated: {mdp_path}")
+            sys.exit(1)
+
+    # Opcional: comm.ndx
+    if args.comm_groups:
+        commndx_path = os.path.join(outdir, "comm.ndx")
+        create_index_ndx(
+            os.path.join(outdir, f"{args.outprefix}.gro"),
+            commndx_path,
+            args.comm_groups,
+            logger
+        )
+        if not os.path.isfile(commndx_path):
+            logger.error(f"COMM NDX file was not generated: {commndx_path}")
             sys.exit(1)
 
     logger.info("Process completed successfully.")
