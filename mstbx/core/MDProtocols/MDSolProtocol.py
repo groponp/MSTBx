@@ -630,11 +630,11 @@ harmonic {
     centers  xcenter         #! Centro dos carbonos alpha ou heavy atoms para fazer pulling.
     targetCenters xtarget    #! Centro taget até a onde se quer fazer pulling.
     forceConstant %s         #! Força constante para o pulling em kcal/mol/A² 
-    targetNumSteps %s        #! Total número de steps, onde para fazer 10 A/ns.  
+    targetNumSteps %s        #! Total número de steps, calculado pela velocidade.  
     outputCenters   on       #! Print o centers do atoms pulling durante a simulação. 
-    outputAccumulatedWork yes #! Print o trabalho acumulado, necessário para o jarzynski.
+    outputAccumulatedWork yes #! Print o trabajo acumulado, necessário para o jarzynski.
 }
-""" % (self.kforce, int(self.mdsteps))
+""" % (self.kforce, self.mdsteps)
         f.write(colvars)
         f.close()
 
