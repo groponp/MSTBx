@@ -1,0 +1,13 @@
+Bootstrap: docker
+From: ghcr.io/sokrypton/colabfold:1.5.5-cuda12.2.2
+
+%post
+    # Additional setup if needed
+    apt-get update && apt-get install -y wget
+    # colabfold is already installed in the base image
+
+%environment
+    export PATH=/usr/local/bin:$PATH
+
+%runscript
+    exec "$@"

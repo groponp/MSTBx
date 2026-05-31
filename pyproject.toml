@@ -20,6 +20,8 @@ dependencies = [
     "scikit-learn",
     "scipy",
     "statsmodels",
+    "pdbfixer",
+    "openmm",
 ]
 
 [project.scripts]
