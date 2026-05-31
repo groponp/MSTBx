@@ -13,8 +13,8 @@ def topopsfgen():
 # Helper para opciones comunes
 def common_options(f):
     options = [
-        click.option('--psf', type=click.Path(exists=True), required=True, help="Archivo PSF de entrada."),
-        click.option('--pdb', type=click.Path(exists=True), required=True, help="Archivo PDB de entrada."),
+        click.option('--psf', type=click.Path(exists=True, dir_okay=False), required=True, help="Archivo PSF de entrada."),
+        click.option('--pdb', type=click.Path(exists=True, dir_okay=False), required=True, help="Archivo PDB de entrada."),
         click.option('--salt', default=0.150, help="Concentración de NaCl (mol/L). Default 0.150."),
         click.option('--ofile', default="macromol150mM", help="Prefijo para los archivos de salida."),
         click.option('--hmr', is_flag=True, help="Habilitar Hydrogen Mass Repartition (para pasos de 4fs)."),

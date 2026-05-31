@@ -4,8 +4,8 @@ from mstbx.core.Build.PDBWriter import PDBWriter
 from mstbx.core.Utils.Utils import UnixMessage
 
 @click.command()
-@click.option('--input', '-i', required=True, help="Input PDB/MMCIF file.")
-@click.option('--output', '-o', required=True, help="Output PDB file.")
+@click.option('--input', '-i', type=click.Path(exists=True, dir_okay=False), required=True, help="Input PDB/MMCIF file.")
+@click.option('--output', '-o', type=click.Path(dir_okay=False), required=True, help="Output PDB file.")
 @click.option('--fix', is_flag=True, help="Run PDBFixer to repair missing atoms/residues.")
 @click.option('--internal-only', is_flag=True, default=True, help="If fixing, only repair internal gaps, not terminals.")
 @click.option('--ph', type=float, help="pH for protonation using pdb2pqr.")
