@@ -25,8 +25,8 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--hill', default=0.01, help="Hill value for metadynamics bias. Default 0.01.")
 @click.option('--hillfreq', default=500, help="Hill frequency for metadynamics bias. Default 500.")
 @click.option('--width', default=1.0, help="Width for metadynamics bias. Default 1.0.")
-@click.option('--biasT', default=15.0, help="Bias temperature for metadynamics bias. Default 15.")
-def namdinputs(type, psf, pdb, temperature, mdtime, dcdfreq, lparm, selpull, selanchor, target_center, kforce, sel1, sel2, target_distance, hill, hillfreq, width, biasT):
+@click.option('--biasT', 'biast', default=15.0, help="Bias temperature for metadynamics bias. Default 15.")
+def namdinputs(type, psf, pdb, temperature, mdtime, dcdfreq, lparm, selpull, selanchor, target_center, kforce, sel1, sel2, target_distance, hill, hillfreq, width, biast):
     """Generate NAMD configuration files for various protocols."""
     uxm = UnixMessage()
     uxm.message(message=f"Writing the configuration files for NAMD {type} simulation.", type="info")
@@ -70,9 +70,9 @@ def namdinputs(type, psf, pdb, temperature, mdtime, dcdfreq, lparm, selpull, sel
         smd.makecolvarspdb()
 
     elif type == 'metad-sol':
-        md = MDProtocolSol(psf=psf, pdb=pdb, temperature=temperature, mdtime=mdtime)
+        md = MDProtocolSol(psf=psf, pdb=pdb, temperature=temperature, mdtime=mdtime, dcdfreq=dcdfreq)
         meta = WTMetaDProtocolSol(psf=psf, pdb=pdb, temperature=temperature, mdtime=mdtime, hill=hill, hillfreq=hillfreq,
-                                  width=width, biasT=biasT, sel1=sel1, sel2=sel2, dunbind=target_distance)
+                                  width=width, biasT=biast, sel1=sel1, sel2=sel2, dunbind=target_distance)
         listdirs = ["01build", "02nvt", "03npt", "04md"]
         uxm.makedir(dirs=listdirs)
         os.system("rm -rf 02mineq 03prod")
