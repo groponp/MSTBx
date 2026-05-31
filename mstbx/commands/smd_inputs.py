@@ -9,6 +9,7 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--psf', type=click.Path(exists=True, dir_okay=False), required=True, help="Input PSF file.")
 @click.option('--pdb', type=click.Path(exists=True, dir_okay=False), required=True, help="Input PDB file.")
 @click.option('--temperature', default=310.0, help="Temperature in Kelvin.")
+@click.option('--mdtime', '--md-time', type=float, help="Production time in ns (will be overridden by velocity calculation).")
 @click.option('--dcdfreq', default=10.0, help="DCD trajectory saving frequency in ps.")
 @click.option('--selpull', required=True, help="VMD selection for the pulling group.")
 @click.option('--selanchor', required=True, help="VMD selection for the anchor group.")
@@ -16,7 +17,7 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--velocity', default=10.0, help="Pulling velocity in Angstrom/ns. Default 10.0.")
 @click.option('--kforce', default=1.5, help="Force constant for pulling.")
 @click.option('--colvar-input', type=click.Path(exists=True, file_okay=False, dir_okay=True), help="Directory containing custom smd.in and dependencies.")
-def smd_inputs(engine, env, psf, pdb, temperature, dcdfreq, selpull, selanchor, target_center, velocity, kforce, colvar_input):
+def smd_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, selpull, selanchor, target_center, velocity, kforce, colvar_input):
     uxm = UnixMessage()
     
     if engine != 'namd':
@@ -25,14 +26,21 @@ def smd_inputs(engine, env, psf, pdb, temperature, dcdfreq, selpull, selanchor, 
 
     uxm.message(f"Generating SMD configuration for {engine}...", "info")
     
-    # Calculate simulation time based on distance and velocity
+    # CALCULATE STRICT TIME BASED ON VELOCITY
     # time (ns) = distance (A) / velocity (A/ns)
-    mdtime = float(target_center) / float(velocity)
-    uxm.message(f"Calculated simulation time: {mdtime:.2f} ns based on {velocity} A/ns velocity.", "info")
+    calculated_mdtime = float(target_center) / float(velocity)
+    
+    # Enforce override if user provided --mdtime
+    if mdtime is not None:
+        uxm.message(f"Manual --mdtime ({mdtime} ns) detected. Overriding to {calculated_mdtime:.2f} ns to maintain consistency with --velocity ({velocity} A/ns).", "warning")
+    
+    mdtime = calculated_mdtime
+    uxm.message(f"Final SMD production time: {mdtime:.2f} ns.", "info")
 
     md = MDProtocolSol(psf=psf, pdb=pdb, temperature=temperature, mdtime=mdtime, dcdfreq=dcdfreq)
     smd = SMDProtocolSol(psf=psf, pdb=pdb, temperature=temperature, selpull=selpull, selanchor=selanchor,
-                         targetCenter=target_center, kforce=kforce, mdtime=mdtime, dcdfreq=dcdfreq)
+                         targetCenter=target_center, kforce=kforce, mdtime=mdtime, dcdfreq=dcdfreq, 
+                         velocity=velocity, colvar_input=colvar_input)
     
     uxm.makedir(dirs=["01build", "02nvt", "03npt", "04md"])
     os.system("rm -rf 02mineq 03prod")
