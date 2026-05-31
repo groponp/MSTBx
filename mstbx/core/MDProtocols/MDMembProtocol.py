@@ -409,6 +409,7 @@ set currenttime [expr $totaltime - $ft]
 if {$npt} {
     reinitvels $dotemp
 } 
+numsteps                $totaltime
 run                     $currenttime;     # %s ns
 """ % (self.psf, self.pdb, self.temperature, self.dcdfreq, self.mdsteps, self.mdtime) 
         f.write(md)
