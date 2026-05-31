@@ -20,12 +20,14 @@ import os
 import shutil
 
 class MDProtocolMemb:
-    def __init__(self, psf, pdb, temperature=310, mdtime=100):
-        self.psf = psf 
-        self.pdb = pdb 
-        self.temperature = temperature 
-        self.mdtime = mdtime 
-        self.mdsteps = int((self.mdtime * 1000)/0.002) # mdtime is em nanosegundos e converte para mdsteps.
+    def __init__(self, psf, pdb, temperature, mdtime, dcdfreq=5000):
+        self.psf = psf
+        self.pdb = pdb
+        self.temperature = temperature
+        self.mdtime = mdtime
+        self.dcdfreq = dcdfreq
+        self.mdsteps = int((self.mdtime * 1000)/0.002) # mdtime is in nanoseconds and converts to mdsteps.
+
 
     def nvt(self):
         f = open("02nvt/nvt.confg", "w")
@@ -108,7 +110,8 @@ minimize 25000
 reinitvels $temp 
 
 run 1000000    ;# 2 ns
-""" %(self.psf, self.pdb, self.temperature) 
+""" %(self.psf, self.pdb, self.temperature, self.dcdfreq)
+ 
         f.write(nvt)
         f.close()
         
@@ -196,7 +199,8 @@ minimize 25000
 reinitvels $temp 
 
 run 2500000
-""" % (self.psf, self.pdb, self.temperature)
+""" %(self.psf, self.pdb, self.temperature, self.dcdfreq)
+
         f.write(npt)
         f.close()
 
@@ -282,7 +286,8 @@ binvelocities  $inputname.restart.vel
 
 # equilibration with constraint during 5 ns 
 run 2500000
-""" % (self.psf, self.pdb, self.temperature)
+""" %(self.psf, self.pdb, self.temperature, self.dcdfreq)
+
         f.write(npt)
         f.close()
 
@@ -305,7 +310,7 @@ outputtiming    500
 outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
-dcdfreq         5000
+dcdfreq         %s
 XSTFreq         500
 restartfreq     500
 restartname     $outputname.restart
@@ -400,7 +405,7 @@ if {$npt} {
     reinitvels $dotemp
 } 
 run                     $currenttime;     # %s ns
-""" % (self.psf, self.pdb, self.temperature, self.mdsteps, self.mdtime) 
+""" % (self.psf, self.pdb, self.temperature, self.dcdfreq, self.mdsteps, self.mdtime) 
         f.write(md)
         f.close()
 
