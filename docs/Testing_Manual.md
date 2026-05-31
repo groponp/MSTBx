@@ -8,19 +8,19 @@ Esta guía te permitirá validar cada módulo de la nueva arquitectura modular.
 
 ### 1.1 Solución (Standard)
 ```bash
-mstbx topopsfgen sol --psf protein.psf --pdb protein.pdb --padding 18
+mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --padding 18
 ```
 *   **Check:** Verifica que `01build/step3_pbcsetup.str` tenga dimensiones consistentes con la proteína + 36A (18 de cada lado).
 
 ### 1.2 Membrana
 ```bash
-mstbx topopsfgen memb --psf lipids.psf --pdb lipids.pdb --padding 15 --z-dist 10
+mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --padding 15 --z-dist 10
 ```
 *   **Check:** Verifica que las aguas se hayan eliminado correctamente de la zona hidrofóbica.
 
 ### 1.3 SMD (Orientado)
 ```bash
-mstbx topopsfgen smd --psf prot.psf --pdb prot.pdb --atoms-anchor "resid 1" --atoms-pull "resid 100" --extra-space 60
+mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --atoms-anchor "resid 1" --atoms-pull "resid 100" --extra-space 60
 ```
 *   **Check:** El eje Z de la caja debe ser significativamente más largo que X e Y.
 

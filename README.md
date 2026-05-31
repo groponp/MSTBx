@@ -31,9 +31,14 @@ pip install -e .
 
 ### 1. `topopsfgen` (CHARMM/NAMD)
 Generación de archivos PSF/PDB con control granular de padding.
-*   `mstbx topopsfgen sol`: Sistemas en solución.
-*   `mstbx topopsfgen memb`: Sistemas de membrana.
-*   `mstbx topopsfgen smd`: Sistemas orientados para estiramiento.
+Uso: `mstbx topopsfgen --env [solution|membrane|smd] [OPCIONES]`
+
+*   **Sistemas en Solución**:
+    `mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb`
+*   **Sistemas de Membrana**:
+    `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb`
+*   **Sistemas SMD**:
+    `mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --atoms-pull "resid 100" --atoms-anchor "resid 1"`
 
 ### 2. `topotleap` (AMBER)
 Generación de archivos PRMTOP/INPCRD usando tLeap (En desarrollo).
