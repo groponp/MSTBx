@@ -11,7 +11,7 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--pdb', type=click.Path(exists=True), required=True, help="PDB file of your system.")
 @click.option('--temperature', default=310.0, help="Temperature in Kelvin. Default 310.")
 @click.option('--mdtime', default=100.0, help="MD production time in ns. Default 100.")
-@click.option('--dcdfreq', default=5000, help="DCD trajectory saving frequency. Default 5000.")
+@click.option('--dcdfreq', default=10.0, help="DCD trajectory saving frequency in ps. Default 10.0 ps.")
 @click.option('--lparm', help="Ligand parameter file (str or prm). Optional.")
 # SMD Options
 @click.option('--selpull', help="VMD syntax for pulling group (only for 'smd-sol').")

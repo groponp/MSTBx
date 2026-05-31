@@ -4,8 +4,7 @@ coordinates             ../01build/system_sol.pdb
 
 ################### Variables ###################
 set temp  310.0
-temperature $temp
-set outputname nvt 
+set outputname npt
 outputName              $outputname
 
 ################### Output Parameters ###################
@@ -33,22 +32,28 @@ conskcol         B
 langevin        on
 langevintemp    $temp
 langevinHydrogen off
-langevindamping  1.0
+langevindamping  1
+
+usegrouppressure    yes
+useflexiblecell     no
+useConstantArea     no
+
+langevinpiston      on
+langevinpistontarget 1.01325
+langevinpistonperiod 50.0
+langevinpistondecay 25.0
+langevinpistontemp  $temp
 
 ################### Integrator ###################
 timestep    2.0
 firstTimestep 0
-
 fullElectFrequency 1
 nonbondedfreq 1
-
 cutoff      12.0
 pairlistdist 14.0
-
 switching   on
 vdwForceSwitching on
 switchdist  10.0
-
 PME         on
 PMEGridspacing 1
 wrapAll     on
@@ -65,15 +70,10 @@ foreach file $files {
 }
 
 ################### Running Script ###################
-exec tr "\[:upper:\]" "\[:lower:\]" < ../01build/step3_pbcsetup.str | sed -e "s/ =//g" > step3_input.str
-source                  step3_input.str
+set inputname  ../02nvt/nvt
+binCoordinates $inputname.restart.coor
+extendedSystem $inputname.restart.xsc
+binvelocities  $inputname.restart.vel
 
-cellBasisVector1     $a   0.0   0.0;        # vector to the next image
-cellBasisVector2    0.0    $b   0.0;
-cellBasisVector3    0.0   0.0    $c;
-cellOrigin          $xcen $ycen $zcen;        # the *center* of the cell
-
-minimize 50000
-reinitvels $temp 
-
-run 1000000    ;# 2 ns
+# equilibration with constraint during 5 ns 
+run 2500000
