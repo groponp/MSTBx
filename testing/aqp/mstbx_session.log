@@ -8,3 +8,9 @@
 [INFO 16:52:02 31/05/2026] Directory created: 03npt
 [INFO 16:52:02 31/05/2026] Directory created: 04md
 [INFO 16:52:02 31/05/2026] Configuration generated successfully.
+[INFO 16:59:23 31/05/2026] Generating membrane configuration for namd...
+[INFO 16:59:23 31/05/2026] Directory created: 02nvt
+[INFO 16:59:23 31/05/2026] Directory created: 03npt1
+[INFO 16:59:23 31/05/2026] Directory created: 04npt2
+[INFO 16:59:23 31/05/2026] Directory created: 05md
+[INFO 16:59:24 31/05/2026] Configuration generated successfully.
