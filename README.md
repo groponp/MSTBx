@@ -1,6 +1,6 @@
 # MSTBx (Development Version)
 
-This README is for testing purposes during the refactor to v0.7.0.
+This README is for testing purposes during the refactor to v0.7.2.
 
 ## 🚀 Quick Setup
 
@@ -13,35 +13,50 @@ conda activate mstbx
 pip install -e .
 ```
 
-## 🧪 Testing Commands
+### 3. Enable Autocomplete (Recommended)
+To enable TAB completion for `mstbx` commands, run:
 
-### 1. General Help
+**For Bash:**
+```bash
+echo 'eval "$(_MSTBX_COMPLETE=bash_source mstbx)"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+**For Zsh:**
+```bash
+echo 'eval "$(_MSTBX_COMPLETE=zsh_source mstbx)"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+## 🧪 Testing Modules
+
+### 1. General Help (Lists all modules)
 ```bash
 mstbx --help
 ```
 
-### 2. PDBWriter (Internal Gap Fix & SS Bonds)
+### 2. pdbwriter (Repair & Cleaning)
 ```bash
-# Replace 'your_protein.pdb' with a real file to test
 mstbx pdbwriter -i your_protein.pdb -o fixed.pdb --fix --ssbond
 ```
 
-### 3. Solvation System
+### 3. autopsfgen (System Building)
 ```bash
-# Requires .psf and .pdb
 mstbx autopsfgen --type sol --psf protein.psf --pdb protein.pdb --ofile test_sol
 ```
 
-### 4. NAMD Protocol
+### 4. namdinputs (Configuration Generation)
 ```bash
-# Run after autopsfgen
 mstbx namdinputs --type sol --psf 01build/test_sol.psf --pdb 01build/test_sol.pdb
 ```
 
-## 📁 Repository Structure
+## 🔄 How to Update
+If you pull new changes or dependencies are updated:
+```bash
+pip install --upgrade -e .
+```
 
-*   `mstbx/`: Source code of the package.
-*   `docs/`: Multilingual Wiki and documentation.
-*   `old.code/`: Original scripts and examples (for reference).
-*   `pyproject.toml`: Installation metadata.
-*   `mstbx.yml`: Conda environment definition.
+## 📁 Repository Structure
+*   `mstbx/`: Source code.
+*   `docs/`: Multilingual Wiki.
+*   `old.code/`: Legacy scripts and original examples.
