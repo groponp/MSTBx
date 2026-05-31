@@ -39,7 +39,7 @@ class GroupedGroup(click.Command):
 @click.option('--salt', default=0.150, help="NaCl concentration (mol/L). Default 0.150.")
 @click.option('--ofile', default="macromol150mM", help="Prefix for output files.")
 @click.option('--hmr', is_flag=True, help="Enable Hydrogen Mass Repartition.")
-@click.option('--padding', type=float, help="Global padding (A). Defaults: 18.0 (Solution/SMD), 22.5 (Membrane).")
+@click.option('--padding', type=float, help="Global padding (A). Defaults: 18.0 (Solution/SMD), 25.0 (Membrane).")
 @click.option('--pad-x-pos', type=float, help="Specific padding for X+ axis.")
 @click.option('--pad-x-neg', type=float, help="Specific padding for X- axis.")
 @click.option('--pad-y-pos', type=float, help="Specific padding for Y+ axis.")
@@ -69,7 +69,7 @@ def topopsfgen(env, psf, pdb, salt, ofile, hmr, padding, pad_x_pos, pad_x_neg, p
     elif env == 'membrane':
         builder = BuildMembrane()
         peptide = 1 if mol_outside else 0
-        memb_padding = padding if padding is not None else 22.5
+        memb_padding = padding if padding is not None else 25.0
         builder.build(psf=psf, pdb=pdb, salt=salt, ofile=ofile, hmr=hmrbool, peptide=peptide, 
                       moveZ=z_distance, padding=memb_padding)
         script_tcl = "PSFGenMemb.tcl"
