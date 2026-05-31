@@ -7,8 +7,8 @@ from mstbx.core.Utils.Utils import UnixMessage
 
 @click.command()
 @click.option('--type', type=click.Choice(['sol', 'memb', 'smd-sol', 'metad-sol']), required=True, help="Type of protocol.")
-@click.option('--psf', required=True, help="PSF file of your system.")
-@click.option('--pdb', required=True, help="PDB file of your system.")
+@click.option('--psf', type=click.Path(exists=True), required=True, help="PSF file of your system.")
+@click.option('--pdb', type=click.Path(exists=True), required=True, help="PDB file of your system.")
 @click.option('--temperature', default=310.0, help="Temperature in Kelvin. Default 310.")
 @click.option('--mdtime', default=100.0, help="MD production time in ns. Default 100.")
 @click.option('--dcdfreq', default=5000, help="DCD trajectory saving frequency. Default 5000.")

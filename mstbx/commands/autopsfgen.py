@@ -7,8 +7,8 @@ from mstbx.core.Utils.Utils import UnixMessage
 
 @click.command()
 @click.option('--type', type=click.Choice(['sol', 'memb', 'smd-sol']), required=True, help="Type of system to build.")
-@click.option('--psf', required=True, help="PSF file of your system.")
-@click.option('--pdb', required=True, help="PDB file of your system.")
+@click.option('--psf', type=click.Path(exists=True), required=True, help="PSF file of your system.")
+@click.option('--pdb', type=click.Path(exists=True), required=True, help="PDB file of your system.")
 @click.option('--salt', default=0.150, help="Salt concentration in mol/L. Default 0.150.")
 @click.option('--ofile', default="macromol150mM", help="Prefix of the output file.")
 @click.option('--hmr', is_flag=True, help="Enable Hydrogen Mass Repartition.")
@@ -37,7 +37,7 @@ def autopsfgen(type, psf, pdb, salt, ofile, hmr, padding, pad_x_pos, pad_x_neg, 
         sol.build(psf=psf, pdb=pdb, salt=salt, ofile=ofile, hmr=hmrbool, padding=padding,
                   pad_x_pos=pad_x_pos, pad_x_neg=pad_x_neg, pad_y_pos=pad_y_pos, 
                   pad_y_neg=pad_y_neg, pad_z_pos=pad_z_pos, pad_z_neg=pad_z_neg)
-        listdirs = ["01build", "02mineq", "03prod"]
+        listdirs = ["01build"]
         uxm.makedir(dirs=listdirs)
         os.chdir("01build")
         os.system("cp ../*psf .")
@@ -50,7 +50,7 @@ def autopsfgen(type, psf, pdb, salt, ofile, hmr, padding, pad_x_pos, pad_x_neg, 
         peptide = 1 if mol_outside_memb else 0
         mem.build(psf=psf, pdb=pdb, salt=salt, ofile=ofile, hmr=hmrbool, peptide=peptide, 
                   moveZ=move_in_z, padding=padding)
-        listdirs = ["01build", "02mineq", "03prod"]
+        listdirs = ["01build"]
         uxm.makedir(dirs=listdirs)
         os.chdir("01build")
         if os.path.exists("../step4_lipid.psf"):
@@ -66,7 +66,7 @@ def autopsfgen(type, psf, pdb, salt, ofile, hmr, padding, pad_x_pos, pad_x_neg, 
         sol = BuildSolutionSMD()
         sol.build(psf=psf, pdb=pdb, salt=salt, ofile=ofile, hmr=hmrbool, atomsvec1=atoms_anchor, 
                   atomsvec2=atoms_pull, extrapadz=extra_space, padding=padding)
-        listdirs = ["01build", "02mineq", "03prod"]
+        listdirs = ["01build"]
         uxm.makedir(dirs=listdirs)
         os.chdir("01build")
         os.system("cp ../*psf .")
