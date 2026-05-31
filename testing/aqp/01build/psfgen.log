@@ -7,7 +7,7 @@ Info)    Molecular Dynamics', J. Molec. Graphics 1996, 14.1, 33-38.
 Info) -------------------------------------------------------------
 Info) Multithreading available, 12 CPUs.
 Info)   CPU features: SSE2 SSE4.1 AVX AVX2 FMA F16 HT 
-Info) Free system memory: 8GB (26%)
+Info) Free system memory: 8GB (25%)
 Info) No CUDA accelerator devices available.
 Info) Dynamically loaded 2 plugins in directory:
 Info) /usr/local/lib/vmd/plugins/LINUXAMD64/molfile
@@ -17,7 +17,7 @@ Info) The duplication indicates a conflict with residue names in the PDB, GLYCAM
 step4_lipid.psf
 step4_lipid.pdb
 solvated
-macromol150mM
+mol
 0.15
 0
 25.0
@@ -315,21 +315,21 @@ Info)    Fragments: 26086   Protein: 4   Nucleic: 0
 Info) Using plugin pdb for coordinates from file ionized.pdb
 Info) Finished with coordinate file ionized.pdb.
 7
-atomselect186
--0.08506212383508682 0.04148140549659729 -0.054022613912820816
-atomselect187
-{-58.35493469238281 -58.4804801940918 -52.466976165771484} {58.52306365966797 58.38751983642578 52.57802200317383}
--58.35493469238281 -58.4804801940918 -52.466976165771484
-58.52306365966797 58.38751983642578 52.57802200317383
+atomselect182
+-0.09028279781341553 0.03669360652565956 -0.05821312963962555
+atomselect183
+{-58.34971618652344 -58.47569274902344 -52.46278762817383} {58.528282165527344 58.39230728149414 52.582210540771484}
+-58.34971618652344 -58.47569274902344 -52.46278762817383
+58.528282165527344 58.39230728149414 52.582210540771484
 116.87799835205078
 116.86800003051758
 105.04499816894531
 file4
-Info) Opened coordinate file macromol150mM.pdb for writing.
-Info) Finished with coordinate file macromol150mM.pdb.
+Info) Opened coordinate file mol.pdb for writing.
+Info) Finished with coordinate file mol.pdb.
 psfplugin) Writing angles/dihedrals/impropers...
-Info) Opened coordinate file macromol150mM.psf for writing.
-Info) Finished with coordinate file macromol150mM.psf.
+Info) Opened coordinate file mol.psf for writing.
+Info) Finished with coordinate file mol.psf.
 Info) VMD for LINUXAMD64, version 2.0.0b1 (February 21, 2026)
 Info) Exiting normally.
 vmd > 

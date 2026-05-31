@@ -1,3 +1,10 @@
 [INFO 16:48:47 31/05/2026] Directory created: 01build
 [INFO 16:48:47 31/05/2026] Working inside: /media/groponp/Galvani/Scripts/MSTBx/testing/aqp/01build
 [INFO 16:48:56 31/05/2026] Membrane system ready in 01build/
+[INFO 16:51:20 31/05/2026] Working inside: /media/groponp/Galvani/Scripts/MSTBx/testing/aqp/01build
+[INFO 16:51:29 31/05/2026] Membrane system ready in 01build/
+[INFO 16:52:02 31/05/2026] Generating solution configuration for namd...
+[INFO 16:52:02 31/05/2026] Directory created: 02nvt
+[INFO 16:52:02 31/05/2026] Directory created: 03npt
+[INFO 16:52:02 31/05/2026] Directory created: 04md
+[INFO 16:52:02 31/05/2026] Configuration generated successfully.

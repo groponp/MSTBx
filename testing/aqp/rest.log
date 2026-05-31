@@ -1,4 +1,4 @@
-Info) VMD for LINUXAMD64, version 1.9.4a57 (April 27, 2022)
+Info) VMD for LINUXAMD64, version 2.0.0b1 (February 21, 2026)
 Info) http://www.ks.uiuc.edu/Research/vmd/                         
 Info) Email questions and bug reports to vmd@ks.uiuc.edu           
 Info) Please include this reference in published work using VMD:   
@@ -7,41 +7,34 @@ Info)    Molecular Dynamics', J. Molec. Graphics 1996, 14.1, 33-38.
 Info) -------------------------------------------------------------
 Info) Multithreading available, 12 CPUs.
 Info)   CPU features: SSE2 SSE4.1 AVX AVX2 FMA F16 HT 
-Info) Free system memory: 18GB (57%)
+Info) Free system memory: 8GB (25%)
 Info) No CUDA accelerator devices available.
-Info) Dynamically loaded 3 plugins in directory:
+Info) Dynamically loaded 2 plugins in directory:
 Info) /usr/local/lib/vmd/plugins/LINUXAMD64/molfile
-Invalid axes location: on
-FLTK
-01build/aqp.psf
-01build/aqp.pdb
+Info) Duplicate resname "4YS" for glycanReader.
+Info) Duplicate resname "YGA" for glycanReader.
+Info) The duplication indicates a conflict with residue names in the PDB, GLYCAM, or CHARMM databases. If you're not working with glycans that use these residue names, you can safely ignore this warning.
+01build/mol.psf
+01build/mol.pdb
 psfplugin) Detected a Charmm PSF file
-Info) Using plugin psf for structure file 01build/aqp.psf
+Info) Using plugin psf for structure file 01build/mol.psf
 Info) Analyzing structure ...
-Info)    Atoms: 112126
-Info)    Bonds: 90806
-Info)    Angles: 112746  Dihedrals: 129492  Impropers: 2840  Cross-terms: 960
+Info)    Atoms: 125764
+Info)    Bonds: 99882
+Info)    Angles: 117284  Dihedrals: 129492  Impropers: 2840  Cross-terms: 960
 Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
-Info)    Residues: 22488
-Info)    Waters: 21142
+Info)    Residues: 27050
+Info)    Waters: 25680
 Info)    Segments: 14
-Info)    Fragments: 21524   Protein: 4   Nucleic: 0
+Info)    Fragments: 26086   Protein: 4   Nucleic: 0
 0
-Info) Using plugin pdb for coordinates from file 01build/aqp.pdb
-Info) Finished with coordinate file 01build/aqp.pdb.
+Info) Using plugin pdb for coordinates from file 01build/mol.pdb
+Info) Finished with coordinate file 01build/mol.pdb.
 0
 atomselect0
 atomselect1
-Info) Opened coordinate file restraints/meltlipid.ref for writing.
-Info) Finished with coordinate file restraints/meltlipid.ref.
-atomselect2
-atomselect3
-Info) Opened coordinate file restraints/protein.ref for writing.
-Info) Finished with coordinate file restraints/protein.ref.
-atomselect4
-atomselect5
-Info) Opened coordinate file restraints/backbone.ref for writing.
-Info) Finished with coordinate file restraints/backbone.ref.
-Info) VMD for LINUXAMD64, version 1.9.4a57 (April 27, 2022)
+Info) Opened coordinate file restraints/prot_posres.ref for writing.
+Info) Finished with coordinate file restraints/prot_posres.ref.
+Info) VMD for LINUXAMD64, version 2.0.0b1 (February 21, 2026)
 Info) Exiting normally.
 vmd > 

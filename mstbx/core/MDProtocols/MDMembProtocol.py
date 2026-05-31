@@ -1,21 +1,3 @@
-# -*- coding: utf-8 -*-
-
-#//*****************************************************************************************//# 
-# MDMembProtocol: Este módulo escreve o protcolo estandar para realizar simulações de         #
-#                moléculas, em membrana, tais como: Proteínas ou proteina e ligando           #
-#                                                                                             #
-# autor     : Ropón-Palacios G., BSc - MSc estudante em Física Biomolecular.                  #
-# afiliação : Departamento de Física, IBILCE/UNESP, São Jośe do Rio Preto, São Paulo.         #                                                  
-# e-mail    : georcki.ropon@unesp.br                                                          #
-# data      : Quarta-feira 3 de Julho do 2024.                                               #
-# $rev$     : Rev Quarta-feira 3 de Julho de 2024                                              #                    
-#//*****************************************************************************************//#
-
-#// ****************************************************************************************//#
-# Log mudanças no código:                                                                     #
-#  1. Adicionando uma classe para o protocolo de md em agua - Quarta-feira 3 de Julho 2024.   #
-#// ****************************************************************************************//#
-
 import os 
 import shutil
 
@@ -154,7 +136,7 @@ conskcol         B
 langevin        on
 langevintemp    $temp
 langevinHydrogen off
-langevindamping  1
+langevindamping  1.0
 
 usegrouppressure    yes
 useflexiblecell     yes
@@ -207,7 +189,6 @@ run 2500000
         f.write(npt)
         f.close()
 
-
     def npt2(self): 
         f = open("04npt2/npt2.confg", "w")
         npt = """\
@@ -236,8 +217,8 @@ restartname     $outputname.restart
 ################### Harmonic constriants ###################
 
 constraints     on
-consref         ../restraints/backbone.ref	
-conskfile       ../restraints/backbone.ref	
+consref         ../restraints/backbone.ref		
+conskfile       ../restraints/backbone.ref		
 constraintScaling 1.0
 conskcol         B
 
@@ -245,7 +226,7 @@ conskcol         B
 langevin        on
 langevintemp    $temp
 langevinHydrogen off
-langevindamping  1
+langevindamping  1.0
 
 usegrouppressure    yes
 useflexiblecell     yes
@@ -303,7 +284,8 @@ structure               ../%s
 coordinates             ../%s
 
 ################### Variables ###################
-set dotemp %s
+set temp  %s
+set dotemp $temp
 set outputname md0
 outputName              $outputname
 
@@ -317,12 +299,12 @@ dcdfile         $outputname.dcd
 dcdfreq         %s
 XSTFreq         5000
 
-restartfreq     500
+restartfreq     5000
 restartname     $outputname.restart
 
 ################### Thermostat and Barostat ###################
 langevin        on
-langevintemp    $dotemp
+langevintemp    $temp
 langevinHydrogen off
 langevindamping  1.0
 
@@ -332,12 +314,12 @@ useConstantRatio    yes;                # keeps the ratio of the unit cell in th
 
 langevinpiston      on
 langevinpistontarget 1.01325
-langevinpistonperiod 200.0
-langevinpistondecay  100.0
-langevinpistontemp  $dotemp
+langevinpistonperiod 50.0
+langevinpistondecay 25.0
+langevinpistontemp  $temp
 
 ################### Integrator ###################
-timestep    2
+timestep    2.0
 
 fullElectFrequency 1
 nonbondedfreq 1
@@ -357,8 +339,6 @@ exclude scaled1-4
 rigidbonds all
 
 ################### FF ###################
-# Nota: Se você tem um ligando, coloque em toppar pasta o archivo prm ou str de seu 
-#       ligando, para evitar erros. 
 paraTypeCharmm          on;                 # We're using charmm type parameter file(s)
 set files [glob "../toppar/*"]
 foreach file $files {
@@ -373,18 +353,13 @@ set num 0
 set count [expr $num - 1]
 
 if {$npt} {
-    set inputname  ../04npt2/npt2
-    binCoordinates $inputname.restart.coor
-    extendedSystem $inputname.restart.xsc
-    binvelocities  $inputname.restart.vel
-} else {
-    set inputname md$count
+    set inputname ../04npt2/npt2
     binCoordinates $inputname.restart.coor
     extendedSystem $inputname.restart.xsc
     binvelocities  $inputname.restart.vel
 }
 
-proc get_first_ts {xscfile} {
+proc get_first_ts { xscfile } {
     set fd [open $xscfile r]
     gets $fd
     gets $fd
@@ -514,4 +489,3 @@ echo -e "${GREEN}Simulation steps completed successfully.${NC}"
         else:
             # Fallback a la variable de entorno por si acaso
             os.system("cp -r $MSTBx/mstbx/core/toppar .")
-

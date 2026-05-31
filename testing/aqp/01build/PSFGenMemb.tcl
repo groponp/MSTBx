@@ -2,7 +2,7 @@
 set psf step4_lipid.psf 
 set pdb step4_lipid.pdb 
 set sol solvated
-set output macromol150mM 
+set output mol 
 set salt 0.15 
 set peptidemem 0
 set padding 25.0
