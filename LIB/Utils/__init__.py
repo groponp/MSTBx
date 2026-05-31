@@ -1,2 +1,0 @@
-# PSFGenSol.py hacía esto:
-

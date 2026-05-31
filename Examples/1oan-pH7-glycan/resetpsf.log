@@ -1,0 +1,84 @@
+[INFO    2025-06-20 19:00:14] Resetting PSF/PDB from CHARMM-GUI (CHARMM format) for NAMD compatibility...
+[INFO    2025-06-20 19:00:15] VMD output:
+Info) VMD for LINUXAMD64, version 1.9.4a57 (April 27, 2022)
+Info) http://www.ks.uiuc.edu/Research/vmd/                         
+Info) Email questions and bug reports to vmd@ks.uiuc.edu           
+Info) Please include this reference in published work using VMD:   
+Info)    Humphrey, W., Dalke, A. and Schulten, K., `VMD - Visual   
+Info)    Molecular Dynamics', J. Molec. Graphics 1996, 14.1, 33-38.
+Info) -------------------------------------------------------------
+Info) Multithreading available, 12 CPUs.
+Info)   CPU features: SSE2 SSE4.1 AVX AVX2 FMA F16 HT 
+Info) Free system memory: 8GB (25%)
+Info) No CUDA accelerator devices available.
+Info) Dynamically loaded 5 plugins in directory:
+Info) /usr/local/lib/vmd/plugins/LINUXAMD64/molfile
+Invalid axes location: on
+FLTK
+2.0
+psfgen) clearing structure, preserving topology and aliases
+psfgen) reading structure from psf file step1_pdbreader.psf
+psfgen) reading coordinates from pdb file step1_pdbreader.pdb
+psfgen) Printing bonds between virtual particles and host.
+
+psfgen) Info: writing psf file reset.psf
+psfgen) total of 12448 atoms
+psfgen) total of 12592 bonds
+psfgen) total of 22900 angles
+psfgen) total of 33552 dihedrals
+psfgen) total of 2132 impropers
+psfgen) total of 0 explicit exclusions
+psfgen) Structure requires EXTended PSF format
+psfgen) total of 784 cross-terms
+psfgen) Info: psf file complete.
+psfgen) Info: writing pdb file reset.pdb
+psfgen) Info: pdb file complete.
+Info) VMD for LINUXAMD64, version 1.9.4a57 (April 27, 2022)
+Info) Exiting normally.
+vmd > 
+[ERROR   2025-06-20 19:00:15] VMD error:
+rlwrap: Command not found.
+
+[INFO    2025-06-20 19:00:15] PSF/PDB reset complete for NAMD. Output: reset.psf, reset.pdb
+[INFO    2025-06-20 19:01:53] Resetting PSF/PDB from CHARMM-GUI (CHARMM format) for NAMD compatibility...
+[INFO    2025-06-20 19:01:54] VMD output:
+Info) VMD for LINUXAMD64, version 1.9.4a57 (April 27, 2022)
+Info) http://www.ks.uiuc.edu/Research/vmd/                         
+Info) Email questions and bug reports to vmd@ks.uiuc.edu           
+Info) Please include this reference in published work using VMD:   
+Info)    Humphrey, W., Dalke, A. and Schulten, K., `VMD - Visual   
+Info)    Molecular Dynamics', J. Molec. Graphics 1996, 14.1, 33-38.
+Info) -------------------------------------------------------------
+Info) Multithreading available, 12 CPUs.
+Info)   CPU features: SSE2 SSE4.1 AVX AVX2 FMA F16 HT 
+Info) Free system memory: 7978MB (25%)
+Info) No CUDA accelerator devices available.
+Info) Dynamically loaded 5 plugins in directory:
+Info) /usr/local/lib/vmd/plugins/LINUXAMD64/molfile
+Invalid axes location: on
+FLTK
+2.0
+psfgen) clearing structure, preserving topology and aliases
+psfgen) reading structure from psf file step1_pdbreader.psf
+psfgen) reading coordinates from pdb file step1_pdbreader.pdb
+psfgen) Printing bonds between virtual particles and host.
+
+psfgen) Info: writing psf file reset.psf
+psfgen) total of 12448 atoms
+psfgen) total of 12592 bonds
+psfgen) total of 22900 angles
+psfgen) total of 33552 dihedrals
+psfgen) total of 2132 impropers
+psfgen) total of 0 explicit exclusions
+psfgen) Structure requires EXTended PSF format
+psfgen) total of 784 cross-terms
+psfgen) Info: psf file complete.
+psfgen) Info: writing pdb file reset.pdb
+psfgen) Info: pdb file complete.
+Info) VMD for LINUXAMD64, version 1.9.4a57 (April 27, 2022)
+Info) Exiting normally.
+vmd > 
+[ERROR   2025-06-20 19:01:54] VMD error:
+rlwrap: Command not found.
+
+[INFO    2025-06-20 19:01:54] PSF/PDB reset complete for NAMD. Output: reset.psf, reset.pdb

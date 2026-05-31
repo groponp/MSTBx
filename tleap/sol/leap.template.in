@@ -1,0 +1,30 @@
+
+
+source leaprc.protein.ff19SB
+source leaprc.DNA.OL21
+source leaprc.RNA.OL3
+source leaprc.water.tip3p
+source leaprc.gaff2
+
+
+dimer = loadpdb prot_pH3.pdb4amber.pdb
+
+bond dimer.3.SG dimer.30.SG
+bond dimer.60.SG dimer.121.SG
+bond dimer.74.SG dimer.105.SG
+bond dimer.92.SG dimer.116.SG
+bond dimer.185.SG dimer.285.SG
+bond dimer.302.SG dimer.333.SG
+bond dimer.397.SG dimer.424.SG
+bond dimer.454.SG dimer.515.SG
+bond dimer.468.SG dimer.499.SG
+bond dimer.486.SG dimer.510.SG
+bond dimer.579.SG dimer.679.SG
+bond dimer.696.SG dimer.727.SG
+
+solvatebox dimer TIP3PBOX 15 iso  
+ charge dimer 
+
+saveamberparm dimer solvated.prmtop solvated.inpcrd
+savepdb dimer solvated.pdb 
+quit
