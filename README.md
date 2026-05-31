@@ -34,11 +34,11 @@ Generación de archivos PSF/PDB con control granular de padding.
 Uso: `mstbx topopsfgen --env [solution|membrane|smd] [OPCIONES]`
 
 *   **Sistemas en Solución**:
-    `mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb`
+    `mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --salt 0.150`
 *   **Sistemas de Membrana**:
-    `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb`
+    `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150`
 *   **Sistemas SMD**:
-    `mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --atoms-pull "resid 100" --atoms-anchor "resid 1"`
+    `mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --salt 0.150 --atoms-pull "resid 100" --atoms-anchor "resid 1"`
 
 ### 2. `topotleap` (AMBER)
 Generación de archivos PRMTOP/INPCRD usando tLeap (En desarrollo).
@@ -50,8 +50,11 @@ Generación de archivos PRMTOP/INPCRD usando tLeap (En desarrollo).
 Generación de protocolos de simulación con soporte multi-motor (`--engine namd|amber|gmx`).
 
 *   **`md-inputs`**: Dinámica estándar (NVT, NPT, Producción).
+    `mstbx md-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb`
 *   **`smd-inputs`**: Dinámica de estiramiento (SMD).
+    `mstbx smd-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --selpull "resid 100" --target-center 50`
 *   **`metad-inputs`**: Metadinámica Well-Tempered.
+    `mstbx metad-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --sel1 "segid PROA"`
 
 ---
 
