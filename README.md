@@ -33,8 +33,12 @@ System building with granular padding control and accurate PBC reporting.
 Usage: `mstbx topopsfgen --env [solution|membrane|smd] [OPTIONS]`
 
 *   **Solution**: `mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --salt 0.150`
-*   **Membrane**: `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150`
+*   **Membrane (Standard - Inside)**: 
+    `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150`
     *   *Note: Uses strict XY square box and 25Å default Z-padding.*
+*   **Membrane (Peripheral - Outside)**:
+    `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --mol-outside --z-distance 10`
+    *   *Positions the protein 10Å away from the membrane surface.*
 *   **SMD**: `mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --atoms-pull "resid 100" --atoms-anchor "resid 1"`
 
 ---
