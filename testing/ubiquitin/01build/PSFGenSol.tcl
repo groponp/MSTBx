@@ -2,7 +2,7 @@
 set psf step1_pdbreader.psf 
 set pdb step1_pdbreader.pdb 
 set sol solvated
-set output macromol150mM 
+set output mol 
 set salt 0.15 
 
 mol new $psf type psf waitfor all 

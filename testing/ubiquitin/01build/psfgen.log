@@ -17,7 +17,7 @@ Info) The duplication indicates a conflict with residue names in the PDB, GLYCAM
 step1_pdbreader.psf
 step1_pdbreader.pdb
 solvated
-macromol150mM
+mol
 0.15
 psfplugin) Detected a Charmm PSF file
 psfplugin) Detected a Charmm PSF EXTEnded file
@@ -266,14 +266,14 @@ Info) Using plugin pdb for coordinates from file ionized.pdb
 Info) Finished with coordinate file ionized.pdb.
 5
 atomselect78
-30.76416015625 29.163301467895508 17.94516372680664
-Info) Opened coordinate file macromol150mM.pdb for writing.
-Info) Finished with coordinate file macromol150mM.pdb.
+30.7797794342041 29.18071746826172 17.93781280517578
+Info) Opened coordinate file mol.pdb for writing.
+Info) Finished with coordinate file mol.pdb.
 psfplugin) Writing angles/dihedrals/impropers...
-Info) Opened coordinate file macromol150mM.psf for writing.
-Info) Finished with coordinate file macromol150mM.psf.
+Info) Opened coordinate file mol.psf for writing.
+Info) Finished with coordinate file mol.psf.
 psfplugin) Detected a Charmm PSF file
-Info) Using plugin psf for structure file macromol150mM.psf
+Info) Using plugin psf for structure file mol.psf
 Info) Analyzing structure ...
 Info)    Atoms: 30993
 Info)    Bonds: 21041
@@ -284,16 +284,16 @@ Info)    Waters: 9902
 Info)    Segments: 9
 Info)    Fragments: 9959   Protein: 1   Nucleic: 0
 6
-Info) Using plugin pdb for coordinates from file macromol150mM.pdb
-Info) Finished with coordinate file macromol150mM.pdb.
+Info) Using plugin pdb for coordinates from file mol.pdb
+Info) Finished with coordinate file mol.pdb.
 6
 atomselect79
-{-33.321998596191406 -34.26599884033203 -36.30699920654297} {33.356998443603516 34.099998474121094 36.25400161743164}
--33.321998596191406 -34.26599884033203 -36.30699920654297
-33.356998443603516 34.099998474121094 36.25400161743164
-0.00015932820679154247 0.0003020434523932636 0.0001639157853787765
-66.67899703979492
-68.36599731445312
+{-33.3380012512207 -34.284000396728516 -36.29999923706055} {33.340999603271484 34.082000732421875 36.26100158691406}
+-33.3380012512207 -34.284000396728516 -36.29999923706055
+33.340999603271484 34.082000732421875 36.26100158691406
+-0.0002204044722020626 -0.0002817760978359729 -0.0001870668347692117
+66.67900085449219
+68.36600112915039
 72.56100082397461
 file4
 Info) VMD for LINUXAMD64, version 2.0.0b1 (February 21, 2026)
