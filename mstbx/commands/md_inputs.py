@@ -7,23 +7,23 @@ from mstbx.core.Utils.Utils import UnixMessage
 
 @click.command(help="Genera archivos de configuración para Dinámica Molecular estándar.")
 @click.option('--engine', type=click.Choice(['namd', 'amber', 'gromacs', 'openmm']), default='namd', help="Motor de simulación a utilizar.")
-@click.option('--type', type=click.Choice(['sol', 'memb']), required=True, help="Tipo de sistema.")
-@click.option('--psf', type=click.Path(exists=True), required=True, help="Archivo PSF del sistema.")
-@click.option('--pdb', type=click.Path(exists=True), required=True, help="Archivo PDB del sistema.")
+@click.option('--env', type=click.Choice(['solution', 'membrane']), required=True, help="Entorno del sistema.")
+@click.option('--psf', type=click.Path(exists=True, dir_okay=False), required=True, help="Archivo PSF del sistema.")
+@click.option('--pdb', type=click.Path(exists=True, dir_okay=False), required=True, help="Archivo PDB del sistema.")
 @click.option('--temperature', default=310.0, help="Temperatura en Kelvin. Default 310.")
 @click.option('--mdtime', default=100.0, help="Tiempo de producción en ns. Default 100.")
 @click.option('--dcdfreq', default=10.0, help="Frecuencia de guardado de trayectoria en ps. Default 10.0.")
 @click.option('--lparm', help="Parámetros de ligando (str o prm).")
-def md_inputs(engine, type, psf, pdb, temperature, mdtime, dcdfreq, lparm):
+def md_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, lparm):
     uxm = UnixMessage()
     
     if engine != 'namd':
         uxm.message(f"El motor '{engine}' aún no está implementado para este módulo.", "error")
         return
 
-    uxm.message(f"Generando configuración {type} para {engine}...", "info")
+    uxm.message(f"Generando configuración {env} para {engine}...", "info")
 
-    if type == 'sol':
+    if env == 'solution':
         md = MDProtocolSol(psf=psf, pdb=pdb, temperature=temperature, mdtime=mdtime, dcdfreq=dcdfreq)
         uxm.makedir(dirs=["01build", "02nvt", "03npt", "04md"])
         os.system("rm -rf 02mineq 03prod")
@@ -33,7 +33,7 @@ def md_inputs(engine, type, psf, pdb, temperature, mdtime, dcdfreq, lparm):
         md.md()
         md.restraint()
 
-    elif type == 'memb':
+    elif env == 'membrane':
         md = MDProtocolMemb(psf=psf, pdb=pdb, temperature=temperature, mdtime=mdtime, dcdfreq=dcdfreq)
         uxm.makedir(dirs=["01build", "02nvt", "03npt1", "04npt2", "05md"])
         os.system("rm -rf 02mineq 03prod")

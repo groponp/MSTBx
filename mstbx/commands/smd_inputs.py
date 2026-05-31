@@ -5,9 +5,9 @@ from mstbx.core.Utils.Utils import UnixMessage
 
 @click.command(help="Genera archivos de configuración para Steered Molecular Dynamics (SMD).")
 @click.option('--engine', type=click.Choice(['namd', 'amber', 'gromacs', 'openmm']), default='namd', help="Motor de simulación a utilizar.")
-@click.option('--type', type=click.Choice(['sol']), default='sol', help="Tipo de sistema.")
-@click.option('--psf', type=click.Path(exists=True), required=True, help="Archivo PSF del sistema.")
-@click.option('--pdb', type=click.Path(exists=True), required=True, help="Archivo PDB del sistema.")
+@click.option('--env', type=click.Choice(['solution']), default='solution', help="Entorno del sistema.")
+@click.option('--psf', type=click.Path(exists=True, dir_okay=False), required=True, help="Archivo PSF del sistema.")
+@click.option('--pdb', type=click.Path(exists=True, dir_okay=False), required=True, help="Archivo PDB del sistema.")
 @click.option('--temperature', default=310.0, help="Temperatura en Kelvin.")
 @click.option('--mdtime', default=100.0, help="Tiempo de producción en ns.")
 @click.option('--dcdfreq', default=10.0, help="Frecuencia de guardado en ps.")
@@ -15,7 +15,7 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--selanchor', required=True, help="Selección VMD para el grupo de anclaje.")
 @click.option('--target-center', type=float, required=True, help="Distancia máxima de estiramiento.")
 @click.option('--kforce', default=1.5, help="Constante de fuerza para el tirón.")
-def smd_inputs(engine, type, psf, pdb, temperature, mdtime, dcdfreq, selpull, selanchor, target_center, kforce):
+def smd_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, selpull, selanchor, target_center, kforce):
     uxm = UnixMessage()
     
     if engine != 'namd':
