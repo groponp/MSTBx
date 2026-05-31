@@ -22,6 +22,8 @@ dependencies = [
     "statsmodels",
     "pdbfixer",
     "openmm",
+    "colorama",
+    "pdb2pqr",
 ]
 
 [project.scripts]
