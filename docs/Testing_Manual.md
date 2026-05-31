@@ -1,52 +1,69 @@
-# MSTBx Testing Manual & Debugging Guide
+# 🧪 MSTBx v0.8.0: Guía de Pruebas y Depuración
 
-Manual actualizado para la arquitectura modular v0.7.6.
+Esta guía te permitirá validar cada módulo de la nueva arquitectura modular.
 
 ---
 
-## 🛠️ Módulo: autopsfgen
-**Objetivo:** Construir sistemas con control granular de padding.
+## 1. Módulos de Construcción (`topopsfgen`)
 
+### 1.1 Solución (Standard)
 ```bash
-mstbx autopsfgen --type sol --psf protein.psf --pdb protein.pdb --padding 18
+mstbx topopsfgen sol --psf protein.psf --pdb protein.pdb --padding 18
 ```
+*   **Check:** Verifica que `01build/step3_pbcsetup.str` tenga dimensiones consistentes con la proteína + 36A (18 de cada lado).
 
----
-
-## ⚙️ Módulo: md-inputs
-**Objetivo:** Generar archivos para dinámica estándar.
-
+### 1.2 Membrana
 ```bash
-# NAMD Solución
-mstbx md-inputs --engine namd --type sol --psf 01build/sys.psf --pdb 01build/sys.pdb --dcdfreq 10.0
+mstbx topopsfgen memb --psf lipids.psf --pdb lipids.pdb --padding 15 --z-dist 10
 ```
+*   **Check:** Verifica que las aguas se hayan eliminado correctamente de la zona hidrofóbica.
+
+### 1.3 SMD (Orientado)
+```bash
+mstbx topopsfgen smd --psf prot.psf --pdb prot.pdb --atoms-anchor "resid 1" --atoms-pull "resid 100" --extra-space 60
+```
+*   **Check:** El eje Z de la caja debe ser significativamente más largo que X e Y.
 
 ---
 
-## ⚙️ Módulo: smd-inputs
-**Objetivo:** Generar archivos para Steered MD.
+## 2. Módulos de Simulación (`inputs`)
 
+### 2.1 MD Estándar
+```bash
+mstbx md-inputs --engine namd --type sol --psf 01build/sys.psf --pdb 01build/sys.pdb --dcdfreq 5.0
+```
+*   **Nota:** `--dcdfreq 5.0` ahora se interpreta como **5 picosegundos**.
+
+### 2.2 Steered MD
 ```bash
 mstbx smd-inputs --engine namd --psf 01build/sys.psf --pdb 01build/sys.pdb \
-                 --selpull "segid PROA and resid 100" \
-                 --selanchor "segid PROA and resid 1" \
-                 --target-center 50
+                 --selpull "resid 100" --selanchor "resid 1" --target-center 50
 ```
 
----
-
-## ⚙️ Módulo: metad-inputs
-**Objetivo:** Generar archivos para Metadinámica.
-
+### 2.3 Metadinámica
 ```bash
 mstbx metad-inputs --engine namd --psf 01build/sys.psf --pdb 01build/sys.pdb \
-                   --sel1 "segid PROA" --sel2 "segid PROB" \
-                   --target-distance 60
+                   --sel1 "segid PROA" --sel2 "segid PROB" --target-distance 60
 ```
 
 ---
 
-## 🧪 Otros Módulos
-*   **pdbwriter**: `mstbx pdbwriter -i in.pdb -o out.pdb --fix`
-*   **colabfold**: `mstbx colabfold -i ./fastas -o ./results`
-*   **mkdocking-cmplx**: `mstbx mkdocking-cmplx -p prot.pdb -d dock.pdbqt -o complex.pdb`
+## 3. Traducción y Herramientas
+
+### 3.1 MDTranslate
+```bash
+mstbx md-translate --psf sys.psf --coor restart.coor --xsc restart.xsc --toppar-dir ./toppar
+```
+
+### 3.2 PDBWriter
+```bash
+mstbx pdbwriter -i in.pdb -o fixed.pdb --fix --ssbond --ph 7.0
+```
+*   **Check:** Revisa `pdbwriter_report.log` para ver qué residuos fueron reparados.
+
+---
+
+## 🔍 Lista de Consistencia
+1.  **Versión:** `mstbx --version` debe reportar `0.8.0`.
+2.  **Autocompletado:** Prueba escribir `mstbx topop[TAB]` para ver si completa `topopsfgen`.
+3.  **Logs:** Cada comando debe generar logs claros en la terminal (Colorama habilitado).
