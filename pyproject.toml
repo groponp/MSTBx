@@ -26,5 +26,8 @@ dependencies = [
     "pdb2pqr",
 ]
 
+[tool.setuptools]
+packages = ["mstbx"]
+
 [project.scripts]
 mstbx = "mstbx.cli:cli"
