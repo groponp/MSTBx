@@ -34,21 +34,17 @@ Usage: `mstbx topopsfgen --env [solution|membrane|smd] [OPTIONS]`
 
 *   **Solution**: `mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --salt 0.150`
 *   **Membrane**: `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150`
-*   **SMD (Oriented)**: 
-    ```bash
-    mstbx topopsfgen --env smd --psf protein.psf --pdb protein.pdb \
-                     --atoms-pull "resid 100" --atoms-anchor "resid 1" --extra-space 50
-    ```
+*   **SMD (Oriented)**: `mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --atoms-pull "resid 100" --atoms-anchor "resid 1"`
 
-### 🧬 Glycosylated Proteins (Step-by-Step)
-For proteins with glycans (from CHARMM-GUI or similar), follow this workflow:
+### 🧬 Glycosylated Proteins (Advanced Workflow)
+For proteins with glycans and virtual bonds, follow this **Reset-then-Build** pipeline:
 
-1.  **Build the initial system**:
-    `mstbx topopsfgen --env solution --psf step1.psf --pdb step1.pdb --salt 0.150 --ofile glyc_sys`
-2.  **Reset PSF to X-PLOR format**: (Crucial for virtual bonds/glycosylations)
-    `mstbx resetpsf --psf 01build/glyc_sys.psf --pdb 01build/glyc_sys.pdb --output final_glyc`
+1.  **Reset to X-PLOR**: (Handles virtual bonds/glycosylation patches first)
+    `mstbx resetpsf --psf step1.psf --pdb step1.pdb --output reset_glyc`
+2.  **Build Environment**: (Use the reset files as input)
+    `mstbx topopsfgen --env solution --psf reset_glyc.psf --pdb reset_glyc.pdb --salt 0.150`
 3.  **Generate MD Protocols**:
-    `mstbx md-inputs --engine namd --env solution --psf final_glyc.psf --pdb final_glyc.pdb`
+    `mstbx md-inputs --engine namd --env solution --psf 01build/macromol150mM.psf --pdb 01build/macromol150mM.pdb`
 
 ---
 
@@ -72,7 +68,7 @@ Automatic generation of NAMD configuration files and an automated **`runner.sh`*
 ## 🧪 Advanced Tools
 
 *   **`pdbwriter`**: Intelligent repair (internal gaps only), S-S bond detection, and protonation.
-*   **`resetpsf`**: Reset PSF/PDB to X-PLOR format (ideal for glycosylations/virtual bonds).
+*   **`resetpsf`**: Reset PSF/PDB to X-PLOR format (ideal for glycosylations).
 *   **`md-translate`**: Coordinate/Trajectory translation (e.g., NAMD to GROMACS).
 *   **`colabfold`**: Structure prediction via Apptainer/Singularity.
 *   **`mkdocking-cmplx`**: Assemble protein-ligand complexes from docking poses.
