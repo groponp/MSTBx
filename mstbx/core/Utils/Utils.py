@@ -13,15 +13,15 @@ class MSTBxLogger:
         if not logger.handlers:
             logger.setLevel(logging.INFO)
             
-            # Format: [HH:MM:SS DD/MM/YYYY] [LEVEL] Message
+            # Format: [LEVEL HH:MM:SS DD/MM/YYYY] Message
             formatter = logging.Formatter(
-                fmt='[' + Fore.CYAN + '%(asctime)s' + Fore.RESET + '] [' + Fore.YELLOW + '%(levelname)s' + Fore.RESET + '] %(message)s',
+                fmt='[' + Fore.YELLOW + '%(levelname)s' + Fore.RESET + ' ' + Fore.CYAN + '%(asctime)s' + Fore.RESET + '] %(message)s',
                 datefmt='%H:%M:%S %%d/%%m/%%Y'
             )
             
             # File Handler (no colors)
             file_formatter = logging.Formatter(
-                fmt='[%(asctime)s] [%(levelname)s] %(message)s',
+                fmt='[%(levelname)s %(asctime)s] %(message)s',
                 datefmt='%H:%M:%S %d/%m/%Y'
             )
             
