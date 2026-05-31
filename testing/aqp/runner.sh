@@ -17,27 +17,31 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-echo -e "${GREEN}MSTBx Runner initiated${NC}"
+echo -e "${GREEN}MSTBx Runner initiated (Membrane Protocol)${NC}"
 
 if [ "$eq" == "on" ]; then
     echo -e "${YELLOW}Starting Equilibration (NVT)...${NC}"
     cd 02nvt && $NAMD $OPTS nvt.confg > nvt.log || exit 1
     cd ..
     
-    echo -e "${YELLOW}Starting Equilibration (NPT)...${NC}"
-    cd 03npt && $NAMD $OPTS npt.confg > npt.log || exit 1
+    echo -e "${YELLOW}Starting Equilibration (NPT1)...${NC}"
+    cd 03npt1 && $NAMD $OPTS npt1.confg > npt1.log || exit 1
+    cd ..
+
+    echo -e "${YELLOW}Starting Equilibration (NPT2)...${NC}"
+    cd 04npt2 && $NAMD $OPTS npt2.confg > npt2.log || exit 1
     cd ..
 fi
 
 if [ "$md_init" == "on" ]; then
     echo -e "${YELLOW}Starting Initial Production MD...${NC}"
-    cd 04md && $NAMD $OPTS md.confg > md.log || exit 1
+    cd 05md && $NAMD $OPTS md.confg > md.log || exit 1
     cd ..
 fi
 
 if [ "$md_continue" == "on" ]; then
     echo -e "${YELLOW}Continuing Production MD...${NC}"
-    cd 04md && $NAMD $OPTS md.confg >> md.log || exit 1
+    cd 05md && $NAMD $OPTS md.confg >> md.log || exit 1
     cd ..
 fi
 
