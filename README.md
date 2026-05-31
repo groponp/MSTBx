@@ -33,14 +33,22 @@ System building with granular padding control and accurate PBC reporting.
 Usage: `mstbx topopsfgen --env [solution|membrane|smd] [OPTIONS]`
 
 *   **Solution**: `mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --salt 0.150`
-*   **Membrane (Standard)**: `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150`
-    *   *Note: Uses strict XY square box and 25Å default Z-padding.*
-*   **Membrane (Peripheral)**: `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --mol-outside --z-distance 10`
+*   **Membrane**: `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150`
 *   **SMD (Oriented)**: 
     ```bash
     mstbx topopsfgen --env smd --psf protein.psf --pdb protein.pdb \
                      --atoms-pull "resid 100" --atoms-anchor "resid 1" --extra-space 50
     ```
+
+### 🧬 Glycosylated Proteins (Step-by-Step)
+For proteins with glycans (from CHARMM-GUI or similar), follow this workflow:
+
+1.  **Build the initial system**:
+    `mstbx topopsfgen --env solution --psf step1.psf --pdb step1.pdb --salt 0.150 --ofile glyc_sys`
+2.  **Reset PSF to X-PLOR format**: (Crucial for virtual bonds/glycosylations)
+    `mstbx resetpsf --psf 01build/glyc_sys.psf --pdb 01build/glyc_sys.pdb --output final_glyc`
+3.  **Generate MD Protocols**:
+    `mstbx md-inputs --engine namd --env solution --psf final_glyc.psf --pdb final_glyc.pdb`
 
 ---
 
@@ -49,32 +57,23 @@ Usage: `mstbx topopsfgen --env [solution|membrane|smd] [OPTIONS]`
 Automatic generation of NAMD configuration files and an automated **`runner.sh`** script.
 
 ### 1. Standard MD (`md-inputs`)
-*   *Solution*: `mstbx md-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb`
-*   *Membrane*: `mstbx md-inputs --engine namd --env membrane --psf 01build/sys.psf --pdb 01build/sys.pdb`
+*   *Solution*: `mstbx md-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb`
+*   *Membrane*: `mstbx md-inputs --engine namd --env membrane --psf sys.psf --pdb sys.pdb`
 
 ### 2. Steered MD (`smd-inputs`)
-*   **Default**: `mstbx smd-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --selpull "resid 100" --target-center 50`
-*   **Custom Folder**: `mstbx smd-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb --colvar-input ./my_smd_setup/ --target-center 50`
-    *   *Note: Validates and copies all files from the folder to the production directory.*
+*   **Default**: `mstbx smd-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb --selpull "resid 100" --target-center 50`
+*   **Custom Folder**: `mstbx smd-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb --colvar-input ./my_smd_setup/`
 
 ### 3. Metadynamics (`metad-inputs`)
 *   **Default**: `mstbx metad-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb --sel1 "segid PROA" --sel2 "segid PROB"`
-*   **Custom Folder**: `mstbx metad-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb --colvar-input ./my_metad_folder/`
-
-### Automated Execution
-After generating any input, simply run:
-```bash
-chmod +x runner.sh
-./runner.sh
-```
 
 ---
 
 ## 🧪 Advanced Tools
 
 *   **`pdbwriter`**: Intelligent repair (internal gaps only), S-S bond detection, and protonation.
+*   **`resetpsf`**: Reset PSF/PDB to X-PLOR format (ideal for glycosylations/virtual bonds).
 *   **`md-translate`**: Coordinate/Trajectory translation (e.g., NAMD to GROMACS).
-*   **`resetpsf`**: Reset PSF/PDB to X-PLOR format (ideal for glycosylations).
 *   **`colabfold`**: Structure prediction via Apptainer/Singularity.
 *   **`mkdocking-cmplx`**: Assemble protein-ligand complexes from docking poses.
 
