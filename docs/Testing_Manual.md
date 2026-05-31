@@ -48,14 +48,35 @@ mstbx metad-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01bu
 
 ---
 
-## 3. Traducción y Herramientas
+## 3. Flujo de Trabajo: Proteína-Ligando
 
-### 3.1 MDTranslate
+Este flujo combina tres módulos para preparar una simulación completa con un ligando.
+
+### 3.1 Ensamblaje del Complejo
+```bash
+mstbx mkdocking-cmplx -p receptor.pdb -d docking_pose.pdbqt -o complex.pdb
+```
+*   **Resultado:** Crea `complex.pdb` con cadena A (proteína) y L (ligando).
+
+### 3.2 Generación de Protocolo con Parámetros de Ligando
+```bash
+mstbx md-inputs --engine namd --env solution \
+                --psf 01build/complex.psf \
+                --pdb 01build/complex.pdb \
+                --lparm ligand_params.str
+```
+*   **Check:** Verifica que `02nvt/nvt.confg` incluya el archivo `ligand_params.str` en la sección de parámetros.
+
+---
+
+## 4. Traducción y Herramientas
+
+### 4.1 MDTranslate
 ```bash
 mstbx md-translate --psf sys.psf --coor restart.coor --xsc restart.xsc --toppar-dir ./toppar
 ```
 
-### 3.2 PDBWriter
+### 4.2 PDBWriter
 ```bash
 mstbx pdbwriter -i in.pdb -o fixed.pdb --fix --ssbond --ph 7.0
 ```
@@ -64,6 +85,6 @@ mstbx pdbwriter -i in.pdb -o fixed.pdb --fix --ssbond --ph 7.0
 ---
 
 ## 🔍 Lista de Consistencia
-1.  **Versión:** `mstbx --version` debe reportar `0.8.0`.
+1.  **Versión:** `mstbx --version` debe reportar `0.8.2`.
 2.  **Autocompletado:** Prueba escribir `mstbx topop[TAB]` para ver si completa `topopsfgen`.
 3.  **Logs:** Cada comando debe generar logs claros en la terminal (Colorama habilitado).
