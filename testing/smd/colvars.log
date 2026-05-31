@@ -1,0 +1,50 @@
+Info) VMD for LINUXAMD64, version 2.0.0b1 (February 21, 2026)
+Info) http://www.ks.uiuc.edu/Research/vmd/                         
+Info) Email questions and bug reports to vmd@ks.uiuc.edu           
+Info) Please include this reference in published work using VMD:   
+Info)    Humphrey, W., Dalke, A. and Schulten, K., `VMD - Visual   
+Info)    Molecular Dynamics', J. Molec. Graphics 1996, 14.1, 33-38.
+Info) -------------------------------------------------------------
+Info) Multithreading available, 12 CPUs.
+Info)   CPU features: SSE2 SSE4.1 AVX AVX2 FMA F16 HT 
+Info) Free system memory: 7903MB (25%)
+Info) No CUDA accelerator devices available.
+Info) Dynamically loaded 2 plugins in directory:
+Info) /usr/local/lib/vmd/plugins/LINUXAMD64/molfile
+Info) Duplicate resname "4YS" for glycanReader.
+Info) Duplicate resname "YGA" for glycanReader.
+Info) The duplication indicates a conflict with residue names in the PDB, GLYCAM, or CHARMM databases. If you're not working with glycans that use these residue names, you can safely ignore this warning.
+01build/mol.psf
+01build/mol.pdb
+resid 100
+resid 1
+50.0
+psfplugin) Detected a Charmm PSF file
+Info) Using plugin psf for structure file 01build/mol.psf
+Info) Analyzing structure ...
+Info)    Atoms: 57662
+Info)    Bonds: 38787
+Info)    Angles: 21032  Dihedrals: 3293  Impropers: 212  Cross-terms: 74
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 18957
+Info)    Waters: 18775
+Info)    Segments: 11
+Info)    Fragments: 18882   Protein: 1   Nucleic: 0
+0
+Info) Using plugin pdb for coordinates from file 01build/mol.pdb
+Info) Finished with coordinate file 01build/mol.pdb.
+0
+atomselect0
+atomselect1
+Info) Opened coordinate file 04md/PullAtom.pdb for writing.
+Info) Finished with coordinate file 04md/PullAtom.pdb.
+atomselect2
+atomselect3
+Info) Opened coordinate file 04md/AnchorAtom.pdb for writing.
+Info) Finished with coordinate file 04md/AnchorAtom.pdb.
+-5.945713996887207
+-26.655500411987305
+44.05428600311279
+Info) VMD for LINUXAMD64, version 2.0.0b1 (February 21, 2026)
+Info) Exiting normally.
+vmd > 

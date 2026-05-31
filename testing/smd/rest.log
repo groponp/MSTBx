@@ -7,7 +7,7 @@ Info)    Molecular Dynamics', J. Molec. Graphics 1996, 14.1, 33-38.
 Info) -------------------------------------------------------------
 Info) Multithreading available, 12 CPUs.
 Info)   CPU features: SSE2 SSE4.1 AVX AVX2 FMA F16 HT 
-Info) Free system memory: 8GB (26%)
+Info) Free system memory: 7905MB (25%)
 Info) No CUDA accelerator devices available.
 Info) Dynamically loaded 2 plugins in directory:
 Info) /usr/local/lib/vmd/plugins/LINUXAMD64/molfile
@@ -19,14 +19,14 @@ Info) The duplication indicates a conflict with residue names in the PDB, GLYCAM
 psfplugin) Detected a Charmm PSF file
 Info) Using plugin psf for structure file 01build/mol.psf
 Info) Analyzing structure ...
-Info)    Atoms: 30993
-Info)    Bonds: 21041
-Info)    Angles: 12159  Dihedrals: 3293  Impropers: 212  Cross-terms: 74
+Info)    Atoms: 57662
+Info)    Bonds: 38787
+Info)    Angles: 21032  Dihedrals: 3293  Impropers: 212  Cross-terms: 74
 Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
-Info)    Residues: 10034
-Info)    Waters: 9902
-Info)    Segments: 9
-Info)    Fragments: 9959   Protein: 1   Nucleic: 0
+Info)    Residues: 18957
+Info)    Waters: 18775
+Info)    Segments: 11
+Info)    Fragments: 18882   Protein: 1   Nucleic: 0
 0
 Info) Using plugin pdb for coordinates from file 01build/mol.pdb
 Info) Finished with coordinate file 01build/mol.pdb.
