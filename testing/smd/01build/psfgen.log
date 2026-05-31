@@ -1,0 +1,89 @@
+Info) VMD for LINUXAMD64, version 2.0.0b1 (February 21, 2026)
+Info) http://www.ks.uiuc.edu/Research/vmd/                         
+Info) Email questions and bug reports to vmd@ks.uiuc.edu           
+Info) Please include this reference in published work using VMD:   
+Info)    Humphrey, W., Dalke, A. and Schulten, K., `VMD - Visual   
+Info)    Molecular Dynamics', J. Molec. Graphics 1996, 14.1, 33-38.
+Info) -------------------------------------------------------------
+Info) Multithreading available, 12 CPUs.
+Info)   CPU features: SSE2 SSE4.1 AVX AVX2 FMA F16 HT 
+Info) Free system memory: 8GB (26%)
+Info) No CUDA accelerator devices available.
+Info) Dynamically loaded 2 plugins in directory:
+Info) /usr/local/lib/vmd/plugins/LINUXAMD64/molfile
+Info) Duplicate resname "4YS" for glycanReader.
+Info) Duplicate resname "YGA" for glycanReader.
+Info) The duplication indicates a conflict with residue names in the PDB, GLYCAM, or CHARMM databases. If you're not working with glycans that use these residue names, you can safely ignore this warning.
+step1_pdbreader.psf
+step1_pdbreader.pdb
+solvated
+mol
+0.15
+psfplugin) Detected a Charmm PSF file
+psfplugin) Detected a Charmm PSF EXTEnded file
+Info) Using plugin psf for structure file step1_pdbreader.psf
+Info) Analyzing structure ...
+Info)    Atoms: 1231
+Info)    Bonds: 1237
+Info)    Angles: 2257  Dihedrals: 3293  Impropers: 212  Cross-terms: 74
+Info)    Bondtypes: 0  Angletypes: 0  Dihedraltypes: 0  Impropertypes: 0
+Info)    Residues: 76
+Info)    Waters: 0
+Info)    Segments: 1
+Info)    Fragments: 1   Protein: 1   Nucleic: 0
+0
+Info) Using plugin pdb for coordinates from file step1_pdbreader.pdb
+Info) Finished with coordinate file step1_pdbreader.pdb.
+0
+atomselect0
+atomselect1
+atomselect2
+25.814420700073242 24.76410484313965 4.564631462097168
+40.353248596191406 39.60162353515625 34.59075164794922
+14.538827896118164 14.837518692016602 30.02612018585205
+{0.3981974422931671 0.4063781201839447 0.8223719596862793 0.0} {-0.7142595052719116 0.6998809576034546 0.0 0.0} {-0.5755624771118164 -0.587386965751648 0.5689502358436584 0.0} {0.0 0.0 0.0 1.0}
+{6.123233995736766e-17 0.0 -1.0 0.0} {0.0 1.0  0.0 0.0} {1.0 0.0 6.123233995736766e-17 0.0} {0.0 0.0  0.0 1.0}
+{11.666739463806152 -14.354354858398438 17.855697631835938} {39.525936126708984 13.447772026062012 61.87241744995117}
+11.666739463806152 -14.354354858398438 17.855697631835938
+39.525936126708984 13.447772026062012 61.87241744995117
+18.0
+60.0
+-6.333260536193848
+57.525936126708984
+-32.35435485839844
+31.44777202606201
+-0.1443023681640625
+139.87241744995117
+1.7
+Info) generating solute plus one replica of water...
+psfgen) reading structure from psf file step1_pdbreader.psf
+ERROR: Unable to open pdb file orientedtoZ.pdb
+MOLECULE DESTROYED BY FATAL ERROR!  Use resetpsf to start over.
+1.5
+Autoionize) Reading solvated.psf/solvated.pdb...
+psfgen) clearing structure, preserving topology and aliases
+ERROR: Unable to open psf file solvated.psf
+MOLECULE DESTROYED BY FATAL ERROR!  Use resetpsf to start over.
+ERROR) No molecules loaded.
+Couldn't open psf file ionized.psf
+ERROR) Could not read file ionized.psf
+Unable to load file 'ionized.psf' using file type 'psf'.
+ERROR) Could not read file ionized.pdb
+Unable to load file 'ionized.pdb' using file type 'pdb'.
+There is no 'top' molecule  in atomselect's 'molId'
+ERROR) No molecule
+can't read "final_minmax": no such variable
+can't read "final_minmax": no such variable
+measure center: molecule was deleted(?)
+file5
+can't read "f_max": no such variable
+can't read "f_max": no such variable
+can't read "f_max": no such variable
+can't read "f_center": no such variable
+can't read "f_center": no such variable
+can't read "f_center": no such variable
+atomsel: writeXXX: was molecule 0 deleted?
+atomsel: writeXXX: was molecule 0 deleted?
+Info) VMD for LINUXAMD64, version 2.0.0b1 (February 21, 2026)
+Info) Exiting normally.
+vmd > 

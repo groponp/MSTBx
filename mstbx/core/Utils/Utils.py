@@ -14,9 +14,10 @@ class MSTBxLogger:
             logger.setLevel(logging.INFO)
             
             # Format: [LEVEL HH:MM:SS DD/MM/YYYY] Message
+            # Note: Removed double %% which were causing literal strings in some environments
             formatter = logging.Formatter(
                 fmt='[' + Fore.YELLOW + '%(levelname)s' + Fore.RESET + ' ' + Fore.CYAN + '%(asctime)s' + Fore.RESET + '] %(message)s',
-                datefmt='%H:%M:%S %%d/%%m/%%Y'
+                datefmt='%H:%M:%S %d/%m/%Y'
             )
             
             # File Handler (no colors)
