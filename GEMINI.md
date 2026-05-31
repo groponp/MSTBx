@@ -1,69 +1,37 @@
-# MSTBx : Molecular Simulação ToolBox
+# MSTBx : Molecular Simulation ToolBox (v0.8.9-beta)
 
-MSTBx is a specialized toolkit for preparing and generating configuration files for Molecular Dynamics (MD) simulations, with primary support for **NAMD2** and **NAMD3**. It is designed to efficiently handle large-scale systems (millions of atoms) by leveraging the power of **PSFGen** and **VMD**.
+MSTBx is a modular Python-based ecosystem designed to streamline the preparation, configuration, and translation of Molecular Dynamics (MD) simulations. It leverages the power of **VMD**, **PSFGen**, and **MDAnalysis** to handle systems from small molecules to large-scale complexes (millions of atoms).
 
 ## Project Overview
 
-*   **Purpose:** Streamline the preparation of molecular systems (solvation, membrane insertion, ionization) and the generation of standardized MD protocols.
-*   **Target Systems:** Proteins in solution, protein-ligand complexes, and membrane proteins.
-*   **Architecture:** Modular Python-based library with integrated Tcl script generation for VMD/PSFGen.
-*   **Key Dependencies:** Python 3.12, VMD, PSFGen, MDAnalysis, Biopython, NumPy, Pandas.
+*   **Goal:** Provide a unified CLI interface for MD simulation workflows.
+*   **Target Engines:** NAMD2/3 (Primary), with cross-engine translation support (e.g., to GROMACS).
+*   **Core Logic:** Located in `mstbx/core/`, utilizing a "Waiter/Chef" architecture where the CLI handles user input and the core modules perform the technical heavy lifting.
+*   **Key Dependencies:** Python 3.12, VMD, MDAnalysis, PDBFixer, OpenMM, Biopython.
 
-## Directory Structure
+## CLI Modules Index
 
-*   `/LIB`: Core library modules.
-    *   `Build/`: Classes for system assembly (`BuildSolution`, `BuildMembrane`).
-    *   `MDProtocols/`: Logic for generating NAMD configuration files (`MDSolProtocol`, `MDMembProtocol`).
-    *   `toppar/`: CHARMM force field topology and parameter files.
-    *   `Utils/`: Helper functions for CLI output and file system operations.
-*   `/SBx`: Structural Biology extensions, including Colabfold integration.
-*   `/AdHocTools`: Scripts for specific tasks like finding disulfide bonds or resetting PSF files.
-*   `/DOCK`: Tools for protein-ligand docking preparation.
-*   `/Examples`: Reference systems and setup scripts.
+*   **`topopsfgen`**: Builds CHARMM-style systems (Solvation, Membrane, SMD).
+    *   *Standards:* 18Å cubic padding for solution, 25Å Z-padding for membrane (square XY).
+*   **`md-inputs`**: Generates standard MD protocols (NVT, NPT, Production).
+*   **`smd-inputs`**: Generates velocity-based pulling protocols aligned to Z-axis.
+*   **`metad-inputs`**: Generates Well-Tempered Metadynamics protocols.
+*   **`pdbwriter`**: Advanced PDB repair (internal gaps only), S-S bond detection, and protonation.
+*   **`resetpsf`**: Converts structures to X-PLOR format (required for glycans/virtual bonds).
+*   **`md-translate`**: Translates coordinates/trajectories between simulation engines.
+*   **`colabfold`**: Interface for AI structure prediction via Apptainer.
+*   **`mkdocking-cmplx`**: Assembles protein-ligand complexes from docking poses.
 
-## Building and Running
+## Development Standards
 
-### Environment Setup
+*   **Logging:** All console output must follow the format `[LEVEL HH:MM:SS DD/MM/YYYY]`. Use `UnixMessage` or `MSTBxLogger`.
+*   **Naming:** Use `--env [solution|membrane|smd]` and `--engine [namd|amber|...]` consistently.
+*   **Language:** ALL console output and internal logs must be in **English**.
+*   **Geometry:** Always enforce strict box symmetry (Square XY or Cubic) based on the maximum dimension of the molecule.
+*   **Git Policy:** Work on feature branches and merge to `main`. Versioning follows `v0.8.x` progression (up to .100) during the Beta phase.
 
-The project uses a Conda environment defined in `mstbx.yml`.
+## Environment Management
 
-```bash
-conda env create -f mstbx.yml
-conda activate mstbx
-
-# Set the MSTBx environment variable to the project root
-export MSTBx=$(pwd)
-export PATH=$MSTBx:$PATH
-```
-
-### Core Commands
-
-#### 1. Prepare a Solvated System
-Use `GenSol.py` to solvate and ionize a system, followed by `GenMDSolConfg.py` to generate the MD protocol.
-
-```bash
-# 1. Build the solvated system
-python $MSTBx/GenSol.py --psf protein.psf --pdb protein.pdb --salt 0.150 --ofile my_system
-
-# 2. Generate NAMD configuration files (NVT, NPT, MD)
-python $MSTBx/GenMDSolConfg.py --psf 01build/my_system.psf --pdb 01build/my_system.pdb --temperature 310 --mdtime 100
-```
-
-#### 2. Prepare a Membrane System
-Use `GenMemb.py` and `GenMDMembConfg.py` for systems involving lipid bilayers.
-
-```bash
-# 1. Build the membrane system
-python $MSTBx/GenMemb.py --psf protein_lipid.psf --pdb protein_lipid.pdb --salt 0.150 --ofile my_memb_system
-
-# 2. Generate NAMD configuration files
-python $MSTBx/GenMDMembConfg.py --psf 01build/my_memb_system.psf --pdb 01build/my_memb_system.pdb --temperature 310 --mdtime 100
-```
-
-## Development Conventions
-
-*   **CLI Argument Parsing:** Uses the `optparse` module.
-*   **File Management:** Scripts are designed to work within a specific directory structure (e.g., creating `01build`, `02nvt`, etc.).
-*   **VMD Integration:** Many Python scripts generate `.tcl` files and execute them using `vmd -dispdev text -e script.tcl`.
-*   **Parameters:** Standard CHARMM force field files are stored in `LIB/toppar` and are automatically copied to the simulation directories by the protocol generators.
-*   **Testing:** New modules should be tested against the provided `Examples/` and ideally include a validation step against known stable configurations.
+The project is packaged with `pyproject.toml`.
+*   Install for development: `pip install -e .`
+*   TAB Completion: Enable via Click completion scripts in `.bashrc` or `.zshrc`.
