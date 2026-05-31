@@ -10,3 +10,13 @@
 [INFO 17:45:15 31/05/2026] Configuration generated successfully.
 [INFO 17:50:44 31/05/2026] Reseteando PSF/PDB de step1_pdbreader.psf a formato X-PLOR...
 [INFO 17:50:45 31/05/2026] Archivos reset.psf y reset.pdb generados con éxito.
+[INFO 18:00:21 31/05/2026] Reseteando PSF/PDB de step1_pdbreader.psf a formato X-PLOR...
+[INFO 18:00:21 31/05/2026] Archivos reset.psf y reset.pdb generados con éxito.
+[INFO 18:00:59 31/05/2026] Directory created: 01build
+[INFO 18:00:59 31/05/2026] Working inside: /media/groponp/Galvani/Scripts/MSTBx/testing/1oan-pH7-resetpsf/01build
+[INFO 18:01:40 31/05/2026] Solution system ready in 01build/
+[INFO 18:03:57 31/05/2026] Generating solution configuration for namd...
+[INFO 18:03:57 31/05/2026] Directory created: 02nvt
+[INFO 18:03:57 31/05/2026] Directory created: 03npt
+[INFO 18:03:57 31/05/2026] Directory created: 04md
+[INFO 18:04:00 31/05/2026] Configuration generated successfully.

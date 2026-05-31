@@ -27,59 +27,75 @@ pip install -e .
 
 ---
 
-## 🛠️ Topology Modules (`topopsfgen`)
+## 🛠️ Main Modules
 
-System building with granular padding control and accurate PBC reporting.
-Usage: `mstbx topopsfgen --env [solution|membrane|smd] [OPTIONS]`
+### 1. Topology Building (`topopsfgen`)
+*   `mstbx topopsfgen --env solution`: Cubic water box (18Å padding).
+*   `mstbx topopsfgen --env membrane`: Strict XY square box (25Å Z-padding).
+*   `mstbx topopsfgen --env smd`: Oriented system with Z+ tunnel extension.
 
-*   **Solution**: `mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --salt 0.150`
-*   **Membrane**: `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150`
-*   **SMD (Oriented)**: `mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --atoms-pull "resid 100" --atoms-anchor "resid 1"`
+### 2. Simulation Protocols (`inputs`)
+*   `mstbx md-inputs`: Standard equilibration and production.
+*   `mstbx smd-inputs`: Velocity-based pulling protocols.
+*   `mstbx metad-inputs`: Well-Tempered Metadynamics.
 
-### 🧬 Glycosylated Proteins (Advanced Workflow)
-For proteins with glycans and virtual bonds, follow this **Reset-then-Build** pipeline:
-
-1.  **Reset to X-PLOR**: (Handles virtual bonds/glycosylation patches first)
-    `mstbx resetpsf --psf step1.psf --pdb step1.pdb --output reset_glyc`
-2.  **Build Environment**: (Use the reset files as input)
-    `mstbx topopsfgen --env solution --psf reset_glyc.psf --pdb reset_glyc.pdb --salt 0.150`
-3.  **Generate MD Protocols**:
-    `mstbx md-inputs --engine namd --env solution --psf 01build/macromol150mM.psf --pdb 01build/macromol150mM.pdb`
-
----
-
-## ⚙️ Simulation Modules (`inputs`)
-
-Automatic generation of NAMD configuration files and an automated **`runner.sh`** script.
-
-### 1. Standard MD (`md-inputs`)
-*   *Solution*: `mstbx md-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb`
-*   *Membrane*: `mstbx md-inputs --engine namd --env membrane --psf sys.psf --pdb sys.pdb`
-
-### 2. Steered MD (`smd-inputs`)
-*   **Default**: `mstbx smd-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb --selpull "resid 100" --target-center 50`
-*   **Custom Folder**: `mstbx smd-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb --colvar-input ./my_smd_setup/`
-
-### 3. Metadynamics (`metad-inputs`)
-*   **Default**: `mstbx metad-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb --sel1 "segid PROA" --sel2 "segid PROB"`
+### 3. Advanced Tools
+*   `pdbwriter`: PDB fixing and S-S bond detection.
+*   `resetpsf`: Conversion to X-PLOR format (required for glycans).
+*   `mkdocking-cmplx`: Protein-ligand complex assembly.
+*   `md-translate`: Coordinate translation (NAMD to GROMACS).
+*   `colabfold`: AI-based structure prediction.
 
 ---
 
-## 🧪 Advanced Tools
+## 📖 Real-World Examples
 
-*   **`pdbwriter`**: Intelligent repair (internal gaps only), S-S bond detection, and protonation.
-*   **`resetpsf`**: Reset PSF/PDB to X-PLOR format (ideal for glycosylations).
-*   **`md-translate`**: Coordinate/Trajectory translation (e.g., NAMD to GROMACS).
-*   **`colabfold`**: Structure prediction via Apptainer/Singularity.
-*   **`mkdocking-cmplx`**: Assemble protein-ligand complexes from docking poses.
+### A. Standard Protein (Ubiquitin)
+```bash
+# 1. Build Cubic Box (18A padding)
+mstbx topopsfgen --env solution --psf ubq.psf --pdb ubq.pdb --salt 0.150
+
+# 2. Generate NAMD files
+mstbx md-inputs --engine namd --env solution --psf 01build/mol.psf --pdb 01build/mol.pdb
+
+# 3. Run
+./runner.sh
+```
+
+### B. Membrane Protein (Aquaporin)
+```bash
+# 1. Build Square XY Box (25A Z-padding)
+mstbx topopsfgen --env membrane --psf aqp.psf --pdb aqp.pdb --salt 0.150
+
+# 2. Generate 4-step Membrane Protocol
+mstbx md-inputs --engine namd --env membrane --psf 01build/mol.psf --pdb 01build/mol.pdb
+```
+
+### C. Protein-Ligand (BAAT)
+```bash
+# 1. Assemble Complex
+mstbx mkdocking-cmplx -p receptor.pdb -d ligand_pose.pdbqt -o complex.pdb
+
+# 2. Build Solution
+mstbx topopsfgen --env solution --psf complex.psf --pdb complex.pdb --salt 0.150
+
+# 3. Inputs with Ligand Parameters (.str/.prm)
+mstbx md-inputs --engine namd --env solution --psf 01build/mol.psf --pdb 01build/mol.pdb --ligand-parm ligand.str
+```
+
+### D. Glycosylated Protein (1OAN)
+```bash
+# 1. Reset Topology (X-PLOR format)
+mstbx resetpsf --psf 1oan.psf --pdb 1oan.pdb --output reset_1oan
+
+# 2. Build from Reset files
+mstbx topopsfgen --env solution --psf reset_1oan.psf --pdb reset_1oan.pdb --salt 0.150
+```
 
 ---
 
 ## 📊 Industrial Logging
-All modules use a standardized logging format:
-`[LEVEL HH:MM:SS DD/MM/YYYY] Message`
-
----
+Standardized format for tracking: `[LEVEL HH:MM:SS DD/MM/YYYY] Message`
 
 ## 📚 Documentation
 *   🇺🇸 [English Wiki](docs/wiki/en/Home.md) | 🇪🇸 [Wiki en Español](docs/wiki/es/Home.md) | 🇧🇷 [Wiki em Português](docs/wiki/pt/Home.md)
