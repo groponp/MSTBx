@@ -1,4 +1,4 @@
-# 🧪 MSTBx v0.8.7: Testing & Debugging Guide
+# 🧪 MSTBx v0.8.9: Testing & Debugging Guide
 
 Comprehensive guide to validate every module in MSTBx.
 
@@ -24,7 +24,6 @@ mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --mol-outside 
 mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb \
                  --atoms-anchor "resid 1" --atoms-pull "resid 100" --extra-space 50
 ```
-*   **Verification**: The protein should be oriented along Z, with a cubic-like box extended only in the Z+ direction.
 
 ---
 
@@ -40,9 +39,10 @@ mstbx md-inputs --engine namd --env membrane --psf 01build/sys.psf --pdb 01build
 
 ### 2.2 Steered MD (SMD)
 ```bash
+# Default (Auto-calculates time based on velocity)
 mstbx smd-inputs --engine namd --env solution \
                  --psf 01build/sys.psf --pdb 01build/sys.pdb \
-                 --selpull "resid 100" --selanchor "resid 1" --target-center 50 --kforce 1.5
+                 --selpull "resid 100" --selanchor "resid 1" --target-center 50 --velocity 10.0
 ```
 
 ### 2.3 Metadynamics (MetaD)
@@ -50,6 +50,18 @@ mstbx smd-inputs --engine namd --env solution \
 mstbx metad-inputs --engine namd --env solution \
                    --psf 01build/sys.psf --pdb 01build/sys.pdb \
                    --sel1 "segid PROA" --sel2 "segid PROB" --target-distance 60
+```
+
+### 2.4 Advanced Colvars Control
+You can provide your own colvars input file to bypass the code-generated templates:
+```bash
+# Custom SMD
+mstbx smd-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb \
+                 --colvar-input my_smd_logic.in --target-center 50
+
+# Custom Metadynamics
+mstbx metad-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb \
+                   --colvar-input my_metad_logic.in
 ```
 
 ---
@@ -69,7 +81,7 @@ mstbx resetpsf --psf glycosylated.psf --pdb coords.pdb --output reset_sys
 ---
 
 ## 🔍 Quality Assurance Checklist
-1.  **Version Consistency**: Run `mstbx --version`, should be `0.8.7`.
+1.  **Version Consistency**: Run `mstbx --version`, should be `0.8.9`.
 2.  **Log Format**: Messages must be `[LEVEL HH:MM:SS DD/MM/YYYY]`.
 3.  **Box Report**: Check `01build/step3_pbcsetup.str` for accurate water-measured dimensions.
 4.  **Runner Script**: Ensure `runner.sh` is created and executable with correct step activation (`eq=on`, etc.).

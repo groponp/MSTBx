@@ -1,4 +1,4 @@
-# MSTBx (Molecular Simulation ToolBox) v0.8.7
+# MSTBx (Molecular Simulation ToolBox) v0.8.9
 
 **MSTBx** is a modular Python ecosystem designed to simplify the preparation, configuration, and translation of Molecular Dynamics (MD) simulations. Optimized for large-scale systems and high-performance computing (HPC) workflows.
 
@@ -40,7 +40,6 @@ Usage: `mstbx topopsfgen --env [solution|membrane|smd] [OPTIONS]`
     mstbx topopsfgen --env smd --psf protein.psf --pdb protein.pdb \
                      --atoms-pull "resid 100" --atoms-anchor "resid 1" --extra-space 50
     ```
-    *   *Note: Aligns protein to Z-axis and extends the box in Z+ for pulling.*
 
 ---
 
@@ -53,18 +52,12 @@ Automatic generation of NAMD configuration files and an automated **`runner.sh`*
 *   *Membrane*: `mstbx md-inputs --engine namd --env membrane --psf 01build/sys.psf --pdb 01build/sys.pdb`
 
 ### 2. Steered MD (`smd-inputs`)
-```bash
-mstbx smd-inputs --engine namd --env solution \
-                 --psf 01build/sys.psf --pdb 01build/sys.pdb \
-                 --selpull "resid 100" --selanchor "resid 1" --target-center 50
-```
+*   **Default Logic**: `mstbx smd-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --selpull "resid 100" --target-center 50`
+*   **Custom Colvars**: `mstbx smd-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --colvar-input custom_smd.in`
 
 ### 3. Metadynamics (`metad-inputs`)
-```bash
-mstbx metad-inputs --engine namd --env solution \
-                   --psf 01build/sys.psf --pdb 01build/sys.pdb \
-                   --sel1 "segid PROA" --sel2 "segid PROB" --target-distance 60
-```
+*   **Default Logic**: `mstbx metad-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --sel1 "segid PROA" --sel2 "segid PROB"`
+*   **Custom Colvars**: `mstbx metad-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --colvar-input custom_metad.in`
 
 ### Automated Execution
 After generating any input, simply run:
@@ -77,20 +70,11 @@ chmod +x runner.sh
 
 ## 🧪 Advanced Tools
 
-### PDBWriter (Repair & Clean)
-`mstbx pdbwriter -i original.pdb -o fixed.pdb --fix --ssbond --ph 7.4`
-
-### Complex Builder (Docking)
-`mstbx mkdocking-cmplx -p protein.pdb -d ligand.pdbqt -o complex.pdb`
-
-### Coordinate Translation
-`mstbx md-translate --psf sys.psf --coor restart.coor --xsc restart.xsc --toppar-dir ./toppar`
-
-### Reset PSF (X-PLOR / Glycans)
-`mstbx resetpsf --psf complex.psf --pdb complex.pdb --output reset_sys`
-
-### ColabFold Prediction
-`mstbx colabfold -i ./input_fastas -o ./predictions`
+*   **`pdbwriter`**: Intelligent repair (internal gaps only), S-S bond detection, and protonation.
+*   **`md-translate`**: Coordinate/Trajectory translation (e.g., NAMD to GROMACS).
+*   **`resetpsf`**: Reset PSF/PDB to X-PLOR format (ideal for glycosylations).
+*   **`colabfold`**: Structure prediction via Apptainer/Singularity.
+*   **`mkdocking-cmplx`**: Assemble protein-ligand complexes from docking poses.
 
 ---
 

@@ -2,7 +2,7 @@ import click
 from mstbx.commands import topopsfgen, topotleap, md_inputs, smd_inputs, metad_inputs, pdbwriter, colabfold, mkdocking_cmplx, md_translate, resetpsf
 
 @click.group(help="MSTBx: Molecular Simulation ToolBox. Un ecosistema modular para la preparación de simulaciones de Dinámica Molecular.")
-@click.version_option(version="0.8.5")
+@click.version_option(version="0.8.9")
 def cli():
 
     """Portal principal de MSTBx."""
