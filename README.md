@@ -1,6 +1,6 @@
 # MSTBx (Development Version)
 
-This README is for testing purposes during the refactor to v0.7.2.
+This README is for testing purposes during the refactor to v0.7.6.
 
 ## 🚀 Quick Setup
 
@@ -35,28 +35,25 @@ source ~/.zshrc
 mstbx --help
 ```
 
-### 2. pdbwriter (Repair & Cleaning)
+### 2. Standard MD Inputs
 ```bash
-mstbx pdbwriter -i your_protein.pdb -o fixed.pdb --fix --ssbond
+# Standard solution
+mstbx md-inputs --engine namd --type sol --psf 01build/sys.psf --pdb 01build/sys.pdb --dcdfreq 5.0
 ```
 
-### 3. autopsfgen (System Building)
+### 3. SMD Inputs
 ```bash
-mstbx autopsfgen --type sol --psf protein.psf --pdb protein.pdb --ofile test_sol
+mstbx smd-inputs --engine namd --psf 01build/sys.psf --pdb 01build/sys.pdb \
+                 --selpull "resid 100" --selanchor "resid 1" --target-center 50
 ```
 
-### 4. namdinputs (Configuration Generation)
+### 4. Metadynamics Inputs
 ```bash
-mstbx namdinputs --type sol --psf 01build/test_sol.psf --pdb 01build/test_sol.pdb
+mstbx metad-inputs --engine namd --psf 01build/sys.psf --pdb 01build/sys.pdb \
+                   --sel1 "segid PROA" --sel2 "segid PROB"
 ```
 
 ## 🔄 How to Update
-If you pull new changes or dependencies are updated:
 ```bash
 pip install --upgrade -e .
 ```
-
-## 📁 Repository Structure
-*   `mstbx/`: Source code.
-*   `docs/`: Multilingual Wiki.
-*   `old.code/`: Legacy scripts and original examples.
