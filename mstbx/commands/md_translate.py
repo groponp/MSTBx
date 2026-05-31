@@ -5,10 +5,10 @@ import subprocess
 from mstbx.core.Utils.Utils import UnixMessage
 
 @click.command(help="Convierte archivos de NAMD (PSF/COOR/XSC) a formatos de otros motores (GROMACS, etc.).")
-@click.option('--psf', type=click.Path(exists=True), required=True, help="Archivo PSF de NAMD.")
-@click.option('--coor', type=click.Path(exists=True), required=True, help="Archivo de coordenadas (.coor o .restart.coor).")
-@click.option('--xsc', type=click.Path(exists=True), required=True, help="Archivo de celda extendida (.xsc).")
-@click.option('--toppar-dir', type=click.Path(exists=True), required=True, help="Directorio con archivos de parámetros CHARMM.")
+@click.option('--psf', type=click.Path(exists=True, dir_okay=False), required=True, help="Archivo PSF de NAMD.")
+@click.option('--coor', type=click.Path(exists=True, dir_okay=False), required=True, help="Archivo de coordenadas (.coor o .restart.coor).")
+@click.option('--xsc', type=click.Path(exists=True, dir_okay=False), required=True, help="Archivo de celda extendida (.xsc).")
+@click.option('--toppar-dir', type=click.Path(exists=True, file_okay=False), required=True, help="Directorio con archivos de parámetros CHARMM.")
 @click.option('--outprefix', default="translated", help="Prefijo para los archivos de salida.")
 @click.option('--target', type=click.Choice(['gromacs']), default='gromacs', help="Motor de destino.")
 def md_translate(psf, coor, xsc, toppar_dir, outprefix, target):
