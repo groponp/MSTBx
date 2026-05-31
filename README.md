@@ -34,6 +34,7 @@ Usage: `mstbx topopsfgen --env [solution|membrane|smd] [OPTIONS]`
 
 *   **Solution**: `mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --salt 0.150`
 *   **Membrane (Standard)**: `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150`
+    *   *Note: Uses strict XY square box and 25Å default Z-padding.*
 *   **Membrane (Peripheral)**: `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --mol-outside --z-distance 10`
 *   **SMD (Oriented)**: 
     ```bash
@@ -52,12 +53,13 @@ Automatic generation of NAMD configuration files and an automated **`runner.sh`*
 *   *Membrane*: `mstbx md-inputs --engine namd --env membrane --psf 01build/sys.psf --pdb 01build/sys.pdb`
 
 ### 2. Steered MD (`smd-inputs`)
-*   **Default Logic**: `mstbx smd-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --selpull "resid 100" --target-center 50`
-*   **Custom Colvars**: `mstbx smd-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --colvar-input custom_smd.in`
+*   **Default**: `mstbx smd-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --selpull "resid 100" --target-center 50`
+*   **Custom Folder**: `mstbx smd-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb --colvar-input ./my_smd_setup/ --target-center 50`
+    *   *Note: Validates and copies all files from the folder to the production directory.*
 
 ### 3. Metadynamics (`metad-inputs`)
-*   **Default Logic**: `mstbx metad-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --sel1 "segid PROA" --sel2 "segid PROB"`
-*   **Custom Colvars**: `mstbx metad-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --colvar-input custom_metad.in`
+*   **Default**: `mstbx metad-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb --sel1 "segid PROA" --sel2 "segid PROB"`
+*   **Custom Folder**: `mstbx metad-inputs --engine namd --env solution --psf sys.psf --pdb sys.pdb --colvar-input ./my_metad_folder/`
 
 ### Automated Execution
 After generating any input, simply run:
