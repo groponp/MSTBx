@@ -16,7 +16,7 @@ mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --padding 18
 ```bash
 mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150
 ```
-*   **Verification**: Default Z-padding is **25Å** per side. Check that the XY box is a perfect square based on max(X,Y).
+*   **Verification**: Default Z-padding is now **25Å** per side. Check that the XY box is a perfect square based on max(X,Y).
 
 ### 1.3 Membrane (Peripheral - Protein Outside)
 ```bash
@@ -33,13 +33,18 @@ mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --atoms-anchor "resid 1
 
 ## 2. Simulation Protocols (`inputs`)
 
-### 2.1 Standard MD
+### 2.1 Standard MD (Solution)
 ```bash
 mstbx md-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --dcdfreq 10.0
 ```
-*   **Verification**: `--dcdfreq` is in **ps**. 10.0 ps = 5000 steps (at 2fs).
 
-### 2.2 Automated Execution (`runner.sh`)
+### 2.2 Standard MD (Membrane)
+```bash
+mstbx md-inputs --engine namd --env membrane --psf 01build/sys.psf --pdb 01build/sys.pdb --dcdfreq 10.0
+```
+*   **Verification**: Check if `02nvt`, `03npt1`, `04npt2`, and `05md` folders are created.
+
+### 2.3 Automated Execution (`runner.sh`)
 After running any `inputs` command, check your folder for `runner.sh`.
 ```bash
 chmod +x runner.sh
