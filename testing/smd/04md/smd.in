@@ -1,0 +1,31 @@
+Colvarstrajfrequency    100
+
+colvar {
+        name PullAtom
+        width 1.0
+        outputAppliedForce yes
+
+        distanceZ {
+                main {
+                        atomsFile PullAtom.pdb
+                        atomsCol B
+                        atomsColValue 1
+                }
+                ref {
+                       dummyAtom (0.0, 0.0, 0.0)
+                }
+	            axis (0.0, 0.0, 1.0)
+
+        }
+}
+
+harmonic {
+    name SMD 
+    colvars  PullAtom        #! in Angstroms 
+    centers  -5.945713996887207         #! Centro dos carbonos alpha ou heavy atoms para fazer pulling.
+    targetCenters 44.05428600311279    #! Centro taget até a onde se quer fazer pulling.
+    forceConstant 1.5         #! Força constante para o pulling em kcal/mol/A² 
+    targetNumSteps 2500000        #! Total número de steps, onde para fazer 10 A/ns.
+    outputCenters   on       #! Print o centers do atoms pulling durante a simulação. 
+    outputAccumulatedWork yes #! Print o trabalho acumulado, necessário para o jarzynski.
+}
