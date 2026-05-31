@@ -63,7 +63,7 @@ mstbx mkdocking-cmplx -p receptor.pdb -d docking_pose.pdbqt -o complex.pdb
 mstbx md-inputs --engine namd --env solution \
                 --psf 01build/complex.psf \
                 --pdb 01build/complex.pdb \
-                --lparm ligand_params.str
+                --ligand-parm ligand_params.str
 ```
 *   **Check:** Verifica que `02nvt/nvt.confg` incluya el archivo `ligand_params.str` en la sección de parámetros.
 
