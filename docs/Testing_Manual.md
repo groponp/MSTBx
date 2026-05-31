@@ -1,4 +1,4 @@
-# 🧪 MSTBx v0.8.9: Testing & Debugging Guide
+# 🧪 MSTBx v0.8.9-beta: Testing & Debugging Guide
 
 Comprehensive guide to validate every module in MSTBx.
 

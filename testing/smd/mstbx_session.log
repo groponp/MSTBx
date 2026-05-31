@@ -10,3 +10,6 @@
 [INFO 17:12:24 31/05/2026] Directory created: 03npt
 [INFO 17:12:24 31/05/2026] Directory created: 04md
 [INFO 17:12:25 31/05/2026] SMD configuration generated successfully.
+[INFO 17:27:37 31/05/2026] Generating SMD configuration for namd...
+[INFO 17:27:37 31/05/2026] Calculated simulation time: 20.00 ns based on 2.5 A/ns velocity.
+[INFO 17:27:37 31/05/2026] SMD configuration generated successfully.
