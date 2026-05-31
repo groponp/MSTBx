@@ -48,6 +48,8 @@ Usage: `mstbx topopsfgen --env [solution|membrane|smd] [OPTIONS]`
 Automatic generation of NAMD configuration files and an automated **`runner.sh`** script.
 
 *   **`md-inputs`**: Standard MD (NVT, NPT, Production).
+    *   *Solution*: `mstbx md-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb`
+    *   *Membrane*: `mstbx md-inputs --engine namd --env membrane --psf 01build/sys.psf --pdb 01build/sys.pdb`
 *   **`smd-inputs`**: Steered MD (Pulling).
 *   **`metad-inputs`**: Well-Tempered Metadynamics.
 
