@@ -49,8 +49,9 @@ outputtiming    500
 outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
-dcdfreq         5000
+dcdfreq         %s
 XSTFreq         5000
+
 restartfreq     5000
 restartname     $outputname.restart
 
@@ -134,8 +135,9 @@ outputtiming    500
 outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
-dcdfreq         5000
+dcdfreq         %s
 XSTFreq         5000
+
 restartfreq     5000
 restartname     $outputname.restart
 
@@ -221,7 +223,8 @@ outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
 dcdfreq         %s
-XSTFreq         500
+XSTFreq         5000
+
 restartfreq     500
 restartname     $outputname.restart
 
@@ -356,11 +359,12 @@ quit
 #-------------------------------------------------------------------#
 class SMDProtocolSol:
     def __init__(self, psf, pdb, temperature, mdtime, selpull, selanchor, targetCenter,
-                 kforce=1.5):
+                 kforce=1.5, dcdfreq=5000):
         self.psf = psf 
         self.pdb = pdb 
         self.temperature = temperature
         self.mdtime = mdtime 
+        self.dcdfreq = dcdfreq
         self.mdsteps = int((self.mdtime * 1000)/0.002) # mdtime is em nanosegundos e converte para mdsteps. 
         #self.speed  = speed          # 10 A/ns for pulling.  
         self.kforce = kforce         # 1.5 kcal/mol/A² é equivalente para ~ 600 kJ/mol/nm².
@@ -388,7 +392,8 @@ outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
 dcdfreq         %s
-XSTFreq         500
+XSTFreq         5000
+
 restartfreq     500
 restartname     $outputname.restart
 
@@ -497,7 +502,7 @@ if {$npt} {
     reinitvels $dotemp
 } 
 run                     $currenttime;     #  %s ns
-""" % (self.psf, self.pdb, self.temperature, self.mdsteps, self.mdtime)
+""" % (self.psf, self.pdb, self.temperature, self.dcdfreq, self.mdsteps, self.mdtime)
         f.write(smd)
         f.close()
 
@@ -582,11 +587,12 @@ quit
 
 class WTMetaDProtocolSol:
     def __init__(self, psf, pdb, temperature, mdtime, hill=0.01, hillfreq=500, width=1.0,
-                 biasT=15, sel1="segid PROA and name CA", sel2="segid PROB and name CA", dunbind=50.0):
+                 biasT=15, sel1="segid PROA and name CA", sel2="segid PROB and name CA", dunbind=50.0, dcdfreq=5000):
         self.psf = psf 
         self.pdb = pdb 
         self.temperature = temperature
         self.mdtime = mdtime 
+        self.dcdfreq = dcdfreq
         self.mdsteps = int((self.mdtime * 1000)/0.002) # mdtime is em nanosegundos e converte para mdsteps. 
         self.hill = hill         
         self.hillfreq = int(hillfreq)      
@@ -619,7 +625,8 @@ outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
 dcdfreq         %s
-XSTFreq         500
+XSTFreq         5000
+
 restartfreq     500
 restartname     $outputname.restart
 
@@ -720,7 +727,7 @@ if {$npt} {
 numsteps                $totaltime;       # para cuando chega aos steps total aqui. 
 run                     $currenttime;     # %s ns
 
-""" % (self.psf, self.pdb, self.temperature, self.mdsteps, self.mdtime)
+""" % (self.psf, self.pdb, self.temperature, self.dcdfreq, self.mdsteps, self.mdtime)
         f.write(metad)
         f.close()
         

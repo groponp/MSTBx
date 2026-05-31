@@ -49,8 +49,9 @@ outputtiming    500
 outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
-dcdfreq         5000
+dcdfreq         %s
 XSTFreq         5000
+
 restartfreq     5000
 restartname     $outputname.restart
 
@@ -134,8 +135,9 @@ outputtiming    500
 outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
-dcdfreq         5000
+dcdfreq         %s
 XSTFreq         5000
+
 restartfreq     5000
 restartname     $outputname.restart
 
@@ -224,8 +226,9 @@ outputtiming    500
 outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
-dcdfreq         5000
+dcdfreq         %s
 XSTFreq         5000
+
 restartfreq     5000
 restartname     $outputname.restart
 
@@ -311,7 +314,8 @@ outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
 dcdfreq         %s
-XSTFreq         500
+XSTFreq         5000
+
 restartfreq     500
 restartname     $outputname.restart
 
