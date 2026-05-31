@@ -560,7 +560,7 @@ if {$npt} {
 } 
 numsteps                $totaltime
 run                     $currenttime;     #  %s ns
-""" % (self.psf, self.pdb, self.temperature, self.dcdfreq, self.mdsteps, self.mdtime)
+""" % (self.psf, self.pdb, self.temperature, self.dcdfreq, self.mdsteps, self.mdsteps, self.mdtime)
         f.write(smd)
         f.close()
 

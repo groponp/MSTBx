@@ -25,7 +25,7 @@ harmonic {
     centers  -5.945713996887207         #! Centro dos carbonos alpha ou heavy atoms para fazer pulling.
     targetCenters 44.05428600311279    #! Centro taget até a onde se quer fazer pulling.
     forceConstant 1.5         #! Força constante para o pulling em kcal/mol/A² 
-    targetNumSteps 2500000        #! Total número de steps, onde para fazer 10 A/ns.
+    targetNumSteps 2500000        #! Total número de steps, calculado pela velocidade.  
     outputCenters   on       #! Print o centers do atoms pulling durante a simulação. 
-    outputAccumulatedWork yes #! Print o trabalho acumulado, necessário para o jarzynski.
+    outputAccumulatedWork yes #! Print o trabajo acumulado, necessário para o jarzynski.
 }
