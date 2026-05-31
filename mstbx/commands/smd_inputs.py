@@ -15,7 +15,8 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--target-center', type=float, required=True, help="Maximum pulling distance (Angstrom).")
 @click.option('--velocity', default=10.0, help="Pulling velocity in Angstrom/ns. Default 10.0.")
 @click.option('--kforce', default=1.5, help="Force constant for pulling.")
-def smd_inputs(engine, env, psf, pdb, temperature, dcdfreq, selpull, selanchor, target_center, velocity, kforce):
+@click.option('--colvar-input', type=click.Path(exists=True, file_okay=False, dir_okay=True), help="Directory containing custom smd.in and dependencies.")
+def smd_inputs(engine, env, psf, pdb, temperature, dcdfreq, selpull, selanchor, target_center, velocity, kforce, colvar_input):
     uxm = UnixMessage()
     
     if engine != 'namd':
