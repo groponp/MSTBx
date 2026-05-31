@@ -960,7 +960,7 @@ metadynamics {
 
     def makecolvarspdb(self):
         f = open("makePDBcolvars.tcl", "w")
-        script = f"""\
+        script = """\
 set psf %s 
 set pdb %s 
 set selp1 \\"%s\\"
