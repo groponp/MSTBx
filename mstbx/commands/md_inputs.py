@@ -13,7 +13,7 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--temperature', default=310.0, help="Temperatura en Kelvin. Default 310.")
 @click.option('--mdtime', '--md-time', default=100.0, help="Tiempo de producción en ns. Default 100.")
 @click.option('--dcdfreq', default=10.0, help="Frecuencia de guardado de trayectoria en ps. Default 10.0.")
-@click.option('--lparm', '--ligand-parm', type=click.Path(exists=True), help="Parámetros de ligando (str o prm).")
+@click.option('--lparm', '--ligand-parm', type=click.Path(exists=True), help="Archivo de parámetros del ligando (debe ser formato CHARMM .str o .prm).")
 def md_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, lparm):
     uxm = UnixMessage()
     
