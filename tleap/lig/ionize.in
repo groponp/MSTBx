@@ -1,0 +1,15 @@
+source leaprc.protein.ff19SB
+source leaprc.DNA.OL21
+source leaprc.RNA.OL3
+source leaprc.water.tip3p
+source leaprc.gaff2
+
+complex = loadcrd solvated.crd
+loadamberparams  solvated.prmtop
+
+addionsrand complex Cl- 80
+addionsrand complex Na+ 73
+
+savepdb complex ionized.pdb
+saveamberparm complex ionized.prmtop ionized.crd
+quit
