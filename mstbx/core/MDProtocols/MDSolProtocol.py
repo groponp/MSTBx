@@ -565,8 +565,40 @@ run                     $currenttime;     #  %s ns
         f.close()
 
     def colvars(self):
-        if self.colvar_input and os.path.exists(self.colvar_input):
-            shutil.copy(self.colvar_input, "04md/smd.in")
+        if self.colvar_input and os.path.isdir(self.colvar_input):
+            config_name = "smd.in"
+            config_path = os.path.join(self.colvar_input, config_name)
+            
+            if not os.path.exists(config_path):
+                # Check for alternative naming just in case
+                if os.path.exists(os.path.join(self.colvar_input, "colvars.in")):
+                    config_name = "colvars.in"
+                    config_path = os.path.join(self.colvar_input, config_name)
+                else:
+                    raise FileNotFoundError(f"Main config file (smd.in) not found in {self.colvar_input}")
+
+            # Validation: Check for files mentioned in the colvars config
+            import re
+            with open(config_path, 'r') as f:
+                content = f.read()
+                # Find patterns like atomsFile filename.pdb
+                files_mentioned = re.findall(r'atomsFile\s+([^\s]+)', content)
+                for fm in files_mentioned:
+                    # Clean potential quotes
+                    fm = fm.strip('"').strip("'")
+                    if not os.path.exists(os.path.join(self.colvar_input, fm)):
+                        print(f"[WARNING] File '{fm}' mentioned in {config_name} was not found in the custom folder.")
+
+            # Copy everything from the custom folder to 04md/
+            for item in os.listdir(self.colvar_input):
+                s = os.path.join(self.colvar_input, item)
+                d = os.path.join("04md", item)
+                if os.path.isfile(s):
+                    shutil.copy2(s, d)
+            
+            # Ensure the main config is named smd.in in the target folder
+            if config_name != "smd.in":
+                shutil.move(os.path.join("04md", config_name), "04md/smd.in")
             return
 
         f = open("04md/smd.in", "w")
@@ -841,8 +873,38 @@ run                     $currenttime;     # %s ns
         '''
            This method writes the collective variable file for Well-Tempered Metadynamics.
         '''
-        if self.colvar_input and os.path.exists(self.colvar_input):
-            shutil.copy(self.colvar_input, "04md/wtmetad.in")
+        if self.colvar_input and os.path.isdir(self.colvar_input):
+            config_name = "wtmetad.in"
+            config_path = os.path.join(self.colvar_input, config_name)
+            
+            if not os.path.exists(config_path):
+                # Check for alternative naming
+                if os.path.exists(os.path.join(self.colvar_input, "colvars.in")):
+                    config_name = "colvars.in"
+                    config_path = os.path.join(self.colvar_input, config_name)
+                else:
+                    raise FileNotFoundError(f"Main config file (wtmetad.in) not found in {self.colvar_input}")
+
+            # Validation: Check for files mentioned in the colvars config
+            import re
+            with open(config_path, 'r') as f:
+                content = f.read()
+                files_mentioned = re.findall(r'atomsFile\s+([^\s]+)', content)
+                for fm in files_mentioned:
+                    fm = fm.strip('"').strip("'")
+                    if not os.path.exists(os.path.join(self.colvar_input, fm)):
+                        print(f"[WARNING] File '{fm}' mentioned in {config_name} was not found in the custom folder.")
+
+            # Copy all files
+            for item in os.listdir(self.colvar_input):
+                s = os.path.join(self.colvar_input, item)
+                d = os.path.join("04md", item)
+                if os.path.isfile(s):
+                    shutil.copy2(s, d)
+            
+            # Ensure proper naming
+            if config_name != "wtmetad.in":
+                shutil.move(os.path.join("04md", config_name), "04md/wtmetad.in")
             return
 
         f = open("04md/wtmetad.in", "w")

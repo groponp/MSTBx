@@ -19,7 +19,8 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--hillfreq', default=500, help="Hill deposition frequency (steps).")
 @click.option('--width', default=1.0, help="Hill width (standard deviation).")
 @click.option('--biasT', 'biast', default=15.0, help="Bias temperature (K).")
-def metad_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, sel1, sel2, target_distance, hill, hillfreq, width, biast):
+@click.option('--colvar-input', type=click.Path(exists=True, file_okay=False, dir_okay=True), help="Directory containing custom wtmetad.in and dependencies.")
+def metad_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, sel1, sel2, target_distance, hill, hillfreq, width, biast, colvar_input):
     uxm = UnixMessage()
     
     if engine != 'namd':
