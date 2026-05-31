@@ -20,12 +20,13 @@ import os
 import shutil
 
 class MDProtocolMemb:
-    def __init__(self, psf, pdb, temperature, mdtime, dcdfreq=5000):
+    def __init__(self, psf, pdb, temperature, mdtime, dcdfreq=10.0):
         self.psf = psf
         self.pdb = pdb
         self.temperature = temperature
         self.mdtime = mdtime
-        self.dcdfreq = dcdfreq
+        # Convert dcdfreq from ps to steps (assuming 2fs timestep)
+        self.dcdfreq = int((dcdfreq * 1000) / 2)
         self.mdsteps = int((self.mdtime * 1000)/0.002) # mdtime is in nanoseconds and converts to mdsteps.
 
 
