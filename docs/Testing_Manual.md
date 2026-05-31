@@ -1,83 +1,52 @@
 # 🧪 MSTBx v0.8.9-beta: Testing & Debugging Guide
 
-Comprehensive guide to validate every module in MSTBx.
+Comprehensive guide to validate every module using provided examples.
 
 ---
 
-## 1. Topology Building (`topopsfgen`)
+## 1. Environment Building (`topopsfgen`)
 
-### 1.1 Standard Solution
-```bash
-mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --padding 18 --salt 0.150
-```
+### 1.1 Solution (Ubiquitin)
+*   **Command**: `mstbx topopsfgen --env solution --psf testing/ubiquitin/step1.psf --pdb testing/ubiquitin/step1.pdb`
+*   **Verification**: Check `01build/step3_pbcsetup.str`. Values `A`, `B`, and `C` must be equal (Cubic Box).
 
-### 1.2 Membrane System
-```bash
-# Standard Insertion (25A default Z-padding)
-mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150
-# Peripheral Placement
-mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --mol-outside --z-distance 10
-```
+### 1.2 Membrane (Aquaporin)
+*   **Command**: `mstbx topopsfgen --env membrane --psf testing/aqp/step4_lipid.psf --pdb testing/aqp/step4_lipid.pdb`
+*   **Verification**: 
+    - Check `01build/step3_pbcsetup.str`. `A` must equal `B` (Square XY).
+    - `C` padding should be exactly 25.0 Å from protein/lipids.
 
-### 1.3 SMD Prepared System
-```bash
-mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb \
-                 --atoms-anchor "resid 1" --atoms-pull "resid 100" --extra-space 50
-```
-
-### 1.4 Workflow: Glycosylated Protein (Reset-then-Build)
-Correct pipeline for handling virtual bonds in glycans:
-1.  **Reset**: (First step to fix topology)
-    `mstbx resetpsf --psf glyc.psf --pdb glyc.pdb --output reset_glyc`
-2.  **Build**: (Use the reset files as inputs)
-    `mstbx topopsfgen --env solution --psf reset_glyc.psf --pdb reset_glyc.pdb --ofile solvated_glyc`
-3.  **Inputs**: (Final step)
-    `mstbx md-inputs --engine namd --env solution --psf 01build/solvated_glyc.psf --pdb 01build/solvated_glyc.pdb`
+### 1.3 SMD (Steered MD)
+*   **Command**: `mstbx topopsfgen --env smd --psf testing/smd/step1.psf --pdb testing/smd/step1.pdb --atoms-pull "resid 76" --atoms-anchor "resid 1"`
+*   **Verification**: Box must be extended in Z+.
 
 ---
 
 ## 2. Simulation Protocols (`inputs`)
 
-### 2.1 Standard MD (Solution & Membrane)
-```bash
-# Solution
-mstbx md-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --dcdfreq 10.0
-# Membrane (4-step protocol: NVT -> NPT1 -> NPT2 -> MD)
-mstbx md-inputs --engine namd --env membrane --psf 01build/sys.psf --pdb 01build/sys.pdb
-```
+### 2.1 Membrane Protocol (AQP)
+*   **Command**: `mstbx md-inputs --engine namd --env membrane --psf 01build/mol.psf --pdb 01build/mol.pdb`
+*   **Verification**: Folders `02nvt`, `03npt1`, `04npt2`, and `05md` must be created with specialized configs.
 
-### 2.2 Steered MD (SMD)
-```bash
-mstbx smd-inputs --engine namd --env solution \
-                 --psf 01build/sys.psf --pdb 01build/sys.pdb \
-                 --selpull "resid 100" --selanchor "resid 1" --target-center 50 --velocity 10.0
-```
-
-### 2.3 Metadynamics (MetaD)
-```bash
-mstbx metad-inputs --engine namd --env solution \
-                   --psf 01build/sys.psf --pdb 01build/sys.pdb \
-                   --sel1 "segid PROA" --sel2 "segid PROB" --target-distance 60
-```
+### 2.2 Protein-Ligand (BAAT)
+*   **Command**: `mstbx md-inputs --engine namd --env solution --psf 01build/mol.psf --pdb 01build/mol.pdb --ligand-parm testing/baat/tyl.prm`
+*   **Verification**: Check `02nvt/nvt.confg` for `parameters ../toppar/tyl.prm`.
 
 ---
 
 ## 3. Specialized Tools
 
 ### 3.1 PDBWriter
-```bash
-mstbx pdbwriter -i original.pdb -o fixed.pdb --fix --ssbond --ph 7.4
-```
+*   **Command**: `mstbx pdbwriter -i protein.pdb -o fixed.pdb --fix --ssbond`
+*   **Logs**: Check `pdbwriter_report.log` for a list of repaired residues and disulfide bonds.
 
-### 3.2 ResetPSF
-```bash
-mstbx resetpsf --psf glyc.psf --pdb glyc.pdb --output reset_sys
-```
+### 3.2 ResetPSF (1OAN Glycans)
+*   **Command**: `mstbx resetpsf --psf testing/1oan-pH7-resetpsf/step1.psf --pdb testing/1oan-pH7-resetpsf/step1.pdb --output reset_1oan`
+*   **Verification**: Resulting PSF must be in X-PLOR format.
 
 ---
 
 ## 🔍 Quality Assurance Checklist
-1.  **Version**: `mstbx --version` (0.8.9-beta).
-2.  **Log Format**: `[LEVEL HH:MM:SS DD/MM/YYYY]`.
-3.  **Runner Script**: Ensure `runner.sh` is generated and executable.
-4.  **TAB Completion**: Verify paths can be completed with TAB.
+1.  **Logging**: Terminal output must follow `[LEVEL HH:MM:SS DD/MM/YYYY]` format.
+2.  **Versioning**: `mstbx --version` must return `0.8.9-beta`.
+3.  **Runner**: `runner.sh` must be executable and contain `eq=on` flags.
