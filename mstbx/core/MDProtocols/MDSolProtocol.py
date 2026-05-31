@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
 #//*****************************************************************************************//# 
-# MDSolProtocol: Este módulo escreve o protcolo estandar para realizar simulações de          #
+# MDSolProtocol : Este módulo escreve o protcolo estandar para realizar simulações de         #
 #                moléculas, em solução, tais como: Proteínas ou proteina e ligando            #
 #                                                                                             #
 # autor     : Ropón-Palacios G., BSc - MSc estudante em Física Biomolecular.                  #
 # afiliação : Departamento de Física, IBILCE/UNESP, São Jośe do Rio Preto, São Paulo.         #                                                  
 # e-mail    : georcki.ropon@unesp.br                                                          #
-# data      : Terça-feira 2 de Julho do 2024.                                               #
-# $rev$     : Rev Terça-feira 2 de Julho de 2024                                              #                    
+# data      : Quarta-feira 3 de Julho do 2024.                                               #
+# $rev$     : Rev Quarta-feira 3 de Julho de 2024                                              #                    
 #//*****************************************************************************************//#
 
 #// ****************************************************************************************//#
 # Log mudanças no código:                                                                     #
-#  1. Adicionando uma classe para o protocolo de md em agua - Terça-feira 2 de Julho 2024.    #
+#  1. Adicionando uma classe para o protocolo de md em agua - Quarta-feira 3 de Julho 2024.   #
 #// ****************************************************************************************//#
 
 import os 
@@ -60,8 +60,8 @@ restartname     $outputname.restart
 ################### Harmonic constriants ###################
 
 constraints     on
-consref         ../restraints/prot_posres.ref
-conskfile       ../restraints/prot_posres.ref
+consref         ../restraints/prot_posres.ref	
+conskfile       ../restraints/prot_posres.ref	
 constraintScaling 1.0
 conskcol         B
 
@@ -101,7 +101,7 @@ foreach file $files {
 }
 
 ################### Running Script ###################
-exec tr "\[:upper:\]" "\[:lower:\]" < ../01build/step3_pbcsetup.str | sed -e "s/ =//g" > step3_input.str
+exec tr "[:upper:]" "[:lower:]" < ../01build/step3_pbcsetup.str | sed -e "s/ =//g" > step3_input.str
 source                  step3_input.str
 
 cellBasisVector1     $a   0.0   0.0;        # vector to the next image
@@ -146,93 +146,14 @@ restartname     $outputname.restart
 ################### Harmonic constriants ###################
 
 constraints     on
-consref         ../restraints/prot_posres.ref
-conskfile       ../restraints/prot_posres.ref
+consref         ../restraints/prot_posres.ref		
+conskfile       ../restraints/prot_posres.ref		
 constraintScaling 1.0
 conskcol         B
 
 ################### Thermostat and Barostat ###################
 langevin        on
 langevintemp    $temp
-langevinHydrogen off
-langevindamping  1
-
-usegrouppressure    yes
-useflexiblecell     no
-useConstantArea     no
-
-langevinpiston      on
-langevinpistontarget 1.01325
-langevinpistonperiod 50.0
-langevinpistondecay 25.0
-langevinpistontemp  $temp
-
-################### Integrator ###################
-timestep    2.0
-firstTimestep 0
-fullElectFrequency 1
-nonbondedfreq 1
-cutoff      12.0
-pairlistdist 14.0
-switching   on
-vdwForceSwitching on
-switchdist  10.0
-PME         on
-PMEGridspacing 1
-wrapAll     on
-wrapWater   on
-exclude scaled1-4
-1-4scaling 1.0
-rigidbonds all
-
-################### FF ###################
-paraTypeCharmm          on;                 # We're using charmm type parameter file(s)
-set files [glob "../toppar/*"]
-foreach file $files {
-   parameters		$file 
-}
-
-################### Running Script ###################
-set inputname  ../02nvt/nvt
-binCoordinates $inputname.restart.coor
-extendedSystem $inputname.restart.xsc
-binvelocities  $inputname.restart.vel
-
-# equilibration with constraint during 5 ns 
-run 2500000
-""" %(self.psf, self.pdb, self.temperature, self.dcdfreq)
-
-        f.write(npt)
-        f.close()
-
-    def md(self): 
-        f = open("04md/md.confg", "w")
-        md = """\
-################### Structure ###################
-structure               ../%s
-coordinates             ../%s
-
-################### Variables ###################
-set dotemp %s
-set outputname md0
-outputName              $outputname
-
-################### Output Parameters ###################
-binaryoutput    no
-outputenergies  500
-outputtiming    500
-outputpressure  500
-binaryrestart   yes
-dcdfile         $outputname.dcd
-dcdfreq         %s
-XSTFreq         5000
-
-restartfreq     500
-restartname     $outputname.restart
-
-################### Thermostat and Barostat ###################
-langevin        on
-langevintemp    $dotemp
 langevinHydrogen off
 langevindamping  1.0
 
@@ -244,7 +165,7 @@ langevinpiston      on
 langevinpistontarget 1.01325
 langevinpistonperiod 200.0
 langevinpistondecay  100.0
-langevinpistontemp  $dotemp
+langevinpistontemp  $temp
 
 ################### Integrator ###################
 timestep    2
@@ -275,6 +196,88 @@ foreach file $files {
    parameters		$file 
 }
 
+################### Running Script ###################
+set inputname  ../02nvt/nvt
+binCoordinates $inputname.restart.coor
+extendedSystem $inputname.restart.xsc
+binvelocities  $inputname.restart.vel
+
+# equilibration with constraint during 5 ns 
+run 2500000
+""" %(self.psf, self.pdb, self.temperature, self.dcdfreq)
+
+        f.write(npt)
+        f.close()
+
+    def md(self): 
+        f = open("04md/md.confg", "w")
+        md = """\
+################### Structure ###################
+structure               ../%s
+coordinates             ../%s
+
+################### Variables ###################
+set temp  %s
+set dotemp $temp
+set outputname md0
+outputName              $outputname
+
+################### Output Parameters ###################
+binaryoutput    no
+outputenergies  500
+outputtiming    500
+outputpressure  500
+binaryrestart   yes
+dcdfile         $outputname.dcd
+dcdfreq         %s
+XSTFreq         5000
+
+restartfreq     5000
+restartname     $outputname.restart
+
+################### Thermostat and Barostat ###################
+langevin        on
+langevintemp    $temp
+langevinHydrogen off
+langevindamping  1.0
+
+usegrouppressure    yes
+useflexiblecell     no
+useConstantArea     no
+
+langevinpiston      on
+langevinpistontarget 1.01325
+langevinpistonperiod 200.0
+langevinpistondecay  100.0
+langevinpistontemp  $temp
+
+################### Integrator ###################
+timestep    2
+
+fullElectFrequency 1
+nonbondedfreq 1
+cutoff      12.0
+pairlistdist 14.0
+switching   on
+
+vdwForceSwitching on
+
+switchdist  10.0
+PME         on
+PMEGridspacing 1
+wrapAll     on
+wrapWater   on
+exclude scaled1-4
+1-4scaling 1.0
+rigidbonds all
+
+################### FF ###################
+paraTypeCharmm          on;                 # We're using charmm type parameter file(s)
+set files [glob "../toppar/*"]
+foreach file $files {
+   parameters		$file 
+}
+
 ################### Running ###################
 # Continuing a job from the restart files
 set npt 1
@@ -283,18 +286,13 @@ set num 0
 set count [expr $num - 1]
 
 if {$npt} {
-    set inputname  ../03npt/npt
-    binCoordinates $inputname.restart.coor
-    extendedSystem $inputname.restart.xsc
-    binvelocities  $inputname.restart.vel
-} else {
-    set inputname md$count
+    set inputname ../03npt/npt
     binCoordinates $inputname.restart.coor
     extendedSystem $inputname.restart.xsc
     binvelocities  $inputname.restart.vel
 }
 
-proc get_first_ts {xscfile} {
+proc get_first_ts { xscfile } {
     set fd [open $xscfile r]
     gets $fd
     gets $fd
@@ -334,9 +332,9 @@ set pdb %s
 mol new $psf
 mol addfile $pdb 
 
-set all [atomselect top \"all\"] 
+set all [atomselect top "all"] 
 $all set beta 0 
-set restraints [atomselect top \"protein and backbone or (segid HETA and noh) or (segname \\\"CAR.*\\\" and noh)\"]
+set restraints [atomselect top "protein and backbone or (segid HETA and noh) or (segname \\"CAR.*\\" and noh)"]
 $restraints set beta 5 ;# Set force constant k=5 kcal/mol for restraint atoms
 $all writepdb restraints/prot_posres.ref
 quit
@@ -387,6 +385,9 @@ fi
 
 if [ "$md_continue" == "on" ]; then
     echo -e "${YELLOW}Continuing Production MD...${NC}"
+    # This logic assumes NAMD writes restart files. 
+    # For a generic script, we just run the same config if it handles restarts internally
+    # Or you can edit the script to point to a specific restart.
     cd 04md && $NAMD $OPTS md.confg >> md.log || exit 1
     cd ..
 fi
@@ -412,18 +413,22 @@ echo -e "${GREEN}Simulation steps completed successfully.${NC}"
 #-------------------------------------------------------------------#
 class SMDProtocolSol:
     def __init__(self, psf, pdb, temperature, mdtime, selpull, selanchor, targetCenter,
-                 kforce=1.5, dcdfreq=5000):
+                 kforce=1.5, dcdfreq=5000, velocity=10.0, colvar_input=None):
         self.psf = psf 
         self.pdb = pdb 
         self.temperature = temperature
-        self.mdtime = mdtime 
         self.dcdfreq = dcdfreq
-        self.mdsteps = int((self.mdtime * 1000)/0.002) # mdtime is em nanosegundos e converte para mdsteps. 
-        #self.speed  = speed          # 10 A/ns for pulling.  
-        self.kforce = kforce         # 1.5 kcal/mol/A² é equivalente para ~ 600 kJ/mol/nm².
-        self.selpull = selpull       # Seleção dos atomos para fazer pulling.
-        self.selanchor = selanchor   # Seleção dos atomos para ser restraint.
-        self.targetCenter = targetCenter #! Center até onde queremos levar os átomos de pulling.
+        self.kforce = kforce
+        self.selpull = selpull
+        self.selanchor = selanchor
+        self.targetCenter = targetCenter
+        self.velocity = velocity
+        self.colvar_input = colvar_input
+
+        # Calculate time and steps based on distance and velocity
+        # mdtime (ns) = distance (A) / velocity (A/ns)
+        self.mdtime = float(self.targetCenter) / float(self.velocity)
+        self.mdsteps = int((self.mdtime * 1000)/0.002) # total steps at 2fs timestep
 
     def smd(self):
         f = open("04md/smd.confg", "w")
@@ -445,8 +450,7 @@ outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
 dcdfreq         %s
-XSTFreq         5000
-
+XSTFreq         500
 restartfreq     500
 restartname     $outputname.restart
 
@@ -561,6 +565,10 @@ run                     $currenttime;     #  %s ns
         f.close()
 
     def colvars(self):
+        if self.colvar_input and os.path.exists(self.colvar_input):
+            shutil.copy(self.colvar_input, "04md/smd.in")
+            return
+
         f = open("04md/smd.in", "w")
         colvars = """\
 Colvarstrajfrequency    100
@@ -680,10 +688,10 @@ echo -e "${GREEN}SMD simulation steps completed.${NC}"
 #-------------------------------------------------------------------#
 # WELL TEMPERED METADYNAMICS                                        #
 #-------------------------------------------------------------------#
-
 class WTMetaDProtocolSol:
     def __init__(self, psf, pdb, temperature, mdtime, hill=0.01, hillfreq=500, width=1.0,
-                 biasT=15, sel1="segid PROA and name CA", sel2="segid PROB and name CA", dunbind=50.0, dcdfreq=5000):
+                 biasT=15, sel1="segid PROA and name CA", sel2="segid PROB and name CA", 
+                 dunbind=50.0, dcdfreq=5000, colvar_input=None):
         self.psf = psf 
         self.pdb = pdb 
         self.temperature = temperature
@@ -692,13 +700,13 @@ class WTMetaDProtocolSol:
         self.mdsteps = int((self.mdtime * 1000)/0.002) # mdtime is em nanosegundos e converte para mdsteps. 
         self.hill = hill         
         self.hillfreq = int(hillfreq)      
-        self.width = width               # Este é o desvió padrão, que pode ser obtenido de rodar uma simulãcao unbias, e calcular 
-                                         # o desvió padrão da variable collectiva. É uma boa regra de thumb. 
+        self.width = width
         self.biasT = biasT
-        self.biasTemperature = int((self.biasT * temperature) - temperature)  # Permite obtener a temperatura para o bias definido pelo usuario. 
-        self.sel1 = sel1            # No meu caso particular o sel1 pode ser PROA ou PROC. 
-        self.sel2 = sel2            # Este é só PROB. 
-        self.dunbind = dunbind      # Esta é a distância, que o usuario quer usar para separar as duas moléculas. 
+        self.biasTemperature = int((self.biasT * temperature) - temperature)
+        self.sel1 = sel1
+        self.sel2 = sel2
+        self.dunbind = dunbind
+        self.colvar_input = colvar_input
 
 
     def wtmetad(self):
@@ -721,8 +729,7 @@ outputpressure  500
 binaryrestart   yes
 dcdfile         $outputname.dcd
 dcdfreq         %s
-XSTFreq         5000
-
+XSTFreq         500
 restartfreq     500
 restartname     $outputname.restart
 
@@ -734,7 +741,6 @@ langevindamping  1.0
 
 usegrouppressure    yes
 useflexiblecell     no
-useConstantArea     no
 
 langevinpiston      on
 langevinpistontarget 1.01325
@@ -756,24 +762,28 @@ vdwForceSwitching on
 switchdist  10.0
 PME         on
 PMEGridspacing 1
-#wrapAll     on          ;# Deixar em off este parâmetro para evitar erros na continuação do CV. 
+wrapAll     on
 wrapWater   on
 exclude scaled1-4
 1-4scaling 1.0
 rigidbonds all
 
 ################### FF ###################
-# Nota: Se você tem um ligando, coloque em toppar pasta o archivo prm ou str de seu 
-#       ligando, para evitar erros. 
 paraTypeCharmm          on;                 # We're using charmm type parameter file(s)
 set files [glob "../toppar/*"]
 foreach file $files {
    parameters		$file 
 }
 
-################ WTMetaD  ##################
+############ Metadynamics ################
 colvars on 
 colvarsConfig wtmetad.in 
+
+constraints     on
+consref         ../restraints/prot_posres.ref
+conskfile       ../restraints/prot_posres.ref
+constraintScaling 1.0
+conskcol         B
 
 ################### Running ###################
 # Continuing a job from the restart files
@@ -788,11 +798,11 @@ if {$npt} {
     extendedSystem $inputname.restart.xsc
     binvelocities  $inputname.restart.vel
 } else {
-    set inputname md$count
+    set inputname  md$count
     binCoordinates $inputname.restart.coor
     extendedSystem $inputname.restart.xsc
     binvelocities  $inputname.restart.vel
-    colvarsInput   $inputname.restart.colvars.state
+    colvarsIput    $inputname.colvars.state
 }
 
 proc get_first_ts {xscfile} {
@@ -829,34 +839,30 @@ run                     $currenttime;     # %s ns
         
     def colvars(self):
         '''
-            O colvar aquí é a distância medida entre os centros de massa de duas molẽculas. 
-            Neste caso particular, é de proteína e proteína. 
+           This method writes the collective variable file for Well-Tempered Metadynamics.
         '''
+        if self.colvar_input and os.path.exists(self.colvar_input):
+            shutil.copy(self.colvar_input, "04md/wtmetad.in")
+            return
+
         f = open("04md/wtmetad.in", "w")
         colvars = """\
-colvarsTrajFrequency      500   
-colvarsRestartFrequency   500  
+Colvarstrajfrequency    100
 
 colvar {
     name AtomDistance
-    width 0.10              # Mesmo do que CHARMM-GUI and também BFEE2. Não considere lower/upperWall.
-    lowerboundary xa        # O valor é zero, porque a diferencia de distanciaentre os dímeros é 0.0. 
-    upperboundary xb        # O valor máximo para evaluar o PMF. 
-    expandboundaries  on   
-
+    width %s 
 
     distance {
-        forceNoPBC       yes  
         group1 {
-                atomsFile  P1.pdb    # PROA ou PROC. 
-                atomsCol B 
-                atomsColValue 1.0 
+            atomsFile colvars_sel1.pdb
+            atomsCol B
+            atomsColValue 1
         }
-
-        group2 { 
-                atomsFile  P2.pdb  # PROB.
-                atomsCol B 
-                atomsColValue 1.0  
+        group2 {
+            atomsFile colvars_sel2.pdb
+            atomsCol B
+            atomsColValue 1
         }
 
     }
@@ -886,7 +892,7 @@ metadynamics {
                                        # Onde TemperatureMD é a temperatura escolhida da simulação.
                                        # e biasTemperature é a temperatura escolhida aquí, na metadinâmica, biasFactor 15 cá. 
 } 
-""" % (self.hill, self.hillfreq, self.width, self.biasTemperature) 
+""" % (self.width, self.hill, self.hillfreq, self.width, self.biasTemperature) 
         f.write(colvars)
         f.close()
 
@@ -895,46 +901,39 @@ metadynamics {
         script = f"""\
 set psf %s 
 set pdb %s 
-set selp1 \"%s\"
-set selp2 \"%s\"
+set selp1 \\"%s\\"
+set selp2 \\"%s\\"
 set dunbind %s
 
 
 mol new $psf
 mol addfile $pdb 
 
-set all [atomselect top \"all\"] 
+set all [atomselect top \\"all\\"] 
 $all set beta 0 
-set p1 [atomselect top \"$selp1\"]
-$p1 set beta 1.0
-$all writepdb 04md/P1.pdb 
+set s1 [atomselect top \\"$selp1\\"]
+$s1 set beta 1.0
+$all writepdb 04md/colvars_sel1.pdb 
 
-set all [atomselect top \"all\"]
+set all [atomselect top \\"all\\"]
 $all set beta 0 
-set p2 [atomselect top \"$selp2\"]
-$p2 set beta 1.0      
-$all writepdb 04md/P2.pdb 
+set s2 [atomselect top \\"$selp2\\"]
+$s2 set beta 1.0
+$all writepdb 04md/colvars_sel2.pdb 
 
-# Calcular a distância entre as duas moléculas
-set p1cm [atomselect top $selp1]
-set p2cm [atomselect top $selp2]
+set c1 [measure center [atomselect top \\"$selp1\\"]]
+set c2 [measure center [atomselect top \\"$selp2\\"]]
+set dist [veclength [vecsub $c1 $c2]]
 
-set cm1 [measure center $p1cm]
-set cm2 [measure center $p2cm]
-set d [vecdist $cm1 $cm2]
+set lb [expr $dist - 5.0]
+if { $lb < 0 } { set lb 0 }
+set ub [expr $dist + %s]
 
-# lower and upper boundaries. 
-set lb [format "%%.2f" [expr $d - 1.0]]              ;# Eu subtraio -1 ou adiciono + 1 para dar um espaço extra na variável coletiva. 
-set ub [format "%%.2f" [expr $d + $dunbind + 1.0]]
-
-
-exec sed -i -e \"s/xa/$lb/g\" 04md/wtmetad.in
-exec sed -i -e \"s/xb/$ub/g\" 04md/wtmetad.in
-exec sed -i -e \"s/xc/$lb/g\" 04md/wtmetad.in
-exec sed -i -e \"s/xd/$ub/g\" 04md/wtmetad.in
+exec sed -i -e \\"s/xc/$lb/g\\" 04md/wtmetad.in
+exec sed -i -e \\"s/xd/$ub/g\\" 04md/wtmetad.in
 
 quit 
-""" % (self.psf, self.pdb, self.sel1, self.sel2, self.dunbind) 
+""" % (self.psf, self.pdb, self.sel1, self.sel2, self.dunbind, self.dunbind) 
         f.write(script)
         f.close()
         os.system("vmd -dispdev text -e makePDBcolvars.tcl 2>&1 | tee colvars.log")
@@ -986,8 +985,3 @@ echo -e "${GREEN}Metadynamics simulation steps completed.${NC}"
         f.write(script)
         f.close()
         os.system("chmod +x runner.sh")
-        
-            
-
-
-
