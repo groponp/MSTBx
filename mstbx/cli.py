@@ -1,8 +1,8 @@
 import click
-from mstbx.commands import topopsfgen, topotleap, md_inputs, smd_inputs, metad_inputs, pdbwriter, colabfold, mkdocking_cmplx, md_translate
+from mstbx.commands import topopsfgen, topotleap, md_inputs, smd_inputs, metad_inputs, pdbwriter, colabfold, mkdocking_cmplx, md_translate, resetpsf
 
 @click.group(help="MSTBx: Molecular Simulation ToolBox. Un ecosistema modular para la preparación de simulaciones de Dinámica Molecular.")
-@click.version_option(version="0.8.2")
+@click.version_option(version="0.8.4")
 def cli():
     """Portal principal de MSTBx."""
     pass
@@ -17,6 +17,8 @@ cli.add_command(pdbwriter.pdbwriter, name="pdbwriter")
 cli.add_command(colabfold.colabfold, name="colabfold")
 cli.add_command(mkdocking_cmplx.mkdocking_cmplx, name="mkdocking-cmplx")
 cli.add_command(md_translate.md_translate, name="md-translate")
+cli.add_command(resetpsf.resetpsf, name="resetpsf")
+
 
 
 if __name__ == "__main__":

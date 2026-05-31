@@ -1,0 +1,111 @@
+################### Structure ###################
+structure               ../01build/aqp.psf
+coordinates             ../01build/aqp.pdb
+
+################### Variables ###################
+set dotemp 310.0
+set outputname md0
+outputName              $outputname
+
+################### Output Parameters ###################
+binaryoutput    no
+outputenergies  500
+outputtiming    500
+outputpressure  500
+binaryrestart   yes
+dcdfile         $outputname.dcd
+dcdfreq         5000
+XSTFreq         5000
+restartfreq     5000
+restartname     $outputname.restart
+
+################### Thermostat and Barostat ###################
+langevin        on
+langevintemp    $dotemp
+langevinHydrogen off
+langevindamping  1.0
+
+usegrouppressure    yes
+useflexiblecell     yes
+useConstantRatio    yes;                # keeps the ratio of the unit cell in the x-y plane constant A=B
+
+langevinpiston      on
+langevinpistontarget 1.01325
+langevinpistonperiod 200.0
+langevinpistondecay  100.0
+langevinpistontemp  $dotemp
+
+################### Integrator ###################
+timestep    2
+
+fullElectFrequency 1
+nonbondedfreq 1
+cutoff      12.0
+pairlistdist 14.0
+switching   on
+
+vdwForceSwitching on
+
+switchdist  10.0
+PME         on
+PMEGridspacing 1
+wrapAll     on
+wrapWater   on
+exclude scaled1-4
+1-4scaling 1.0
+rigidbonds all
+
+################### FF ###################
+# Nota: Se você tem um ligando, coloque em toppar pasta o archivo prm ou str de seu 
+#       ligando, para evitar erros. 
+paraTypeCharmm          on;                 # We're using charmm type parameter file(s)
+set files [glob "../toppar/*"]
+foreach file $files {
+   parameters		$file 
+}
+
+################### Running ###################
+# Continuing a job from the restart files
+set npt 1
+set restart off
+set num 0
+set count [expr $num - 1]
+
+if {$npt} {
+    set inputname  ../04npt2/npt2
+    binCoordinates $inputname.restart.coor
+    extendedSystem $inputname.restart.xsc
+    binvelocities  $inputname.restart.vel
+} else {
+    set inputname md$count
+    binCoordinates $inputname.restart.coor
+    extendedSystem $inputname.restart.xsc
+    binvelocities  $inputname.restart.vel
+}
+
+proc get_first_ts {xscfile} {
+    set fd [open $xscfile r]
+    gets $fd
+    gets $fd
+    gets $fd line
+    set ts [lindex $line 0]
+    close $fd
+    return $ts
+}
+
+if { $restart == "on" } {
+    firsttimestep       [get_first_ts md$count.restart.xsc]
+    set ft              [get_first_ts md$count.restart.xsc]
+} else {
+    set ft 0
+    firsttimestep $ft
+}
+
+set totaltime   500000
+set currenttime [expr $totaltime - $ft]
+
+# run
+if {$npt} {
+    reinitvels $dotemp
+} 
+run                     $currenttime;     # 1.0 ns
