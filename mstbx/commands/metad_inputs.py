@@ -3,30 +3,30 @@ import os
 from mstbx.core.MDProtocols.MDSolProtocol import MDProtocolSol, WTMetaDProtocolSol
 from mstbx.core.Utils.Utils import UnixMessage
 
-@click.command(help="Genera archivos de configuración para Well-Tempered Metadynamics.")
-@click.option('--engine', type=click.Choice(['namd', 'amber', 'gromacs', 'openmm']), default='namd', help="Motor de simulación a utilizar.")
-@click.option('--env', type=click.Choice(['solution']), default='solution', help="Entorno del sistema.")
-@click.option('--psf', type=click.Path(exists=True, dir_okay=False), required=True, help="Archivo PSF del sistema.")
-@click.option('--pdb', type=click.Path(exists=True, dir_okay=False), required=True, help="Archivo PDB del sistema.")
-@click.option('--temperature', default=310.0, help="Temperatura en Kelvin.")
-@click.option('--mdtime', '--md-time', default=100.0, help="Tiempo de producción en ns.")
-@click.option('--dcdfreq', default=10.0, help="Frecuencia de guardado en ps.")
+@click.command(help="Generates configuration files for Well-Tempered Metadynamics.")
+@click.option('--engine', type=click.Choice(['namd', 'amber', 'gromacs', 'openmm']), default='namd', help="Simulation engine to use.")
+@click.option('--env', type=click.Choice(['solution']), default='solution', help="System environment.")
+@click.option('--psf', type=click.Path(exists=True, dir_okay=False), required=True, help="Input PSF file.")
+@click.option('--pdb', type=click.Path(exists=True, dir_okay=False), required=True, help="Input PDB file.")
+@click.option('--temperature', default=310.0, help="Temperature in Kelvin.")
+@click.option('--mdtime', '--md-time', default=100.0, help="Production time in ns.")
+@click.option('--dcdfreq', default=10.0, help="DCD trajectory saving frequency in ps.")
 # Metadynamics specific
-@click.option('--sel1', required=True, help="Selección VMD para la primera molécula.")
-@click.option('--sel2', required=True, help="Selección VMD para la segunda molécula.")
-@click.option('--target-distance', default=50.0, help="Distancia máxima para la metadinámica.")
-@click.option('--hill', default=0.01, help="Peso de la colina (kcal/mol).")
-@click.option('--hillfreq', default=500, help="Frecuencia de depósito de colinas (pasos).")
-@click.option('--width', default=1.0, help="Ancho de la colina (desviación estándar).")
-@click.option('--biasT', 'biast', default=15.0, help="Temperatura de bias (K).")
+@click.option('--sel1', required=True, help="VMD selection for the first molecule.")
+@click.option('--sel2', required=True, help="VMD selection for the second molecule.")
+@click.option('--target-distance', default=50.0, help="Maximum distance for metadynamics.")
+@click.option('--hill', default=0.01, help="Hill weight (kcal/mol).")
+@click.option('--hillfreq', default=500, help="Hill deposition frequency (steps).")
+@click.option('--width', default=1.0, help="Hill width (standard deviation).")
+@click.option('--biasT', 'biast', default=15.0, help="Bias temperature (K).")
 def metad_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, sel1, sel2, target_distance, hill, hillfreq, width, biast):
     uxm = UnixMessage()
     
     if engine != 'namd':
-        uxm.message(f"El motor '{engine}' aún no está implementado para Metadinámica.", "error")
+        uxm.message(f"Engine '{engine}' is not yet implemented for Metadynamics.", "error")
         return
 
-    uxm.message(f"Generando configuración Metadinámica para {engine}...", "info")
+    uxm.message(f"Generating Metadynamics configuration for {engine}...", "info")
     
     md = MDProtocolSol(psf=psf, pdb=pdb, temperature=temperature, mdtime=mdtime, dcdfreq=dcdfreq)
     meta = WTMetaDProtocolSol(psf=psf, pdb=pdb, temperature=temperature, mdtime=mdtime, hill=hill, hillfreq=hillfreq,
@@ -42,4 +42,4 @@ def metad_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, sel1, sel2
     meta.colvars()
     meta.makecolvarspdb()
     
-    uxm.message("Configuración Metadinámica generada con éxito.", "info")
+    uxm.message("Metadynamics configuration generated successfully.", "info")
