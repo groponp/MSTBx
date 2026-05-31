@@ -6,7 +6,7 @@ from mstbx.core.Build.PSFGenMemb import BuildMembrane
 from mstbx.core.Utils.Utils import UnixMessage
 
 @click.group(help="Generación de sistemas (PSF/PDB) para diferentes entornos.")
-def autopsfgen():
+def topopsfgen():
     """Módulo para construir sistemas solvatados, de membrana o preparados para SMD."""
     pass
 
@@ -30,7 +30,7 @@ def common_options(f):
         f = option(f)
     return f
 
-@autopsfgen.command(name="sol", help="Construye un sistema de proteína en solución (agua + iones).")
+@topopsfgen.command(name="sol", help="Construye un sistema de proteína en solución (agua + iones).")
 @common_options
 def sol(psf, pdb, salt, ofile, hmr, padding, pad_x_pos, pad_x_neg, pad_y_pos, pad_y_neg, pad_z_pos, pad_z_neg):
     hmrbool = 1 if hmr else 0
@@ -49,7 +49,7 @@ def sol(psf, pdb, salt, ofile, hmr, padding, pad_x_pos, pad_x_neg, pad_y_pos, pa
     time.sleep(3)
     uxm.message("Sistema en solución listo en 01build/", "info")
 
-@autopsfgen.command(name="memb", help="Inserta y solvata una proteína en una bicapa lipídica.")
+@topopsfgen.command(name="memb", help="Inserta y solvata una proteína en una bicapa lipídica.")
 @common_options
 @click.option('--mol-outside', is_flag=True, help="Colocar la proteína/péptido fuera de la membrana.")
 @click.option('--z-dist', default=10.0, help="Distancia en Z (A) desde la superficie de la membrana.")
@@ -77,7 +77,7 @@ def memb(psf, pdb, salt, ofile, hmr, padding, pad_x_pos, pad_x_neg, pad_y_pos, p
     time.sleep(3)
     uxm.message("Sistema de membrana listo en 01build/", "info")
 
-@autopsfgen.command(name="smd", help="Orienta y construye un sistema para Steered Molecular Dynamics.")
+@topopsfgen.command(name="smd", help="Orienta y construye un sistema para Steered Molecular Dynamics.")
 @common_options
 @click.option('--atoms-anchor', required=True, help="Selección VMD para el grupo fijo (anclaje).")
 @click.option('--atoms-pull', required=True, help="Selección VMD para el grupo que se estira.")
