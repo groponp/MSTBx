@@ -40,7 +40,20 @@ Uso: `mstbx topopsfgen --env [solution|membrane|smd] [OPCIONES]`
 *   **Sistemas SMD**:
     `mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --salt 0.150 --atoms-pull "resid 100" --atoms-anchor "resid 1"`
 
-### 2. `topotleap` (AMBER)
+### 2. Complejo Proteína-Ligando (Nuevo)
+Preparación completa de un complejo a partir de docking:
+```bash
+# 1. Crear el complejo (Proteína + Pose de Docking)
+mstbx mkdocking-cmplx -p protein.pdb -d ligand_vina.pdbqt -o complex.pdb
+
+# 2. Construir el sistema solvatado (necesita PSF del complejo)
+mstbx topopsfgen --env solution --psf complex.psf --pdb complex.pdb --salt 0.150
+
+# 3. Generar inputs incluyendo parámetros del ligando (.str o .prm)
+mstbx md-inputs --engine namd --env solution --psf 01build/complex.psf --pdb 01build/complex.pdb --lparm ligand.str
+```
+
+### 3. `topotleap` (AMBER)
 Generación de archivos PRMTOP/INPCRD usando tLeap (En desarrollo).
 
 ---

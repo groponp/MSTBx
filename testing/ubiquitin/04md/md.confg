@@ -109,4 +109,5 @@ set currenttime [expr $totaltime - $ft]
 if {$npt} {
     reinitvels $dotemp
 } 
+numsteps                $totaltime
 run                     $currenttime;     # 10.0 ns
