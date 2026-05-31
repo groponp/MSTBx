@@ -1,4 +1,4 @@
-# MSTBx (Molecular Simulation ToolBox) v0.8.5
+# MSTBx (Molecular Simulation ToolBox) v0.8.6
 
 **MSTBx** is a modular Python ecosystem designed to simplify the preparation, configuration, and translation of Molecular Dynamics (MD) simulations. Optimized for large-scale systems and high-performance computing (HPC) workflows.
 
@@ -37,8 +37,7 @@ Usage: `mstbx topopsfgen --env [solution|membrane|smd] [OPTIONS]`
     `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150`
     *   *Note: Uses strict XY square box and 25Å default Z-padding.*
 *   **Membrane (Peripheral - Outside)**:
-    `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --mol-outside --z-distance 10`
-    *   *Positions the protein 10Å away from the membrane surface.*
+    `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --mol-outside --z-distance 10 --salt 0.150`
 *   **SMD**: `mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --atoms-pull "resid 100" --atoms-anchor "resid 1"`
 
 ---
@@ -50,6 +49,7 @@ Automatic generation of NAMD configuration files and an automated **`runner.sh`*
 *   **`md-inputs`**: Standard MD (NVT, NPT, Production).
     *   *Solution*: `mstbx md-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb`
     *   *Membrane*: `mstbx md-inputs --engine namd --env membrane --psf 01build/sys.psf --pdb 01build/sys.pdb`
+        *   *(Generates 4-step protocol: NVT -> NPT1 -> NPT2 -> MD)*
 *   **`smd-inputs`**: Steered MD (Pulling).
 *   **`metad-inputs`**: Well-Tempered Metadynamics.
 
@@ -74,7 +74,7 @@ chmod +x runner.sh
 ---
 
 ## 📊 Industrial Logging
-All modules use a standardized logging format for easy tracking:
+All modules use a standardized logging format:
 `[LEVEL HH:MM:SS DD/MM/YYYY] Message`
 
 ---
