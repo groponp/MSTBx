@@ -1,0 +1,13 @@
+Bootstrap: docker
+From: nvcr.io/nvidia/cuda:12.2.2-runtime-ubuntu22.04
+
+%post
+    apt-get update && apt-get install -y wget
+    wget https://github.com/gnina/gnina/releases/download/v1.1/gnina -O /usr/local/bin/gnina
+    chmod +x /usr/local/bin/gnina
+
+%environment
+    export PATH=/usr/local/bin:$PATH
+
+%runscript
+    exec gnina "$@"
