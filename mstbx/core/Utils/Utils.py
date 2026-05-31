@@ -1,67 +1,60 @@
-# -*- coding: utf-8 -*-
-
-#//*****************************************************************************************//# 
-# Utils     : Este módulo contem multiples classes que podem ajudar                           #
-#             com tarefas generais.                                                           #
-#                                                                                             #
-# autor     : Ropón-Palacios G., BSc - MSc estudante em Física Biomolecular.                  #
-# afiliação : Departamento de Física, IBILCE/UNESP, São Jośe do Rio Preto, São Paulo.         #                                                  
-# e-mail    : georcki.ropon@unesp.br                                                          #
-# data      : Quarta-feira 12 de Junho do 2024.                                               #
-# $rev$     : Não testado ainda.                                                              #                    #
-# Mudanças no código:                                                                         #
-#  1. Adicionando uma classe para preparar los sistemas - Quarta feira 12 de Junho 2024.      #
-#// ****************************************************************************************//#
-
-#// ****************************************************************************************//#
-# Log mudanças no código:                                                                     #
-#  1. Adicionando uma classe para preparar los sistemas - Quarta feira 12 de Junho 2024.      #
-#// ****************************************************************************************//#
-
+import logging
 import os
-import sys
-import warnings
-import time 
-#import Utils 
 from datetime import datetime
-from colorama import Fore 
-warnings.filterwarnings("ignore")
+from colorama import init, Fore, Style
 
+# Initialize colorama
+init(autoreset=True)
 
-#// ****************************************************************************************//#
-# Definição da classe  UnixMessage                                                          #
-#// ****************************************************************************************//#
+class MSTBxLogger:
+    @staticmethod
+    def setup_logger(name="MSTBx"):
+        logger = logging.getLogger(name)
+        if not logger.handlers:
+            logger.setLevel(logging.INFO)
+            
+            # Format: [HH:MM:SS DD/MM/YYYY] [LEVEL] Message
+            formatter = logging.Formatter(
+                fmt='[' + Fore.CYAN + '%(asctime)s' + Fore.RESET + '] [' + Fore.YELLOW + '%(levelname)s' + Fore.RESET + '] %(message)s',
+                datefmt='%H:%M:%S %%d/%%m/%%Y'
+            )
+            
+            # File Handler (no colors)
+            file_formatter = logging.Formatter(
+                fmt='[%(asctime)s] [%(levelname)s] %(message)s',
+                datefmt='%H:%M:%S %d/%m/%Y'
+            )
+            
+            sh = logging.StreamHandler()
+            sh.setFormatter(formatter)
+            logger.addHandler(sh)
+            
+            # Optionally log to file
+            log_file = os.path.join(os.getcwd(), "mstbx_session.log")
+            fh = logging.FileHandler(log_file)
+            fh.setFormatter(file_formatter)
+            logger.addHandler(fh)
+            
+        return logger
 
 class UnixMessage:
-    def __init__(self) -> None:
-        pass 
+    """Legacy class updated to use the new Logger system."""
+    def __init__(self):
+        self.logger = MSTBxLogger.setup_logger()
 
-    def makedir(self, dirs: list):
-        ''' Nesta método cria um conjunto de pastas que via permitir
-            organizar a simulação.
-        '''
-        for j in dirs: 
-            if not os.path.exists(j):
-                os.mkdir(j)
-                UnixMessage().message(message=f"Making the folder: {j}", type="info")
-    
-    def message(self, message: str, type: str):
-        ''' Este método permite imprimir no terminal determinados 
-            mensagens que o usuario quer enviar. 
-        '''
-        if type == "info":
-            print(Fore.GREEN +   f"[INFO     ] {message}." + Fore.RESET)
-        elif type == "warning": 
-            print(Fore.YELLOW +  f"[WARNING  ] {message}." + Fore.RESET)
-        elif type == "error":
-            print(Fore.RED +     f"[ERROR    ] {message}." + Fore.RESET)
-        else: 
-            print("[ERROR     ] You don't have to select any option.")
+    def message(self, message, type="info"):
+        if type.lower() == "info":
+            self.logger.info(message)
+        elif type.lower() == "warning":
+            self.logger.warning(message)
+        elif type.lower() == "error":
+            self.logger.error(message)
+
+    def makedir(self, dirs):
+        for d in dirs:
+            if not os.path.exists(d):
+                os.makedirs(d)
+                self.logger.info(f"Directory created: {d}")
 
     def date(self):
-        ''' Este método permite obter a data actual para 
-            adicionar nos archivos ou logs
-        '''
-        now = datetime.now()
-        formatted_time = now.strftime("%m/%d/%Y %H:%M:%S.%f")
-        return formatted_time
+        return datetime.now().strftime("%H:%M:%S %d/%m/%Y")
