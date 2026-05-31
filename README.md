@@ -50,7 +50,7 @@ mstbx mkdocking-cmplx -p protein.pdb -d ligand_vina.pdbqt -o complex.pdb
 mstbx topopsfgen --env solution --psf complex.psf --pdb complex.pdb --salt 0.150
 
 # 3. Generar inputs incluyendo parámetros del ligando (.str o .prm)
-mstbx md-inputs --engine namd --env solution --psf 01build/complex.psf --pdb 01build/complex.pdb --lparm ligand.str
+mstbx md-inputs --engine namd --env solution --psf 01build/complex.psf --pdb 01build/complex.pdb --ligand-parm ligand.str
 ```
 
 ### 3. `topotleap` (AMBER)
