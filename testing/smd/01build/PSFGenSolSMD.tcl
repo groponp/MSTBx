@@ -20,46 +20,70 @@ set M [transvecinv $axis]
 $all move $M
 set M [transaxis y -90]
 $all move $M
+$all writepdb orientedtoZ.pdb
+mol delete all
 
+# Recalculate box after orientation
+mol new $psf type psf waitfor all
+mol addfile orientedtoZ.pdb type pdb waitfor all
+set all [atomselect top all]
 set minmax [measure minmax $all]
-set min [lindex $minmax 0]
-set max [lindex $minmax 1]
+set f_min [lindex $minmax 0]
+set f_max [lindex $minmax 1]
 
-# Apply Standard padding + Extra pad for SMD in Z+
+# Calculate STRICT XY SQUARE size (like membrane)
+set xylen [vecsub $f_max $f_min]
+set max_xy [expr {max([lindex $xylen 0],[lindex $xylen 1])}]
+set vec [expr ($max_xy + (2 * 18.0))/2 + 1]
+
+# Z padding: Standard padding + Extra pad for SMD in Z+
 set p [expr 18.0]
 set p_extra [expr 60.0]
+set zlen [expr [lindex $f_max 2] - [lindex $f_min 2]]
+# Protein is centered in Z by 'solvate' if we use -minmax around its current center
+set zbox_half [expr ($zlen + (2 * $p) + $p_extra)/2 + 1]
 
-set minx [expr [lindex $min 0] - $p]
-set maxx [expr [lindex $max 0] + $p]
-set miny [expr [lindex $min 1] - $p]
-set maxy [expr [lindex $max 1] + $p]
-set minz [expr [lindex $min 2] - $p]
-set maxz [expr [lindex $max 2] + $p + $p_extra]
+# We want the protein to be at the bottom (Z-) part of the box
+# So we offset the box min/max relative to the protein's center
+set z_center [lindex [measure center $all] 2]
+set box_min_z [expr $z_center - ($zlen/2) - $p]
+set box_max_z [expr $box_min_z + ($zlen + (2 * $p) + $p_extra)]
+
+set center_xy [measure center $all]
+set boxmin [list [expr [lindex $center_xy 0] - $vec] [expr [lindex $center_xy 1] - $vec] $box_min_z]
+set boxmax [list [expr [lindex $center_xy 0] + $vec] [expr [lindex $center_xy 1] + $vec] $box_max_z]
 
 package require solvate
-solvate $psf orientedtoZ.pdb -minmax [list [list $minx $miny $minz] [list $maxx $maxy $maxz]] -o $sol -s W
+solvate $psf orientedtoZ.pdb -minmax [list $boxmin $boxmax] -o $sol -s W
 
 mol delete all
 package require autoionize
 autoionize -psf $sol.psf -pdb $sol.pdb -cation SOD -anion CLA -sc $salt -o ionized -seg ION
 
-# Final report from ACTUAL coordinates
-mol delete all
-mol new ionized.psf
-mol addfile ionized.pdb
+# Final centering and ACCURATE PBC report based on ACTUAL water atoms
+mol delete all 
+mol new ionized.psf 
+mol addfile ionized.pdb type pdb waitfor all
 set all [atomselect top all]
-set final_minmax [measure minmax $all]
+set center [measure center $all]
+$all move [transoffset [vecsub {0 0 0} $center]]
+
+set wat [atomselect top "waters"]
+set final_minmax [measure minmax $wat]
 set f_min [lindex $final_minmax 0]
 set f_max [lindex $final_minmax 1]
-set f_center [measure center $all]
+
+set A [expr [lindex $f_max 0] - [lindex $f_min 0]]
+set B [expr [lindex $f_max 1] - [lindex $f_min 1]]
+set C [expr [lindex $f_max 2] - [lindex $f_min 2]]
 
 set fout [open "step3_pbcsetup.str" w]
-puts $fout "SET A = [expr [lindex $f_max 0] - [lindex $f_min 0]]"
-puts $fout "SET B = [expr [lindex $f_max 1] - [lindex $f_min 1]]"
-puts $fout "SET C = [expr [lindex $f_max 2] - [lindex $f_min 2]]"
-puts $fout "SET XCEN = [lindex $f_center 0]"
-puts $fout "SET YCEN = [lindex $f_center 1]"
-puts $fout "SET ZCEN = [lindex $f_center 2]"
+puts $fout "SET A = $A"
+puts $fout "SET B = $B"
+puts $fout "SET C = $C"
+puts $fout "SET XCEN = 0"
+puts $fout "SET YCEN = 0"
+puts $fout "SET ZCEN = 0"
 close $fout
 
 $all writepdb $output.pdb

@@ -9,13 +9,13 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--psf', type=click.Path(exists=True, dir_okay=False), required=True, help="Input PSF file.")
 @click.option('--pdb', type=click.Path(exists=True, dir_okay=False), required=True, help="Input PDB file.")
 @click.option('--temperature', default=310.0, help="Temperature in Kelvin.")
-@click.option('--mdtime', '--md-time', default=100.0, help="Production time in ns.")
 @click.option('--dcdfreq', default=10.0, help="DCD trajectory saving frequency in ps.")
 @click.option('--selpull', required=True, help="VMD selection for the pulling group.")
 @click.option('--selanchor', required=True, help="VMD selection for the anchor group.")
-@click.option('--target-center', type=float, required=True, help="Maximum pulling distance.")
+@click.option('--target-center', type=float, required=True, help="Maximum pulling distance (Angstrom).")
+@click.option('--velocity', default=10.0, help="Pulling velocity in Angstrom/ns. Default 10.0.")
 @click.option('--kforce', default=1.5, help="Force constant for pulling.")
-def smd_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, selpull, selanchor, target_center, kforce):
+def smd_inputs(engine, env, psf, pdb, temperature, dcdfreq, selpull, selanchor, target_center, velocity, kforce):
     uxm = UnixMessage()
     
     if engine != 'namd':
@@ -24,6 +24,11 @@ def smd_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, selpull, sel
 
     uxm.message(f"Generating SMD configuration for {engine}...", "info")
     
+    # Calculate simulation time based on distance and velocity
+    # time (ns) = distance (A) / velocity (A/ns)
+    mdtime = float(target_center) / float(velocity)
+    uxm.message(f"Calculated simulation time: {mdtime:.2f} ns based on {velocity} A/ns velocity.", "info")
+
     md = MDProtocolSol(psf=psf, pdb=pdb, temperature=temperature, mdtime=mdtime, dcdfreq=dcdfreq)
     smd = SMDProtocolSol(psf=psf, pdb=pdb, temperature=temperature, selpull=selpull, selanchor=selanchor,
                          targetCenter=target_center, kforce=kforce, mdtime=mdtime, dcdfreq=dcdfreq)

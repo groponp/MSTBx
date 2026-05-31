@@ -3,3 +3,10 @@
 [INFO 17:04:02 31/05/2026] Smd system ready in 01build/
 [INFO 17:04:19 31/05/2026] Working inside: /media/groponp/Galvani/Scripts/MSTBx/testing/smd/01build
 [INFO 17:04:21 31/05/2026] Smd system ready in 01build/
+[INFO 17:11:14 31/05/2026] Working inside: /media/groponp/Galvani/Scripts/MSTBx/testing/smd/01build
+[INFO 17:11:19 31/05/2026] Smd system ready in 01build/
+[INFO 17:12:24 31/05/2026] Generating SMD configuration for namd...
+[INFO 17:12:24 31/05/2026] Directory created: 02nvt
+[INFO 17:12:24 31/05/2026] Directory created: 03npt
+[INFO 17:12:24 31/05/2026] Directory created: 04md
+[INFO 17:12:25 31/05/2026] SMD configuration generated successfully.
