@@ -1,4 +1,4 @@
-# 🧪 MSTBx v0.8.6: Testing & Debugging Guide
+# 🧪 MSTBx v0.8.7: Testing & Debugging Guide
 
 Comprehensive guide to validate every module in MSTBx.
 
@@ -11,18 +11,20 @@ Comprehensive guide to validate every module in MSTBx.
 mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --padding 18 --salt 0.150
 ```
 
-### 1.2 Membrane System
+### 1.2 Membrane System (Updated)
 ```bash
-# Standard Insertion
+# Standard Insertion (25A default Z-padding)
 mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150
-# Peripheral Placement
+# Peripheral Placement (Positioned 10A from surface)
 mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --mol-outside --z-distance 10
 ```
 
-### 1.3 SMD Prepared System
+### 1.3 SMD Prepared System (Simplified Logic)
 ```bash
-mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --atoms-anchor "resid 1" --atoms-pull "resid 100" --extra-space 60
+mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb \
+                 --atoms-anchor "resid 1" --atoms-pull "resid 100" --extra-space 50
 ```
+*   **Verification**: The protein should be oriented along Z, with a cubic-like box extended only in the Z+ direction.
 
 ---
 
@@ -32,7 +34,7 @@ mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --atoms-anchor "resid 1
 ```bash
 # Solution
 mstbx md-inputs --engine namd --env solution --psf 01build/sys.psf --pdb 01build/sys.pdb --dcdfreq 10.0
-# Membrane (4-step protocol)
+# Membrane (4-step protocol: NVT -> NPT1 -> NPT2 -> MD)
 mstbx md-inputs --engine namd --env membrane --psf 01build/sys.psf --pdb 01build/sys.pdb
 ```
 
@@ -54,36 +56,20 @@ mstbx metad-inputs --engine namd --env solution \
 
 ## 3. Specialized Tools
 
-### 3.1 PDBWriter (Structure Repair)
+### 3.1 PDBWriter
 ```bash
-mstbx pdbwriter -i original.pdb -o fixed.pdb --fix --ssbond --ph 7.4 --ff-out CHARMM
-```
-*   **Verification**: Inspect `pdbwriter_report.log`.
-
-### 3.2 MKDocking-Cmplx (Complex Builder)
-```bash
-mstbx mkdocking-cmplx -p protein.pdb -d docking.pdbqt -o complex.pdb --ph 7.4
+mstbx pdbwriter -i in.pdb -o fixed.pdb --fix --ssbond --ph 7.4
 ```
 
-### 3.3 MD-Translate (Conversion)
+### 3.2 ResetPSF (X-PLOR / Virtual Bonds)
 ```bash
-mstbx md-translate --psf sys.psf --coor restart.coor --xsc restart.xsc --toppar-dir ./toppar --target gromacs
-```
-
-### 3.4 ResetPSF (X-PLOR)
-```bash
-mstbx resetpsf --psf step1.psf --pdb step1.pdb --output reset_sys
-```
-
-### 3.5 ColabFold (AI Prediction)
-```bash
-mstbx colabfold -i ./fastas -o ./results
+mstbx resetpsf --psf glycosylated.psf --pdb coords.pdb --output reset_sys
 ```
 
 ---
 
 ## 🔍 Quality Assurance Checklist
-1.  **Version Consistency**: Run `mstbx --version`, should be `0.8.6`.
+1.  **Version Consistency**: Run `mstbx --version`, should be `0.8.7`.
 2.  **Log Format**: Messages must be `[LEVEL HH:MM:SS DD/MM/YYYY]`.
-3.  **Runner Script**: Ensure `runner.sh` is created and executable after any `inputs` command.
-4.  **TAB Completion**: Verify TAB works for both subcommands and file paths.
+3.  **Box Report**: Check `01build/step3_pbcsetup.str` for accurate water-measured dimensions.
+4.  **Runner Script**: Ensure `runner.sh` is created and executable with correct step activation (`eq=on`, etc.).

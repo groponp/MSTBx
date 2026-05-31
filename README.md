@@ -1,4 +1,4 @@
-# MSTBx (Molecular Simulation ToolBox) v0.8.6
+# MSTBx (Molecular Simulation ToolBox) v0.8.7
 
 **MSTBx** is a modular Python ecosystem designed to simplify the preparation, configuration, and translation of Molecular Dynamics (MD) simulations. Optimized for large-scale systems and high-performance computing (HPC) workflows.
 
@@ -33,8 +33,14 @@ System building with granular padding control and accurate PBC reporting.
 Usage: `mstbx topopsfgen --env [solution|membrane|smd] [OPTIONS]`
 
 *   **Solution**: `mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --salt 0.150`
-*   **Membrane**: `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150`
-*   **SMD (Oriented)**: `mstbx topopsfgen --env smd --psf prot.psf --pdb prot.pdb --atoms-pull "resid 100" --atoms-anchor "resid 1"`
+*   **Membrane (Standard)**: `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --salt 0.150`
+*   **Membrane (Peripheral)**: `mstbx topopsfgen --env membrane --psf lipids.psf --pdb lipids.pdb --mol-outside --z-distance 10`
+*   **SMD (Oriented)**: 
+    ```bash
+    mstbx topopsfgen --env smd --psf protein.psf --pdb protein.pdb \
+                     --atoms-pull "resid 100" --atoms-anchor "resid 1" --extra-space 50
+    ```
+    *   *Note: Aligns protein to Z-axis and extends the box in Z+ for pulling.*
 
 ---
 
@@ -47,7 +53,6 @@ Automatic generation of NAMD configuration files and an automated **`runner.sh`*
 *   *Membrane*: `mstbx md-inputs --engine namd --env membrane --psf 01build/sys.psf --pdb 01build/sys.pdb`
 
 ### 2. Steered MD (`smd-inputs`)
-Generate pulling protocols aligned with the Z-axis:
 ```bash
 mstbx smd-inputs --engine namd --env solution \
                  --psf 01build/sys.psf --pdb 01build/sys.pdb \
@@ -55,7 +60,6 @@ mstbx smd-inputs --engine namd --env solution \
 ```
 
 ### 3. Metadynamics (`metad-inputs`)
-Generate Well-Tempered Metadynamics protocols:
 ```bash
 mstbx metad-inputs --engine namd --env solution \
                    --psf 01build/sys.psf --pdb 01build/sys.pdb \
