@@ -1,4 +1,4 @@
-# 🧪 MSTBx v0.8.2: Guía de Pruebas y Depuración
+# 🧪 MSTBx v0.8.5: Guía de Pruebas y Depuración
 
 Esta guía te permitirá validar cada módulo de la nueva arquitectura modular.
 

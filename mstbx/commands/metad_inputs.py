@@ -41,5 +41,6 @@ def metad_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, sel1, sel2
     meta.wtmetad()
     meta.colvars()
     meta.makecolvarspdb()
+    meta.runner_script()
     
     uxm.message("Metadynamics configuration generated successfully.", "info")

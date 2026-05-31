@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mstbx"
-version = "0.8.2"
+version = "0.8.5"
 description = "Molecular Simulation ToolBox"
 readme = "README.md"
 authors = [{ name = "Ropón-Palacios G.", email = "georcki.ropon@unesp.br" }]

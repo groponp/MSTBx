@@ -32,6 +32,7 @@ def md_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, lparm):
         md.npt()
         md.md()
         md.restraint()
+        md.runner_script()
 
     elif env == 'membrane':
         md = MDProtocolMemb(psf=psf, pdb=pdb, temperature=temperature, mdtime=mdtime, dcdfreq=dcdfreq)
@@ -43,6 +44,7 @@ def md_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, lparm):
         md.npt2()
         md.md()
         md.restraint()
+        md.runner_script()
 
     if lparm:
         os.system(f"cp -rv {lparm} toppar/")

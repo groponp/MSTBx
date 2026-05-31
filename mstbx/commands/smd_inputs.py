@@ -37,5 +37,6 @@ def smd_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, selpull, sel
     smd.smd()
     smd.colvars()
     smd.makecolvarspdb()
+    smd.runner_script()
     
     uxm.message("SMD configuration generated successfully.", "info")

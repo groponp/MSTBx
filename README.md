@@ -1,4 +1,4 @@
-# MSTBx (Molecular Simulation ToolBox) v0.8.2
+# MSTBx (Molecular Simulation ToolBox) v0.8.5
 
 **MSTBx** es un ecosistema modular de Python diseñado para simplificar la preparación, generación de archivos de configuración y traducción de simulaciones de Dinámica Molecular (MD). Está optimizado para sistemas de gran escala (millones de átomos) y soporta flujos de trabajo multilingües.
 
