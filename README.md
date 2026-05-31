@@ -1,86 +1,47 @@
-<p align="center">
-  <img src="logo_adjust.png" width="350" height="250" alt="MSTBx Logo">
-</p>
+# MSTBx (Development Version)
 
-<h1 align="center">MSTBx : Molecular Simulation ToolBox</h1>
+This README is for testing purposes during the refactor to v0.7.0.
 
-<p align="center" style="font-size:1.3em;">
-  <b>🌐 Select your language | Escolha seu idioma | Elige tu idioma</b>
-</p>
+## 🚀 Quick Setup
 
-<p align="center">
-  <a href="docs/wiki/pt/Home.md"><img src="https://cdn.jsdelivr.net/gh/hjnilsson/country-flags/svg/br.svg" width="48" title="Português"></a>
-  &nbsp;&nbsp;
-  <a href="docs/wiki/en/Home.md"><img src="https://cdn.jsdelivr.net/gh/hjnilsson/country-flags/svg/us.svg" width="48" title="English"></a>
-  &nbsp;&nbsp;
-  <a href="docs/wiki/es/Home.md"><img src="https://cdn.jsdelivr.net/gh/hjnilsson/country-flags/svg/es.svg" width="48" title="Español"></a>
-</p>
-
-<p align="center" style="font-size:1.1em;">
-  <i>Click a flag to visit the Wiki and Examples.<br>Clique em uma bandeira para visitar a Wiki e Exemplos.<br>Haz clic en una bandera para visitar la Wiki y Ejemplos.</i>
-</p>
-
----
-
-## ✨ Overview
-
-**MSTBx** is a modular Python package designed to prepare and generate configuration files for molecular dynamics (MD) simulations. It focuses on large systems (millions of atoms) and leverages the power of **VMD**, **PSFGen**, and **MDAnalysis**.
-
-*   **Supported Engines**: NAMD2, NAMD3 (Future support for GROMACS, AMBER, OpenMM).
-*   **Key Modules**: `autopsfgen`, `namdinputs`, `pdbwriter`, `colabfold`, `mkdocking-cmplx`.
-
----
-
-## 🚀 Installation
-
-MSTBx is now a formal Python package. You can install it via `pip` inside a Conda environment to use it globally without modifying your `$PATH`.
-
-### 1. Create Environment
 ```bash
-git clone https://github.com/groponp/MSTBx.git
-cd MSTBx/
-conda env create -f mstbx.yml
+# 1. Update environment
+conda env update -f mstbx.yml
 conda activate mstbx
-```
 
-### 2. Install Package
-```bash
-# Install in editable mode
+# 2. Install package in editable mode
 pip install -e .
 ```
 
-Now you can run the tool from anywhere using:
+## 🧪 Testing Commands
+
+### 1. General Help
 ```bash
 mstbx --help
 ```
 
----
+### 2. PDBWriter (Internal Gap Fix & SS Bonds)
+```bash
+# Replace 'your_protein.pdb' with a real file to test
+mstbx pdbwriter -i your_protein.pdb -o fixed.pdb --fix --ssbond
+```
 
-## 📚 Wiki & Examples
+### 3. Solvation System
+```bash
+# Requires .psf and .pdb
+mstbx autopsfgen --type sol --psf protein.psf --pdb protein.pdb --ofile test_sol
+```
 
-Explore detailed tutorials and examples in your preferred language:
+### 4. NAMD Protocol
+```bash
+# Run after autopsfgen
+mstbx namdinputs --type sol --psf 01build/test_sol.psf --pdb 01build/test_sol.pdb
+```
 
-### 🇺🇸 [English Wiki](docs/wiki/en/Home.md)
-*   [Protein in Solution](docs/wiki/en/Example_Solvation.md)
-*   [Membrane Proteins](docs/wiki/en/Example_Membrane.md)
-*   [PDB Repair & Cleaning](docs/wiki/en/Example_PDBWriter.md)
+## 📁 Repository Structure
 
-### 🇧🇷 [Wiki em Português](docs/wiki/pt/Home.md)
-*   [Proteína em Solução](docs/wiki/pt/Example_Solvation.md)
-*   [Proteínas de Membrana](docs/wiki/pt/Example_Membrane.md)
-*   [Reparo e Limpeza de PDB](docs/wiki/pt/Example_PDBWriter.md)
-
-### 🇪🇸 [Wiki en Español](docs/wiki/es/Home.md)
-*   [Proteína en Solución](docs/wiki/es/Example_Solvation.md)
-*   [Proteínas de Membrana](docs/wiki/es/Example_Membrane.md)
-*   [Reparación y Limpieza de PDB](docs/wiki/es/Example_PDBWriter.md)
-
----
-
-## 👨‍💻 Author
-**Ropón-Palacios G.**  
-UNESP - São José do Rio Preto/SP  
-Email: [georcki.ropon@unesp.br](mailto:georcki.ropon@unesp.br)
-
-## 📄 License
-[GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
+*   `mstbx/`: Source code of the package.
+*   `docs/`: Multilingual Wiki and documentation.
+*   `old.code/`: Original scripts and examples (for reference).
+*   `pyproject.toml`: Installation metadata.
+*   `mstbx.yml`: Conda environment definition.
