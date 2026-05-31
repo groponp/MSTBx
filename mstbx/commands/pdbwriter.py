@@ -3,7 +3,7 @@ import os
 from mstbx.core.Build.PDBWriter import PDBWriter
 from mstbx.core.Utils.Utils import UnixMessage
 
-@click.command()
+@click.command(help="Advanced PDB preparation (Fix, Protonate, Edit, SSBOND).")
 @click.option('--input', '-i', type=click.Path(exists=True, dir_okay=False), required=True, help="Input PDB/MMCIF file.")
 @click.option('--output', '-o', type=click.Path(dir_okay=False), required=True, help="Output PDB file.")
 @click.option('--fix', is_flag=True, help="Run PDBFixer to repair missing atoms/residues.")
@@ -15,7 +15,7 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--renumber', type=int, help="Renumber residues starting from this value.")
 @click.option('--segid', help="Add/Modify segid for all atoms.")
 def pdbwriter(input, output, fix, internal_only, ph, ff_out, ssbond, rename_chain, renumber, segid):
-    """PDBWriter: Advanced PDB preparation (Fix, Protonate, Edit, SSBOND)."""
+    """PDBWriter: Advanced PDB preparation module."""
     uxm = UnixMessage()
     uxm.message(message=f"Starting PDBWriter for {input}", type="info")
     
@@ -33,7 +33,6 @@ def pdbwriter(input, output, fix, internal_only, ph, ff_out, ssbond, rename_chai
         uxm.message(message="Detecting S-S bonds...", type="info")
         writer.find_ssbonds()
     
-    # Process rename_chain list of 'old:new'
     chains_dict = {}
     for rc in rename_chain:
         if ':' in rc:
