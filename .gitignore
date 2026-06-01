@@ -5,5 +5,5 @@ docs/
 __pycache__/
 *.egg-info/
 dist/
-build/
+/build/
 *.pyc
