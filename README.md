@@ -12,13 +12,33 @@ MSTBx is a modular Python-based ecosystem designed to streamline the preparation
 
 ## 📦 Installation
 
+### 1. Using Conda (Recommended)
+It is highly recommended to use a dedicated Conda environment to manage dependencies:
+
 ```bash
+# Create and activate the environment
+conda create -n mstbx python=3.12
+conda activate mstbx
+
 # Clone the repository
 git clone git@github.com:groponp/MSTBx.git
 cd MSTBx
 
 # Install in development mode
 pip install -e .
+```
+
+### 2. Shell Completion (Zsh)
+To enable TAB completion for `mstbx` commands without needing to activate the conda environment every time, add the following to your `~/.zshrc`:
+
+```bash
+# MSTBx Completion (replace path if your conda is installed elsewhere)
+eval "$(_MSTBX_COMPLETE=zsh_source $HOME/miniconda3/envs/mstbx/bin/mstbx)"
+```
+
+Then, reload your configuration:
+```bash
+source ~/.zshrc
 ```
 
 ---
