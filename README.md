@@ -1,102 +1,135 @@
-# MSTBx (Molecular Simulation ToolBox) v0.8.9-beta
+# MSTBx: Molecular Simulation ToolBox (v0.8.9-beta)
 
-**MSTBx** is a modular Python ecosystem designed to simplify the preparation, configuration, and translation of Molecular Dynamics (MD) simulations. Optimized for large-scale systems and high-performance computing (HPC) workflows.
+MSTBx is a modular Python-based ecosystem designed to streamline the preparation, configuration, and translation of Molecular Dynamics (MD) simulations. It leverages the power of **VMD**, **PSFGen**, and **MDAnalysis** to handle systems from small molecules to large-scale complexes (millions of atoms).
 
----
+## 🚀 Key Features
 
-## 🚀 Quick Installation
+*   **Unified CLI:** A single entry point for all MD preparation tasks.
+*   **Engine Agnostic:** Supports NAMD (Primary), AMBER, GROMACS, and OpenMM.
+*   **Automation:** Automates solvation, ionization, and configuration file generation.
+*   **Complex Systems:** Specialized protocols for membrane proteins and protein-ligand complexes.
+*   **AI Integration:** Interface for ColabFold via Apptainer/Singularity.
+
+## 📦 Installation
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/groponp/MSTBx.git
-cd MSTBx/
+# Clone the repository
+git clone git@github.com:groponp/MSTBx.git
+cd MSTBx
 
-# 2. Setup Conda environment
-conda env update -f mstbx.yml
-conda activate mstbx
-
-# 3. Install in editable mode
+# Install in development mode
 pip install -e .
 ```
 
-### Enable TAB Autocompletion
-```bash
-# Bash: echo 'eval "$(_MSTBX_COMPLETE=bash_source mstbx)"' >> ~/.bashrc
-# Zsh: echo 'eval "$(_MSTBX_COMPLETE=zsh_source mstbx)"' >> ~/.zshrc
-```
+---
+
+## 🛠 Command Reference & Examples
+
+### 1. `topopsfgen`
+Builds CHARMM-style systems (Solvation, Membrane, SMD).
+
+**Usage Examples:**
+*   **Detailed Solvation:**
+    ```bash
+    mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --salt 0.150 --padding 18.0 --ofile solvated_system
+    ```
+*   **Membrane System with custom padding:**
+    ```bash
+    mstbx topopsfgen --env membrane --psf protein.psf --pdb protein.pdb --salt 0.15 --padding 25.0 --ofile membrane_complex
+    ```
+*   **SMD Preparation with extended Z-axis:**
+    ```bash
+    mstbx topopsfgen --env smd --psf system.psf --pdb system.pdb --pad-z-pos 50.0 --extra-space 20.0 --ofile smd_ready
+    ```
+
+### 2. `md-inputs`
+Generates standard MD protocols (Minimization, NVT, NPT, Production).
+
+**Usage Examples:**
+*   **NAMD Production (200ns) at 310K:**
+    ```bash
+    mstbx md-inputs --engine namd --env solution --psf ionized.psf --pdb ionized.pdb --temperature 310 --mdtime 200 --dcdfreq 50.0
+    ```
+*   **GROMACS Membrane with ligand parameters:**
+    ```bash
+    mstbx md-inputs --engine gromacs --env membrane --psf step4_lipid.psf --pdb step4_lipid.pdb --temperature 310 --mdtime 100 --lparm ligand.str
+    ```
+
+### 3. `smd-inputs`
+Generates velocity-based pulling protocols (Steered Molecular Dynamics).
+
+**Usage Examples:**
+*   **High-precision pulling:**
+    ```bash
+    mstbx smd-inputs --engine namd --psf system.psf --pdb system.pdb --selpull "resname LIG" --selanchor "protein and backbone" --target-center 45.0 --velocity 5.0 --temperature 310 --dcdfreq 1.0
+    ```
+
+### 4. `metad-inputs`
+Generates Well-Tempered Metadynamics protocols.
+
+**Usage Examples:**
+*   **Custom Metadynamics setup:**
+    ```bash
+    mstbx metad-inputs --psf complex.psf --pdb complex.pdb --sel1 "segid PROA" --sel2 "segid PROB" --target-distance 30.0 --hill 0.2 --hillfreq 1000 --width 0.5 --temperature 310 --mdtime 500
+    ```
+
+### 5. `pdbwriter`
+Advanced PDB preparation (Fix, Protonate, Edit, SSBOND).
+
+**Usage Examples:**
+*   **Fix missing atoms and protonate at pH 7.4:**
+    ```bash
+    mstbx pdbwriter -i input.pdb -o fixed.pdb --fix --ph 7.4
+    ```
+*   **Detect Disulfide Bonds and rename chains:**
+    ```bash
+    mstbx pdbwriter -i protein.pdb -o clean.pdb --ssbond --rename-chain "A:P"
+    ```
+
+### 6. `mkdocking-cmplx`
+Assembles protein-ligand complexes from docking poses (Vina/Gnina).
+
+**Usage Examples:**
+*   **Build complex from Vina output:**
+    ```bash
+    mstbx mkdocking-cmplx --protein receptor.pdb --dock poses.pdbqt --output final_complex.pdb
+    ```
+
+### 7. `md-translate`
+Translates NAMD systems to other engines (e.g., GROMACS).
+
+**Usage Examples:**
+*   **NAMD to GROMACS conversion:**
+    ```bash
+    mstbx md-translate --psf system.psf --coor system.coor --xsc system.xsc --toppar-dir ./toppar --target gromacs
+    ```
+
+### 8. `colabfold`
+Interface for AI structure prediction via Apptainer.
+
+**Usage Examples:**
+*   **Run batch prediction:**
+    ```bash
+    mstbx colabfold -i ./fasta_files -o ./results --sif ./apptainer/colabfold.sif
+    ```
+
+### 9. `resetpsf`
+Converts structures to X-PLOR format (required for glycans/virtual bonds).
+
+**Usage Examples:**
+*   **Reset PSF/PDB:**
+    ```bash
+    mstbx resetpsf --psf charmm_system.psf --pdb charmm_system.pdb -o xplor_ready
+    ```
 
 ---
 
-## 🛠️ Main Modules
+## 📜 Development Standards
 
-### 1. Topology Building (`topopsfgen`)
-*   `mstbx topopsfgen --env solution`: Cubic water box (18Å padding).
-*   `mstbx topopsfgen --env membrane`: Strict XY square box (25Å Z-padding).
-*   `mstbx topopsfgen --env smd`: Oriented system with Z+ tunnel extension.
+*   **Logging:** All console output follows the format `[LEVEL HH:MM:SS DD/MM/YYYY]`.
+*   **Naming:** Consistent flags across modules (`--env`, `--engine`, `--psf`, `--pdb`).
+*   **Geometry:** Strict box symmetry (Square XY or Cubic) based on the maximum dimension.
 
-### 2. Simulation Protocols (`inputs`)
-*   `mstbx md-inputs`: Standard equilibration and production.
-*   `mstbx smd-inputs`: Velocity-based pulling protocols.
-*   `mstbx metad-inputs`: Well-Tempered Metadynamics.
+## ⚖️ License
 
-### 3. Advanced Tools
-*   `pdbwriter`: PDB fixing and S-S bond detection.
-*   `resetpsf`: Conversion to X-PLOR format (required for glycans).
-*   `mkdocking-cmplx`: Protein-ligand complex assembly.
-*   `md-translate`: Coordinate translation (NAMD to GROMACS).
-*   `colabfold`: AI-based structure prediction.
-
----
-
-## 📖 Real-World Examples
-
-### A. Standard Protein (Ubiquitin)
-```bash
-# 1. Build Cubic Box (18A padding)
-mstbx topopsfgen --env solution --psf ubq.psf --pdb ubq.pdb --salt 0.150
-
-# 2. Generate NAMD files
-mstbx md-inputs --engine namd --env solution --psf 01build/mol.psf --pdb 01build/mol.pdb
-
-# 3. Run
-./runner.sh
-```
-
-### B. Membrane Protein (Aquaporin)
-```bash
-# 1. Build Square XY Box (25A Z-padding)
-mstbx topopsfgen --env membrane --psf aqp.psf --pdb aqp.pdb --salt 0.150
-
-# 2. Generate 4-step Membrane Protocol
-mstbx md-inputs --engine namd --env membrane --psf 01build/mol.psf --pdb 01build/mol.pdb
-```
-
-### C. Protein-Ligand (BAAT)
-```bash
-# 1. Assemble Complex
-mstbx mkdocking-cmplx -p receptor.pdb -d ligand_pose.pdbqt -o complex.pdb
-
-# 2. Build Solution
-mstbx topopsfgen --env solution --psf complex.psf --pdb complex.pdb --salt 0.150
-
-# 3. Inputs with Ligand Parameters (.str/.prm)
-mstbx md-inputs --engine namd --env solution --psf 01build/mol.psf --pdb 01build/mol.pdb --ligand-parm ligand.str
-```
-
-### D. Glycosylated Protein (1OAN)
-```bash
-# 1. Reset Topology (X-PLOR format)
-mstbx resetpsf --psf 1oan.psf --pdb 1oan.pdb --output reset_1oan
-
-# 2. Build from Reset files
-mstbx topopsfgen --env solution --psf reset_1oan.psf --pdb reset_1oan.pdb --salt 0.150
-```
-
----
-
-## 📊 Industrial Logging
-Standardized format for tracking: `[LEVEL HH:MM:SS DD/MM/YYYY] Message`
-
-## 📚 Documentation
-*   🇺🇸 [English Wiki](docs/wiki/en/Home.md) | 🇪🇸 [Wiki en Español](docs/wiki/es/Home.md) | 🇧🇷 [Wiki em Português](docs/wiki/pt/Home.md)
-*   🔬 [**Full Testing Manual**](docs/Testing_Manual.md)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
