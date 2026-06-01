@@ -1,22 +1,38 @@
-# MSTBx: Molecular Simulation ToolBox (v0.8.9-beta)
+<p align="center">
+  <img src="logo_adjust.png" width="350" height="250" alt="MSTBx Logo">
+</p>
 
-MSTBx is a modular Python-based ecosystem designed to streamline the preparation, configuration, and translation of Molecular Dynamics (MD) simulations. It leverages the power of **VMD**, **PSFGen**, and **MDAnalysis** to handle systems from small molecules to large-scale complexes (millions of atoms).
+<h1 align="center">MSTBx: Molecular Simulation ToolBox (v0.8.9-beta)</h1>
 
-## 🚀 Key Features
+<p align="center">
+  <b>A modular Python ecosystem to streamline Molecular Dynamics preparation, configuration, and translation.</b>
+</p>
 
-*   **Unified CLI:** A single entry point for all MD preparation tasks.
-*   **Engine Agnostic:** Supports NAMD (Primary), AMBER, GROMACS, and OpenMM.
-*   **Automation:** Automates solvation, ionization, and configuration file generation.
-*   **Complex Systems:** Specialized protocols for membrane proteins and protein-ligand complexes.
-*   **AI Integration:** Interface for ColabFold via Apptainer/Singularity.
+<p align="center">
+  <a href="#en">🇺🇸 English</a> | 
+  <a href="#pt-br">🇧🇷 Português</a> | 
+  <a href="#es">🇪🇸 Español</a>
+</p>
 
-## 📦 Installation
+---
 
-### 1. Using Conda (Recommended)
-It is highly recommended to use a dedicated Conda environment to manage dependencies:
+<h2 id="en">🇺🇸 English</h2>
 
+### ✨ Overview
+**MSTBx** is a modular CLI-based suite designed to automate the heavy lifting of MD simulations. It leverages **VMD**, **PSFGen**, and **MDAnalysis** to handle systems ranging from small ligands to massive complexes with millions of atoms.
+
+*   **Primary Engine:** NAMD2/3.
+*   **Secondary Support:** GROMACS, AMBER, OpenMM.
+*   **Efficiency:** Up to **16x faster** than web-based builders for large systems (e.g., SARS-CoV-2 Spike).
+
+### 🚀 Installation & Setup
+
+<details open>
+<summary><b>View Installation Steps</b></summary>
+
+#### 1. Environment Setup (Conda)
 ```bash
-# Create and activate the environment
+# Create and activate a dedicated environment
 conda create -n mstbx python=3.12
 conda activate mstbx
 
@@ -28,128 +44,117 @@ cd MSTBx
 pip install -e .
 ```
 
-### 2. Shell Completion (Zsh)
-To enable TAB completion for `mstbx` commands without needing to activate the conda environment every time, add the following to your `~/.zshrc`:
-
+#### 2. Persistent Shell Completion (Zsh)
+To enable TAB completion without activating the environment every time, add this to your `~/.zshrc`:
 ```bash
-# MSTBx Completion (replace path if your conda is installed elsewhere)
+# MSTBx TAB Completion
 eval "$(_MSTBX_COMPLETE=zsh_source $HOME/miniconda3/envs/mstbx/bin/mstbx)"
 ```
+</details>
 
-Then, reload your configuration:
+### 🛠 Command Reference & Examples
+
+<details>
+<summary><b>1. topopsfgen: System Building (Solvation/Membrane)</b></summary>
+
+Builds systems with water, ions, or lipid bilayers.
+
+*   **Ubiquitin in Solution:**
+    ```bash
+    # Cubic box, 18A padding, 0.15M NaCl
+    mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --salt 0.150 --padding 18.0 --ofile ubq
+    ```
+*   **Aquaporin in Membrane:**
+    ```bash
+    # Automatic Z-padding (25A), square XY box
+    mstbx topopsfgen --env membrane --psf step4_lipid.psf --pdb step4_lipid.pdb --salt 0.150 --ofile aqp
+    ```
+</details>
+
+<details>
+<summary><b>2. md-inputs: Protocol Generation</b></summary>
+
+Generates Minimization, NVT, NPT, and Production scripts.
+
+*   **Protein-Ligand NAMD Production:**
+    ```bash
+    # 200ns at 310K, saving every 50ps, with ligand parameters
+    mstbx md-inputs --engine namd --env solution --psf ionized.psf --pdb ionized.pdb \
+                    --temperature 310 --mdtime 200 --dcdfreq 50.0 --lparm ligand.str
+    ```
+</details>
+
+<details>
+<summary><b>3. Advanced Sampling (SMD & Metadynamics)</b></summary>
+
+*   **Steered Molecular Dynamics (SMD):**
+    ```bash
+    # Pulling a ligand from a site at 5A/ns
+    mstbx smd-inputs --psf system.psf --pdb system.pdb --selpull "resname LIG" \
+                     --selanchor "protein and backbone" --target-center 45.0 --velocity 5.0
+    ```
+*   **Well-Tempered Metadynamics:**
+    ```bash
+    # Distance-based sampling between two domains
+    mstbx metad-inputs --psf complex.psf --pdb complex.pdb --sel1 "segid PROA" \
+                       --sel2 "segid PROB" --target-distance 30.0 --hill 0.2
+    ```
+</details>
+
+---
+
+<h2 id="pt-br">🇧🇷 Português</h2>
+
+### ✨ Visão Geral
+O **MSTBx** é um pacote modular para automatizar a preparação de simulações de Dinâmica Molecular. Focado em **sistemas grandes** (milhões de átomos), ele utiliza PSFGen e VMD para entregar resultados muito mais rápidos que ferramentas web.
+
+*   **Foco Principal:** NAMD2 e NAMD3.
+*   **Performance:** Prepare sistemas como a Spike do SARS-CoV-2 em ~30 min (contra 8h em ferramentas convencionais).
+
+### 📚 Exemplos de Uso Detalhados
+
+<details>
+<summary><b>Proteína-Ligante em Solução</b></summary>
+
+1. Gere os arquivos PSF/PDB iniciais (ex: via CHARMM-GUI PDBReader).
+2. Monte o sistema e gere os inputs com parâmetros do ligante.
+
 ```bash
-source ~/.zshrc
+# 1. Montar o sistema (Solvatação e Ionização)
+mstbx topopsfgen --env solution --psf protein_ligand.psf --pdb protein_ligand.pdb --salt 0.150 --ofile complex
+
+# 2. Gerar protocolos (NAMD, 310K, 100ns)
+mstbx md-inputs --engine namd --env solution --psf 01build/complex.psf --pdb 01build/complex.pdb \
+                --lparm ligand.prm --temperature 310 --mdtime 100
 ```
+</details>
 
 ---
 
-## 🛠 Command Reference & Examples
+<h2 id="es">🇪🇸 Español</h2>
 
-### 1. `topopsfgen`
-Builds CHARMM-style systems (Solvation, Membrane, SMD).
+### ✨ Visión General
+**MSTBx** permite preparar sistemas para dinámica molecular de forma eficiente. Aprovecha el poder de PSFGen y VMD para sistemas complejos (proteína-ligando, membranas, etc.).
 
-**Usage Examples:**
-*   **Detailed Solvation:**
-    ```bash
-    mstbx topopsfgen --env solution --psf protein.psf --pdb protein.pdb --salt 0.150 --padding 18.0 --ofile solvated_system
-    ```
-*   **Membrane System with custom padding:**
-    ```bash
-    mstbx topopsfgen --env membrane --psf protein.psf --pdb protein.pdb --salt 0.15 --padding 25.0 --ofile membrane_complex
-    ```
-*   **SMD Preparation with extended Z-axis:**
-    ```bash
-    mstbx topopsfgen --env smd --psf system.psf --pdb system.pdb --pad-z-pos 50.0 --extra-space 20.0 --ofile smd_ready
-    ```
+### 🛠 Referencia de Comandos
 
-### 2. `md-inputs`
-Generates standard MD protocols (Minimization, NVT, NPT, Production).
+<details>
+<summary><b>pdbwriter: Preparación Avanzada de PDB</b></summary>
 
-**Usage Examples:**
-*   **NAMD Production (200ns) at 310K:**
-    ```bash
-    mstbx md-inputs --engine namd --env solution --psf ionized.psf --pdb ionized.pdb --temperature 310 --mdtime 200 --dcdfreq 50.0
-    ```
-*   **GROMACS Membrane with ligand parameters:**
-    ```bash
-    mstbx md-inputs --engine gromacs --env membrane --psf step4_lipid.psf --pdb step4_lipid.pdb --temperature 310 --mdtime 100 --lparm ligand.str
-    ```
+Repara huecos, protona y detecta puentes disulfuro.
 
-### 3. `smd-inputs`
-Generates velocity-based pulling protocols (Steered Molecular Dynamics).
-
-**Usage Examples:**
-*   **High-precision pulling:**
-    ```bash
-    mstbx smd-inputs --engine namd --psf system.psf --pdb system.pdb --selpull "resname LIG" --selanchor "protein and backbone" --target-center 45.0 --velocity 5.0 --temperature 310 --dcdfreq 1.0
-    ```
-
-### 4. `metad-inputs`
-Generates Well-Tempered Metadynamics protocols.
-
-**Usage Examples:**
-*   **Custom Metadynamics setup:**
-    ```bash
-    mstbx metad-inputs --psf complex.psf --pdb complex.pdb --sel1 "segid PROA" --sel2 "segid PROB" --target-distance 30.0 --hill 0.2 --hillfreq 1000 --width 0.5 --temperature 310 --mdtime 500
-    ```
-
-### 5. `pdbwriter`
-Advanced PDB preparation (Fix, Protonate, Edit, SSBOND).
-
-**Usage Examples:**
-*   **Fix missing atoms and protonate at pH 7.4:**
-    ```bash
-    mstbx pdbwriter -i input.pdb -o fixed.pdb --fix --ph 7.4
-    ```
-*   **Detect Disulfide Bonds and rename chains:**
-    ```bash
-    mstbx pdbwriter -i protein.pdb -o clean.pdb --ssbond --rename-chain "A:P"
-    ```
-
-### 6. `mkdocking-cmplx`
-Assembles protein-ligand complexes from docking poses (Vina/Gnina).
-
-**Usage Examples:**
-*   **Build complex from Vina output:**
-    ```bash
-    mstbx mkdocking-cmplx --protein receptor.pdb --dock poses.pdbqt --output final_complex.pdb
-    ```
-
-### 7. `md-translate`
-Translates NAMD systems to other engines (e.g., GROMACS).
-
-**Usage Examples:**
-*   **NAMD to GROMACS conversion:**
-    ```bash
-    mstbx md-translate --psf system.psf --coor system.coor --xsc system.xsc --toppar-dir ./toppar --target gromacs
-    ```
-
-### 8. `colabfold`
-Interface for AI structure prediction via Apptainer.
-
-**Usage Examples:**
-*   **Run batch prediction:**
-    ```bash
-    mstbx colabfold -i ./fasta_files -o ./results --sif ./apptainer/colabfold.sif
-    ```
-
-### 9. `resetpsf`
-Converts structures to X-PLOR format (required for glycans/virtual bonds).
-
-**Usage Examples:**
-*   **Reset PSF/PDB:**
-    ```bash
-    mstbx resetpsf --psf charmm_system.psf --pdb charmm_system.pdb -o xplor_ready
-    ```
+```bash
+# Reparar átomos faltantes, protonar a pH 7.4 y añadir SSBONDs
+mstbx pdbwriter -i original.pdb -o fixed.pdb --fix --ph 7.4 --ssbond
+```
+</details>
 
 ---
 
-## 📜 Development Standards
+### 👨‍💻 Author | Autor
+**Ropón-Palacios G.**  
+*UNESP - São José do Rio Preto/SP*  
+📧 [georcki.ropon@unesp.br](mailto:georcki.ropon@unesp.br)
 
-*   **Logging:** All console output follows the format `[LEVEL HH:MM:SS DD/MM/YYYY]`.
-*   **Naming:** Consistent flags across modules (`--env`, `--engine`, `--psf`, `--pdb`).
-*   **Geometry:** Strict box symmetry (Square XY or Cubic) based on the maximum dimension.
-
-## ⚖️ License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### 📄 License | Licença
+Licensed under the **MIT License**. (GPLv3 in previous versions).
