@@ -3,9 +3,11 @@ import os
 from mstbx.core.Build.PDBWriter import PDBWriter
 from mstbx.core.Utils.Utils import UnixMessage
 
-@click.command(help="Advanced PDB preparation (Fix, Protonate, Edit, SSBOND).")
-@click.option('--input', '-i', type=click.Path(exists=True, dir_okay=False), required=True, help="Input PDB/MMCIF file.")
-@click.option('--output', '-o', type=click.Path(dir_okay=False), required=True, help="Output PDB file.")
+@click.command(help="Advanced PDB preparation (Fix, Protonate, Edit, SSBOND) and CRD generation.")
+@click.option('--input', '-i', type=click.Path(exists=True, dir_okay=False), help="Input PDB/MMCIF file.")
+@click.option('--pdb', type=click.Path(exists=True, dir_okay=False), help="Input PDB file (alias for --input).")
+@click.option('--psf', type=click.Path(exists=True, dir_okay=False), help="Input PSF file (optional, used for CRD).")
+@click.option('--output', '-o', type=click.Path(dir_okay=False), required=True, help="Output file base or PDB.")
 @click.option('--fix', is_flag=True, help="Run PDBFixer to repair missing atoms/residues.")
 @click.option('--internal-only', is_flag=True, default=True, help="If fixing, only repair internal gaps, not terminals.")
 @click.option('--ph', type=float, help="pH for protonation using pdb2pqr.")
@@ -14,12 +16,19 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--rename-chain', multiple=True, help="Rename chain: 'old:new' (e.g., 'A:B').")
 @click.option('--renumber', type=int, help="Renumber residues starting from this value.")
 @click.option('--segid', help="Add/Modify segid for all atoms.")
-def pdbwriter(input, output, fix, internal_only, ph, ff_out, ssbond, rename_chain, renumber, segid):
+@click.option('--write-ext-crd', is_flag=True, help="Generate an extended CHARMM-GUI style .crd file.")
+def pdbwriter(input, pdb, psf, output, fix, internal_only, ph, ff_out, ssbond, rename_chain, renumber, segid, write_ext_crd):
     """PDBWriter: Advanced PDB preparation module."""
     uxm = UnixMessage()
-    uxm.message(message=f"Starting PDBWriter for {input}", type="info")
     
-    writer = PDBWriter(input)
+    input_file = input or pdb
+    if not input_file:
+        uxm.message(message="Error: --input or --pdb must be provided.", type="error")
+        raise click.Abort()
+
+    uxm.message(message=f"Starting PDBWriter for {input_file}", type="info")
+    
+    writer = PDBWriter(input_file, psf_file=psf)
     
     if fix:
         uxm.message(message="Running PDBFixer...", type="info")
@@ -43,6 +52,14 @@ def pdbwriter(input, output, fix, internal_only, ph, ff_out, ssbond, rename_chai
         uxm.message(message="Applying structural edits...", type="info")
         writer.edit_structure(rename_chains=chains_dict, renumber_residues=renumber, add_segid=segid)
     
-    writer.write_final_pdb(output)
-    uxm.message(message=f"Successfully generated {output}", type="info")
+    if write_ext_crd:
+        crd_output = output if output.endswith('.crd') else output.rsplit('.', 1)[0] + '.crd'
+        uxm.message(message="Generating extended CRD...", type="info")
+        writer.write_ext_crd(crd_output)
+    
+    if not output.endswith('.crd') or not write_ext_crd:
+        pdb_output = output if output.endswith('.pdb') else output.rsplit('.', 1)[0] + '.pdb'
+        writer.write_final_pdb(pdb_output)
+    
+    uxm.message(message=f"Successfully processed inputs.", type="info")
     uxm.message(message="Check 'pdbwriter_report.log' for details.", type="warning")
