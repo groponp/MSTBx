@@ -3,11 +3,13 @@ import os
 from mstbx.core.Build.PDBWriter import PDBWriter
 from mstbx.core.Utils.Utils import UnixMessage
 
+from mstbx.core.Utils.Validator import FormatValidator
+
 @click.command(help="Advanced PDB preparation (Fix, Protonate, Edit, SSBOND) and CRD generation.")
 @click.option('--input', '-i', type=click.Path(exists=True, dir_okay=False), help="Input PDB/MMCIF file.")
 @click.option('--pdb', type=click.Path(exists=True, dir_okay=False), help="Input PDB file (alias for --input).")
 @click.option('--psf', type=click.Path(exists=True, dir_okay=False), help="Input PSF file (optional, used for CRD).")
-@click.option('--output', '-o', type=click.Path(dir_okay=False), required=True, help="Output file base or PDB.")
+@click.option('--output', '-o', type=click.Path(dir_okay=False), help="Output file base or PDB.")
 @click.option('--fix', is_flag=True, help="Run PDBFixer to repair missing atoms/residues.")
 @click.option('--internal-only', is_flag=True, default=True, help="If fixing, only repair internal gaps, not terminals.")
 @click.option('--ph', type=float, help="pH for protonation using pdb2pqr.")
@@ -17,13 +19,27 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--renumber', type=int, help="Renumber residues starting from this value.")
 @click.option('--segid', help="Add/Modify segid for all atoms.")
 @click.option('--write-ext-crd', is_flag=True, help="Generate an extended CHARMM-GUI style .crd file.")
-def pdbwriter(input, pdb, psf, output, fix, internal_only, ph, ff_out, ssbond, rename_chain, renumber, segid, write_ext_crd):
+@click.option('--check-mol-format', is_flag=True, help="Validate the input format (PDB, PSF, CRD, MOL2) and exit.")
+def pdbwriter(input, pdb, psf, output, fix, internal_only, ph, ff_out, ssbond, rename_chain, renumber, segid, write_ext_crd, check_mol_format):
     """PDBWriter: Advanced PDB preparation module."""
     uxm = UnixMessage()
     
     input_file = input or pdb
     if not input_file:
         uxm.message(message="Error: --input or --pdb must be provided.", type="error")
+        raise click.Abort()
+
+    if check_mol_format:
+        uxm.message(message=f"Validating format for {input_file}...", type="info")
+        valid, report = FormatValidator.validate(input_file)
+        if valid:
+            uxm.message(message=f"SUCCESS: {report}", type="info")
+        else:
+            uxm.message(message=f"FAILURE: {report}", type="error")
+        return
+
+    if not output:
+        uxm.message(message="Error: --output must be provided.", type="error")
         raise click.Abort()
 
     uxm.message(message=f"Starting PDBWriter for {input_file}", type="info")

@@ -166,6 +166,7 @@ Advanced preparation tool for repairing, annotating, and converting coordinate f
 - `--ph`: Sets target pH for protonation (e.g., `--ph 7.4`).
 - `--ssbond`: Heuristic detection of disulfide bridges.
 - `--write-ext-crd`: Generates an extended CHARMM-GUI style `.crd` file, retaining high-precision coordinates and matching the exact fixed-width column specifications. Requires both `--pdb` and `--psf`.
+- `--check-mol-format`: Validates the integrity of coordinate and topology files (PDB, PSF, CRD, MOL2). This check is also performed internally whenever `pdbwriter` generates an output file.
 
 **Examples:**
 ```bash

@@ -5,6 +5,7 @@ from datetime import datetime
 import MDAnalysis as mda
 from MDAnalysis.core.universe import Merge
 import warnings
+from mstbx.core.Utils.Validator import FormatValidator
 
 # Try importing optional dependencies
 try:
@@ -25,6 +26,15 @@ class PDBWriter:
     def _add_log(self, message):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.log_messages.append(f"[{timestamp}] {message}")
+
+    def _validate_output(self, output_file):
+        """Internal helper to validate written files."""
+        valid, report = FormatValidator.validate(output_file)
+        if not valid:
+            self._add_log(f"WARNING: Internal validation failed for {output_file}: {report}")
+            print(f"[WARNING] Internal validation failed for {output_file}: {report}")
+        else:
+            self._add_log(f"Internal validation success for {output_file}: {report}")
 
     def fix_structure(self, replace_nonstandard=True, add_missing_atoms=True, add_missing_residues=True, fix_only_internal=True):
         if not PDBFIXER_AVAILABLE:
@@ -167,6 +177,7 @@ class PDBWriter:
             f.writelines(final_lines)
         
         self._add_log(f"Final PDB written to: {output_file}")
+        self._validate_output(output_file)
         self.save_log()
 
     def write_ext_crd(self, output_file):
@@ -200,6 +211,7 @@ class PDBWriter:
                 f.write(line)
         
         self._add_log(f"Extended CRD written successfully to {output_file}.")
+        self._validate_output(output_file)
         self.save_log()
 
     def save_log(self):
