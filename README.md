@@ -165,8 +165,8 @@ Advanced preparation tool for repairing, annotating, and converting coordinate f
 - `--fix`: Repairs missing atoms and internal residues.
 - `--ph`: Sets target pH for protonation (e.g., `--ph 7.4`).
 - `--ssbond`: Heuristic detection of disulfide bridges.
-- `--write-ext-crd`: Generates an extended CHARMM-GUI style `.crd` file, retaining high-precision coordinates and matching the exact fixed-width column specifications. Requires both `--pdb` and `--psf`.
-- `--check-mol-format`: Validates the integrity of coordinate and topology files (PDB, PSF, CRD, MOL2). This check is also performed internally whenever `pdbwriter` generates an output file.
+- `--write-ext-crd`: Generates an extended CHARMM-GUI style `.crd` file, retaining high-precision coordinates and matching the exact fixed-width column specifications. Requires both `--input` and `--psf`.
+- `--check-mol-format`: Validates the integrity of coordinate and topology files (PDB, PSF, CRD, MOL2). Use with `--mol`. This check is also performed internally whenever `pdbwriter` generates an output file.
 
 **Examples:**
 ```bash
@@ -174,7 +174,10 @@ Advanced preparation tool for repairing, annotating, and converting coordinate f
 mstbx pdbwriter -i raw.pdb -o refined.pdb --fix --ph 7.4 --ssbond
 
 # Generate an extended CHARMM-GUI compatible CRD file
-mstbx pdbwriter --psf step3_input.psf --pdb step3_input.pdb --write-ext-crd -o step3_input.crd
+mstbx pdbwriter --psf step3_input.psf -i step3_input.pdb --write-ext-crd -o step3_input.crd
+
+# Validate a file format (PDB, PSF, CRD, or MOL2)
+mstbx pdbwriter --mol system.psf --check-mol-format
 ```
 
 ### 6. `resetpsf` - X-PLOR Format Conversion

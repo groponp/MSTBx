@@ -7,7 +7,7 @@ from mstbx.core.Utils.Validator import FormatValidator
 
 @click.command(help="Advanced PDB preparation (Fix, Protonate, Edit, SSBOND) and CRD generation.")
 @click.option('--input', '-i', type=click.Path(exists=True, dir_okay=False), help="Input PDB/MMCIF file.")
-@click.option('--pdb', type=click.Path(exists=True, dir_okay=False), help="Input PDB file (alias for --input).")
+@click.option('--mol', type=click.Path(exists=True, dir_okay=False), help="Input molecule file for validation only (works with --check-mol-format).")
 @click.option('--psf', type=click.Path(exists=True, dir_okay=False), help="Input PSF file (optional, used for CRD).")
 @click.option('--output', '-o', type=click.Path(dir_okay=False), help="Output file base or PDB.")
 @click.option('--fix', is_flag=True, help="Run PDBFixer to repair missing atoms/residues.")
@@ -20,13 +20,17 @@ from mstbx.core.Utils.Validator import FormatValidator
 @click.option('--segid', help="Add/Modify segid for all atoms.")
 @click.option('--write-ext-crd', is_flag=True, help="Generate an extended CHARMM-GUI style .crd file.")
 @click.option('--check-mol-format', is_flag=True, help="Validate the input format (PDB, PSF, CRD, MOL2) and exit.")
-def pdbwriter(input, pdb, psf, output, fix, internal_only, ph, ff_out, ssbond, rename_chain, renumber, segid, write_ext_crd, check_mol_format):
+def pdbwriter(input, mol, psf, output, fix, internal_only, ph, ff_out, ssbond, rename_chain, renumber, segid, write_ext_crd, check_mol_format):
     """PDBWriter: Advanced PDB preparation module."""
     uxm = UnixMessage()
     
-    input_file = input or pdb
+    if mol and not check_mol_format:
+        uxm.message(message="Error: --mol option can ONLY be used with --check-mol-format flag.", type="error")
+        raise click.Abort()
+
+    input_file = input or mol
     if not input_file:
-        uxm.message(message="Error: --input or --pdb must be provided.", type="error")
+        uxm.message(message="Error: --input (-i) or --mol must be provided.", type="error")
         raise click.Abort()
 
     if check_mol_format:
