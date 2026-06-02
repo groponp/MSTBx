@@ -155,26 +155,31 @@ mstbx metad-inputs --psf complex.psf \
 ```
 *Logic*: Configures a distance CV between segments A and B. MSTBx generates the `colvars.in` file automatically, setting up the Well-Tempered deposition frequency and Gaussian parameters for a 500 ns run.
 
-### 5. `pdbwriter` - Structure Refinement
+### 5. `pdbwriter` - Structure Refinement and CRD Generation
 
 <p align="justify">
-Advanced preparation tool for repairing and annotating PDB files. It integrates PDBFixer for gap filling and PDB2PQR for protonation.
+Advanced preparation tool for repairing, annotating, and converting coordinate files. It integrates PDBFixer for gap filling, PDB2PQR for protonation, and can generate highly compatible CHARMM-GUI extended `.crd` files.
 </p>
 
 **Capabilities:**
 - `--fix`: Repairs missing atoms and internal residues.
 - `--ph`: Sets target pH for protonation (e.g., `--ph 7.4`).
 - `--ssbond`: Heuristic detection of disulfide bridges.
+- `--write-ext-crd`: Generates an extended CHARMM-GUI style `.crd` file, retaining high-precision coordinates and matching the exact fixed-width column specifications. Requires both `--pdb` and `--psf`.
 
-**Example:**
+**Examples:**
 ```bash
+# Refine and fix a PDB file
 mstbx pdbwriter -i raw.pdb -o refined.pdb --fix --ph 7.4 --ssbond
+
+# Generate an extended CHARMM-GUI compatible CRD file
+mstbx pdbwriter --psf step3_input.psf --pdb step3_input.pdb --write-ext-crd -o step3_input.crd
 ```
 
 ### 6. `resetpsf` - X-PLOR Format Conversion
 
 <p align="justify">
-Essential for systems with complex patches (glycans, virtual atoms, or CMAP) that require the X-PLOR PSF format.
+Essential for systems with complex patches (glycans, virtual atoms, or CMAP) that require the X-PLOR PSF format. It safely converts standard CHARMM-GUI structures while preserving system integrity. The module automatically parses and verifies that the `!NATOM` counts perfectly match the input architecture to prevent silent data loss during VMD translations.
 </p>
 
 **Example:**
