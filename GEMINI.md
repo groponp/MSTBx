@@ -1,4 +1,4 @@
-# MSTBx : Molecular Simulation ToolBox (v0.8.9-beta)
+# MSTBx : Molecular Simulation ToolBox (v0.8.10-beta)
 
 MSTBx is a modular Python-based ecosystem designed to streamline the preparation, configuration, and translation of Molecular Dynamics (MD) simulations. It leverages the power of **VMD**, **PSFGen**, and **MDAnalysis** to handle systems from small molecules to large-scale complexes (millions of atoms).
 
@@ -21,6 +21,7 @@ MSTBx is a modular Python-based ecosystem designed to streamline the preparation
 *   **`md-translate`**: Translates coordinates/trajectories between simulation engines.
 *   **`colabfold`**: Interface for AI structure prediction via Apptainer.
 *   **`mkdocking-cmplx`**: Assembles protein-ligand complexes from docking poses.
+*   **`openmm-run`**: Strict Manual OpenMM Runner that executes simulations using CHARMM force fields and restraints.
 
 ## Development Standards
 
