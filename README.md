@@ -1,4 +1,4 @@
-# MSTBx: Molecular Simulation ToolBox (v0.8.9-beta)
+# MSTBx: Molecular Simulation ToolBox (v0.8.10-beta)
 
 <p align="center">
   <img src="logo.png" width="400" alt="MSTBx Logo">
@@ -206,6 +206,207 @@ mstbx md-translate --psf system.psf \
                    --target gromacs
 ```
 
+### 8. `openmm-run` - Strict Manual OpenMM Runner
+
+<p align="justify">
+A unified simulation runner designed for OpenMM engine workflows using CHARMM-style force fields and restraints. It reads standard CHARMM-GUI inputs, automatically generates required templates, handles high-precision restart checkpoints, and includes smart centering and coordinate rewrapping logic.
+</p>
+
+**Key Options:**
+- `-i`, `--inp`: Input file (.inp).
+- `-p`, `--psf`: Topology file (.psf).
+- `-c`, `--pdb`: Coordinates file (.pdb).
+- `--mk-inp`: Generates default input templates (`min.inp`, `eq1.inp`, `prod.inp`) and exits.
+- `-irst`, `--irst`: Input restart file (.rst).
+- `-orst`, `--orst`: Output prefix (default: `output`).
+- `--toppar`: Path to parameter files directory (default: `toppar/`).
+- `--pbc`: Path to PBC .str setup file (default: `01build/step3_pbcsetup.str`).
+- `--platform`: Force platform (e.g. `CUDA`, `OpenCL`, `CPU`).
+- `--ns`: Override duration in nanoseconds.
+- `--rewrap`: Centering/rewrapping coordinates based on bonds topology.
+
+**Example:**
+```bash
+# Generate templates, then run 10 ns of production dynamics with rewrapping
+mstbx openmm-run -i 04prod/prod.inp -p system.psf -c system.pdb -irst 03eq2/eq2.rst -orst 04prod/prod --ns 10.0 --rewrap
+```
+
+---
+
+## 📚 Complete Step-by-Step Examples & Minitutorials
+
+Navigate directly to each workflow tutorial using the hyperlinks below:
+- [1. Ubiquitin in Solution](#1-ubiquitin-in-solution)
+- [2. Protein-Ligand Complex (BAAT)](#2-protein-ligand-complex-baat)
+- [3. Aquaporin Tetramer in POPC Membrane](#3-aquaporin-tetramer-in-popc-membrane)
+- [4. Steered Molecular Dynamics (SMD) Pulling](#4-steered-molecular-dynamics-smd-pulling)
+- [5. Glycosylated Protein Simulation (1OAN Dimer)](#5-glycosylated-protein-simulation-1oan-dimer)
+- [6. Automated OpenMM Runner Pipeline (Chignolin)](#6-automated-openmm-runner-pipeline-chignolin)
+
+---
+
+### 1. Ubiquitin in Solution
+A complete workflow starting from standard CHARMM-GUI PDBReader outputs to assemble and generate NAMD protocols for a protein in water.
+
+1. **Workspace Setup**: Create a folder named `ubiquitin` and place `step1_pdbreader.pdb` and `step1_pdbreader.psf` inside.
+2. **System Assembly**: Solvate the protein and add 0.150 M NaCl salt with an 18 Å padding:
+   ```bash
+   mstbx topopsfgen --env solution \
+                    --psf step1_pdbreader.psf \
+                    --pdb step1_pdbreader.pdb \
+                    --salt 0.150 \
+                    --padding 18.0 \
+                    --ofile ubq
+   ```
+3. **Protocol Generation**: Generate standard NAMD simulation configuration files for 100 ns at 310 K:
+   ```bash
+   mstbx md-inputs --engine namd \
+                   --env solution \
+                   --psf 01build/ubq.psf \
+                   --pdb 01build/ubq.pdb \
+                   --temperature 310 \
+                   --mdtime 100
+   ```
+
+---
+
+### 2. Protein-Ligand Complex (BAAT)
+Configure molecular dynamics for a protein bound to a small molecule ligand, incorporating external parameter files.
+
+1. **Workspace Setup**: Create a folder named `baat` and gather complex files `step1_pdbreader.pdb`, `step1_pdbreader.psf`, and the ligand parameter stream/parameter file `tyl.prm`.
+2. **System Assembly**: Solvate and ionize the complex system:
+   ```bash
+   mstbx topopsfgen --env solution \
+                    --psf step1_pdbreader.psf \
+                    --pdb step1_pdbreader.pdb \
+                    --salt 0.150 \
+                    --ofile baat
+   ```
+3. **Protocol Generation**: Generate NAMD configurations, specifying the path to the ligand parameters (`--lparm`):
+   ```bash
+   mstbx md-inputs --engine namd \
+                   --env solution \
+                   --psf 01build/baat.psf \
+                   --pdb 01build/baat.pdb \
+                   --lparm tyl.prm \
+                   --temperature 310 \
+                   --mdtime 100
+   ```
+
+---
+
+### 3. Aquaporin Tetramer in POPC Membrane
+Build and simulate a large membrane protein system using CHARMM-GUI Membrane Builder inputs.
+
+1. **Workspace Setup**: Create a folder named `aqp` and extract your membrane builder coordinates/topology (`step4_lipid.psf` and `step4_lipid.pdb`).
+2. **System Assembly**: Assemble the system with lipids and correct water/ion buffers:
+   ```bash
+   mstbx topopsfgen --env membrane \
+                    --psf step4_lipid.psf \
+                    --pdb step4_lipid.pdb \
+                    --salt 0.150 \
+                    --ofile aqp
+   ```
+3. **Protocol Generation**: Generate membrane-specific NAMD equilibration and production inputs:
+   ```bash
+   mstbx md-inputs --engine namd \
+                   --env membrane \
+                   --psf 01build/aqp.psf \
+                   --pdb 01build/aqp.pdb \
+                   --temperature 310 \
+                   --mdtime 100
+   ```
+
+---
+
+### 4. Steered Molecular Dynamics (SMD) Pulling
+Assemble and configure pulling simulations to pull a ligand out of a binding pocket along the Z axis.
+
+1. **System Assembly**: Solvate the system while adding extra space along the pulling direction (Z axis):
+   ```bash
+   mstbx topopsfgen --env smd \
+                    --psf complex.psf \
+                    --pdb complex.pdb \
+                    --atoms-pull "resname LIG" \
+                    --atoms-anchor "protein and backbone" \
+                    --extra-space 50 \
+                    --ofile smd_sys
+   ```
+2. **Protocol Generation**: Configure the pulling velocity (e.g. 5 Å/ns) and anchors:
+   ```bash
+   mstbx smd-inputs --psf 01build/smd_sys.psf \
+                    --pdb 01build/smd_sys.pdb \
+                    --selpull "resname LIG" \
+                    --selanchor "protein and backbone" \
+                    --target-center 50.0 \
+                    --velocity 5.0
+   ```
+
+---
+
+### 5. Glycosylated Protein Simulation (1OAN Dimer)
+A robust workflow to handle glycosylated systems requiring virtual bonds and X-PLOR format conversions.
+
+1. **System Assembly**: Assemble the solvated glycosylated protein system:
+   ```bash
+   mstbx topopsfgen --env solution \
+                    --psf step1.psf \
+                    --pdb step1.pdb \
+                    --salt 0.150 \
+                    --ofile glyc_sys
+   ```
+2. **PSF Reset**: Convert the topology to X-PLOR format to support glycan virtual bonds:
+   ```bash
+   mstbx resetpsf --psf 01build/glyc_sys.psf \
+                  --pdb 01build/glyc_sys.pdb \
+                  --output final_glyc
+   ```
+3. **Protocol Generation**: Generate the simulation inputs for the converted structure:
+   ```bash
+   mstbx md-inputs --engine namd \
+                   --env solution \
+                   --psf final_glyc.psf \
+                   --pdb final_glyc.pdb
+   ```
+
+---
+
+### 6. Automated OpenMM Runner Pipeline (Chignolin)
+A complete step-by-step example using `openmm-run` to execute minimization, multi-stage equilibration, and microsecond-scale production.
+
+1. **System Assembly & Prep**: Place your topology and coordinates files (e.g., `01build/mol_chignolin.psf` and `01build/mol_chignolin.pdb`) in the workspace.
+2. **Generate Templates**: Automatically generate the input protocol configuration files (`eq1.inp`, `eq2.inp`, `prod.inp`):
+   ```bash
+   mstbx openmm-run --mk-inp
+   ```
+3. **Unified Equilibration (Step 1)**: Run minimization and NVT equilibration (2 ns) using the generated `02eq1/eq1.inp`:
+   ```bash
+   mstbx openmm-run -i 02eq1/eq1.inp \
+                    -p 01build/mol_chignolin.psf \
+                    -c 01build/mol_chignolin.pdb \
+                    -orst 02eq1/eq1 \
+                    --ns 2.0
+   ```
+4. **NPT Pressurization (Step 2)**: Continue the simulation to run NPT equilibration (5 ns), passing the restart file (`02eq1/eq1.rst`):
+   ```bash
+   mstbx openmm-run -i 03eq2/eq2.inp \
+                    -p 01build/mol_chignolin.psf \
+                    -c 01build/mol_chignolin.pdb \
+                    -irst 02eq1/eq1.rst \
+                    -orst 03eq2/eq2 \
+                    --ns 5.0
+   ```
+5. **NPT Production Run (Step 3)**: Continue to production dynamics (1000 ns / 1 μs) with automatic coordinate rewrapping enabled:
+   ```bash
+   mstbx openmm-run -i 04prod/prod.inp \
+                    -p 01build/mol_chignolin.psf \
+                    -c 01build/mol_chignolin.pdb \
+                    -irst 03eq2/eq2.rst \
+                    -orst 04prod/prod \
+                    --ns 1000.0 \
+                    --rewrap
+   ```
+
 ---
 
 ## Development Standards
@@ -215,6 +416,7 @@ MSTBx follows strict internal standards to ensure reliability:
 - <b>Logging</b>: All output is timestamped: `[LEVEL HH:MM:SS DD/MM/YYYY]`.
 - <b>Naming</b>: Consistent flags across all modules (`--env`, `--engine`, `--psf`, `--pdb`).
 - <b>Safety</b>: Automated box symmetry checks to prevent periodic boundary condition artifacts.
+- <b>Local Development Skill</b>: Standards are checked locally by the `mstbx-development` skill.
 </p>
 
 ## Author
