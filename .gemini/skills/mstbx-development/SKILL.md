@@ -44,3 +44,8 @@ Whenever a new command or tool is added to MSTBx:
 *   Every time a new version is released/updated:
     *   Ensure a `CHANGELOG.md` file exists in the repository root.
     *   Create a dedicated section/release entry inside `CHANGELOG.md` detailing the version number, date, and lists of "Added", "Changed", "Deprecated", "Removed", "Fixed", and "Security" changes.
+
+## 6. Testing and Command Order Validation
+*   Before committing code, finalizing workflows, or updating tutorials, you MUST execute a validation test inside the `testing/` directory.
+*   Use the corresponding testing subdirectories (e.g., `testing/ubiquitin/`, `testing/1oan-pH7-resetpsf/`, `testing/aqp/`, `testing/baat/`, `testing/openmm-runner/`) and the PDBs/PSFs provided there to run the command sequences and verify they function correctly.
+*   Always check the exact command order to verify that files are correctly produced and read (for example, verifying that `resetpsf` is executed prior to `topopsfgen` for glycosylated systems).

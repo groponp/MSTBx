@@ -17,7 +17,7 @@ MSTBx is a modular Python-based ecosystem designed to streamline the preparation
 *   **`smd-inputs`**: Generates velocity-based pulling protocols aligned to Z-axis.
 *   **`metad-inputs`**: Generates Well-Tempered Metadynamics protocols.
 *   **`pdbwriter`**: Advanced PDB repair (internal gaps only), S-S bond detection, protonation, and extended CRD generation. Includes a robust validation suite for PDB, PSF, CRD, and MOL2 formats via `--check-mol-format`.
-*   **`resetpsf`**: Converts structures to X-PLOR format (required for glycans/virtual bonds).
+*   **`resetpsf`**: Converts structures to X-PLOR format (required for glycans).
 *   **`md-translate`**: Translates coordinates/trajectories between simulation engines.
 *   **`colabfold`**: Interface for AI structure prediction via Apptainer.
 *   **`mkdocking-cmplx`**: Assembles protein-ligand complexes from docking poses.
