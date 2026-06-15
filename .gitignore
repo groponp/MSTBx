@@ -8,3 +8,4 @@ dist/
 /build/
 *.pyc
 old.code/
+.gemini/
