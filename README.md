@@ -409,6 +409,27 @@ A complete step-by-step example using `openmm-run` to execute minimization, mult
 
 ---
 
+## 🔄 Version History
+
+Track key updates and features added in each version of MSTBx compared to previous releases:
+
+*   **`v0.8.10-beta` (Current Version)**:
+    *   **OpenMM Integration**: Implemented the `openmm-run` command to run strict manual OpenMM runner simulations locally.
+    *   **Tutorial Overhaul**: Added full step-by-step minitutorials in `README.md` with interactive anchor hyperlinks.
+    *   **Testing Relocation**: Moved the `testing/` directory to `mstbx/testing/` to package all development validation assets inside the module.
+    *   **Local Skills**: Created local `.gemini/` development skills to enforce code quality and version history updates.
+*   **`v0.8.9-beta`**:
+    *   **PDBWriter Refactoring**: Renamed `--pdb` to `--mol` and enforced strict formatting/validation rules.
+    *   **Format Validation**: Added `--check-mol-format` to support validation of PDB, PSF, CRD, and MOL2 file structures.
+    *   **CRD Extended Support**: Added extended CHARMM-GUI CRD generation support.
+*   **`v0.8.5-beta`**:
+    *   **Runner Script**: Added automatic `runner.sh` script generation to execute multi-stage equilibration and MD production steps in NAMD.
+    *   **Standardized Logging**: Enforced strict timestamped logging across all commands.
+*   **`v0.5.0-beta` (Legacy)**:
+    *   Added first protein-ligand complex assembly pipelines (`mkdocking-cmplx`) and metadynamics protocol files creator.
+
+---
+
 ## Development Standards
 
 <p align="justify">
