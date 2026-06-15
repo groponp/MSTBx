@@ -345,28 +345,28 @@ Assemble and configure pulling simulations to pull a ligand out of a binding poc
 ---
 
 ### 5. Glycosylated Protein Simulation (1OAN Dimer)
-A robust workflow to handle glycosylated systems requiring virtual bonds and X-PLOR format conversions.
+A robust workflow to handle glycosylated systems by converting topology/coordinates first before system assembly.
 
-1. **System Assembly**: Assemble the solvated glycosylated protein system:
+1. **PSF Reset**: Convert the raw initial structures (e.g. `step1_pdbreader` from CHARMM-GUI) to X-PLOR format to support glycan structures:
+   ```bash
+   mstbx resetpsf --psf step1_pdbreader.psf \
+                  --pdb step1_pdbreader.pdb \
+                  --output reset
+   ```
+2. **System Assembly**: Solvate and ionize the reset structures using `topopsfgen`:
    ```bash
    mstbx topopsfgen --env solution \
-                    --psf step1.psf \
-                    --pdb step1.pdb \
+                    --psf reset.psf \
+                    --pdb reset.pdb \
                     --salt 0.150 \
-                    --ofile glyc_sys
+                    --ofile mol
    ```
-2. **PSF Reset**: Convert the topology to X-PLOR format to support glycan virtual bonds:
-   ```bash
-   mstbx resetpsf --psf 01build/glyc_sys.psf \
-                  --pdb 01build/glyc_sys.pdb \
-                  --output final_glyc
-   ```
-3. **Protocol Generation**: Generate the simulation inputs for the converted structure:
+3. **Protocol Generation**: Generate the simulation configuration files for the solvated system:
    ```bash
    mstbx md-inputs --engine namd \
                    --env solution \
-                   --psf final_glyc.psf \
-                   --pdb final_glyc.pdb
+                   --psf 01build/mol.psf \
+                   --pdb 01build/mol.pdb
    ```
 
 ---
