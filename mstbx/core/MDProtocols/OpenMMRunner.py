@@ -25,7 +25,7 @@ class FlushFile(object):
         self.fd.flush()
     def flush(self):
         self.fd.flush()
-    def getattr(self, name):
+    def __getattr__(self, name):
         return getattr(self.fd, name)
 
 sys.stdout = FlushFile(sys.stdout)
