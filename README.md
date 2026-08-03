@@ -607,9 +607,8 @@ A complete GROMACS workflow for a protein-ligand system. MSTBx prepares the file
    ```bash
    cd mstbx/testing/gromacs-2oi0
    mkdir -p work/cgenff_inputs_2oi0
-   curl -L https://files.rcsb.org/download/2OI0.pdb -o work/cgenff_inputs_2oi0/2oi0.pdb
    mstbx pdbwriter --prepare-cgenff-inputs \
-     --input work/cgenff_inputs_2oi0/2oi0.pdb \
+     --pdb-id 2OI0 \
      --select-chains A \
      --pdb-ligand-resname 283 \
      --pdb-ligand-chain A \

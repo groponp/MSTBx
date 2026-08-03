@@ -24,9 +24,8 @@ The example uses PDB entry 2OI0, chain A, and ligand residue `283`:
 
 ```bash
 mkdir -p work/cgenff_inputs_2oi0
-curl -L https://files.rcsb.org/download/2OI0.pdb -o work/cgenff_inputs_2oi0/2oi0.pdb
 mstbx pdbwriter --prepare-cgenff-inputs \
-  --input work/cgenff_inputs_2oi0/2oi0.pdb \
+  --pdb-id 2OI0 \
   --select-chains A \
   --pdb-ligand-resname 283 \
   --pdb-ligand-chain A \
@@ -42,19 +41,6 @@ protein_prepared.pdb
 ligand_pose.pdb
 ligand_for_cgenff.mol2
 cgenff_inputs_log.json
-```
-
-When working from this repository, the downloaded PDB can be replaced by the validation copy:
-
-```bash
-mstbx pdbwriter --prepare-cgenff-inputs \
-  --input ../../../staging/gromacs_prepare/gmxpy_snapshot/2OI0/cgenff_inputs_2oi0/2oi0.pdb \
-  --select-chains A \
-  --pdb-ligand-resname 283 \
-  --pdb-ligand-chain A \
-  --output work/cgenff_inputs_2oi0 \
-  --ligand-pH 7.4 \
-  --overwrite
 ```
 
 ## 3. Submit the ligand manually to CGenFF Web

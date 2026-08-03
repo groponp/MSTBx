@@ -4,13 +4,12 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PYTHON="${PYTHON:-python}"
-SOURCE="${SOURCE:-$ROOT/staging/gromacs_prepare/gmxpy_snapshot/2OI0/cgenff_inputs_2oi0/2oi0.pdb}"
 OUTPUT="${OUTPUT:-$HERE/work/cgenff_inputs_2oi0}"
 
 cd "$HERE"
 "$PYTHON" -m mstbx.cli pdbwriter \
   --prepare-cgenff-inputs \
-  --input "$SOURCE" \
+  --pdb-id 2OI0 \
   --select-chains A \
   --pdb-ligand-resname 283 \
   --pdb-ligand-chain A \

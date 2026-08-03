@@ -57,3 +57,14 @@ def test_main_readme_has_clickable_gromacs_tutorials_seven_and_eight():
     assert "### 7. GROMACS Protein-Only" in readme
     assert "### 8. GROMACS Protein-Ligand with CGenFF" in readme
     assert readme.index("### 7. GROMACS Protein-Only") < readme.index("### 8. GROMACS Protein-Ligand with CGenFF")
+
+
+def test_cgenff_tutorial_delegates_rcsb_download_to_pdbwriter():
+    """CGenFF preparation uses pdbwriter's --pdb-id download path once."""
+    readme = (ROOT / "mstbx/testing/gromacs-2oi0/README.md").read_text()
+    script = (ROOT / "mstbx/testing/gromacs-2oi0/PrepareCGenFFInputs.sh").read_text()
+
+    assert "--pdb-id 2OI0" in readme
+    assert "--pdb-id 2OI0" in script
+    assert "curl -L" not in readme
+    assert "curl -L" not in script
