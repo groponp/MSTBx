@@ -15,6 +15,8 @@ All notable changes to this project will be documented in this file.
 - Removed workflow-specific logging instructions from the README; logging
   remains an automatic runtime behavior, and README documentation is explicitly
   required to use English.
+- Added a dedicated PDBWriter command matrix covering valid operation combinations,
+  CRD-only output, CGenFF preparation, and invalid option combinations.
 - Added MDAnalysis atom selection to `pdbwriter`, including `--pdb-id`
   download followed by selection while preserving selected HETATM records.
 - Unified session logging across CLI tools, PDBWriter, and OpenMM with the

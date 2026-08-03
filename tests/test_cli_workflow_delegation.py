@@ -185,3 +185,96 @@ def test_openmm_mk_inp_dispatches_generator(monkeypatch):
 
     assert result.exit_code == 0, result.output
     assert called == [True]
+
+
+def test_topogmx_forwards_protein_only_and_ligand_combinations(tmp_path, monkeypatch):
+    """The topology command builds both supported input modes."""
+    protein = tmp_path / "protein.pdb"
+    mol2 = tmp_path / "ligand.mol2"
+    string = tmp_path / "ligand.str"
+    protein.write_text("END\n")
+    mol2.write_text("MOL2\n")
+    string.write_text("RESI LIG 0.0\n")
+    import mstbx.commands.topogmx as command
+
+    seen = []
+
+    class FakeBuilder:
+        def __init__(self, config):
+            seen.append(config)
+
+        def build_system(self):
+            return None
+
+    monkeypatch.setattr(command, "GromacsBuilder", FakeBuilder)
+    runner = CliRunner()
+    protein_only = runner.invoke(
+        cli,
+        ["topogmx", "--protein", str(protein), "--output-dir", str(tmp_path / "protein")],
+    )
+    with_ligand = runner.invoke(
+        cli,
+        ["topogmx", "--protein", str(protein), "--ligand-mol2", str(mol2), "--ligand-str", str(string),
+         "--ligand-resname", "LIG", "--pdb2gmx-protonation", "--output-dir", str(tmp_path / "ligand")],
+    )
+
+    assert protein_only.exit_code == 0, protein_only.output
+    assert with_ligand.exit_code == 0, with_ligand.output
+    assert seen[0].ligand_mol2 is None
+    assert seen[1].ligand_mol2 == mol2
+    assert seen[1].ligand_str == string
+    assert seen[1].pdb2gmx_protonation is True
+
+
+def test_md_inputs_gromacs_forwards_defaults_and_custom_selections(tmp_path, monkeypatch):
+    """The GROMACS branch forwards natural selections and custom restraint force."""
+    import mstbx.commands.md_inputs as command
+
+    calls = []
+
+    class FakeProtocol:
+        def __init__(self, config):
+            calls.append(("protocol", config))
+
+        def write_all(self):
+            calls.append(("protocol_write", None))
+
+    class FakeIndex:
+        def __init__(self, runs, groups):
+            calls.append(("index", runs, groups))
+
+        def write_all(self):
+            calls.append(("index_write", None))
+
+    class FakeRestraints:
+        def __init__(self, config):
+            calls.append(("restraint", config))
+
+        def apply_all(self):
+            calls.append(("restraint_apply", None))
+            return 10, 5
+
+    class FakeRunner:
+        def __init__(self, runs, gmx):
+            calls.append(("runner", runs, gmx))
+
+        def write_all(self):
+            calls.append(("runner_write", None))
+
+    monkeypatch.setattr(command, "GromacsProtocol", FakeProtocol)
+    monkeypatch.setattr(command, "GromacsIndex", FakeIndex)
+    monkeypatch.setattr(command, "GromacsRestraints", FakeRestraints)
+    monkeypatch.setattr(command, "GromacsRunner", FakeRunner)
+    result = CliRunner().invoke(
+        cli,
+        ["md-inputs", "--engine", "gromacs", "--env", "solution", "--runs-dir", str(tmp_path / "runs"),
+         "--select-group-index-1", "protein or resname LIG", "--select-group-index-2", "not (protein or resname LIG)",
+         "--select-atoms-to-restraint", "protein and backbone or resname LIG and not name H*", "--force", "2092", "--gmx", "gmx"],
+    )
+
+    assert result.exit_code == 0, result.output
+    restraint = next(item[1] for item in calls if item[0] == "restraint")
+    assert restraint.force == 2092
+    groups = next(item[2] for item in calls if item[0] == "index")
+    assert groups[0].selection == "protein or resname LIG"
+    assert groups[1].selection == "not (protein or resname LIG)"
