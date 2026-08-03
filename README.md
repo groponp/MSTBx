@@ -104,6 +104,94 @@ mstbx md-inputs --engine namd \
 ```
 *Logic*: Generates a NAMD protocol for a protein-ligand system. Note the use of `--lparm` to include the specific ligand parameter file (`tyl.prm`). The output includes a step-by-step pipeline (Minimization -> NVT -> NPT -> Production).
 
+### 2b. `gmx-build` and `gmx-inputs` - GROMACS CHARMM/CGenFF Workflow
+
+<p align="justify">
+These commands prepare GROMACS systems while preserving the same MSTBx directory nomenclature used by the NAMD solution workflow: `01build`, `02nvt`, `03npt`, `04md`, `restraints`, and `toppar`. The minimization MDP is written inside `01build` so the stage layout remains consistent across engines.
+</p>
+
+**Generated layout per replica:**
+```text
+rep1/
+  01build/      # topology, coordinates, ionized.gro, em.mdp, index.ndx
+  02nvt/        # nvt.mdp
+  03npt/        # npt.mdp
+  04md/         # md.mdp
+  restraints/   # copied position-restraint files
+  toppar/       # copied ligand topology/parameters when present
+  run_all.sh    # complete GROMACS execution script
+```
+
+**Important defaults:**
+- `--box-distance`: 1.8 nm.
+- `--ligand-resname`: `LIG`.
+- EM minimization: 50,000 steps.
+- NVT: 5 ns at 2 fs.
+- NPT: 5 ns at 2 fs.
+- Production: 100 ns by default.
+- XTC writing frequency: 50 ps.
+- Default restraint force: 2092 kJ mol-1 nm-2, equivalent to 5 kcal mol-1 A-2.
+- Default restrained atoms: protein backbone heavy atoms plus ligand heavy atoms.
+- Default CHARMM/CGenFF force field: packaged `charmm36-feb2026_cgenff-5.0.ff`.
+- Default CGenFF converter: packaged `cgenff_charmm2gmx_py3.py`.
+
+**Protein-only example:**
+```bash
+mstbx gmx-build \
+  --protein protein_prepared.pdb \
+  --output-dir runs \
+  --replicas 3 \
+  --box-distance 1.8 \
+  --pdb2gmx-ter \
+  --pdb2gmx-selection $'1\n1\n' \
+  --gmx gmx
+
+mstbx gmx-inputs \
+  --runs-dir runs \
+  --replicas 3 \
+  --name-group-index-1 Protein_ligand \
+  --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
+  --name-group-index-2 Water_and_ions \
+  --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN" \
+  --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN or resname LIG and not name H*" \
+  --gmx gmx
+```
+
+**Protein-ligand CGenFF example:**
+```bash
+mstbx gmx-build \
+  --protein cgenff_inputs_2oi0/protein_prepared.pdb \
+  --ligand-mol2 cgenff_inputs_2oi0/ligand_for_cgenff.mol2 \
+  --ligand-str cgenff_inputs_2oi0/ligand_for_cgenff.str \
+  --ligand-resname LIG \
+  --output-dir runs \
+  --replicas 3 \
+  --box-distance 1.8 \
+  --pdb2gmx-ter \
+  --pdb2gmx-selection $'1\n1\n' \
+  --gmx gmx \
+  --overwrite
+
+mstbx gmx-inputs \
+  --runs-dir runs \
+  --replicas 3 \
+  --temperature 310 \
+  --mdtime 100 \
+  --xtc-frequency 50 \
+  --name-group-index-1 Protein_ligand \
+  --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
+  --name-group-index-2 Water_and_ions \
+  --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN" \
+  --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN or resname LIG and not name H*" \
+  --gmx gmx
+```
+
+To run a prepared replica later:
+```bash
+cd runs/rep1
+./run_all.sh
+```
+
 ### 3. `smd-inputs` - Steered Molecular Dynamics
 
 <p align="justify">
@@ -162,8 +250,12 @@ Advanced preparation tool for repairing, annotating, and converting coordinate f
 </p>
 
 **Capabilities:**
-- `--fix`: Repairs missing atoms and internal residues.
-- `--ph`: Sets target pH for protonation (e.g., `--ph 7.4`).
+- `--fix-structure`: Repairs missing atoms and internal residues.
+- `--fix-keep-hetatoms`: Keeps waters, ions, ligands, and other HETATM records during structure repair.
+- `--fix-add-hydrogens`: Adds hydrogens during structure repair using `--pH`; by default repair stays heavy-atom-only.
+- `--pH`: Sets target pH for protonation (e.g., `--pH 7.4`).
+- `--prepare-cgenff-inputs`: Prepares `protein_prepared.pdb`, `ligand_pose.pdb`, and `ligand_for_cgenff.mol2` for manual CGenFF Web upload.
+- `--ligand-pH`: Sets ligand pH for Open Babel when preparing CGenFF inputs (Default: 7.4).
 - `--ssbond`: Heuristic detection of disulfide bridges.
 - `--write-ext-crd`: Generates an extended CHARMM-GUI style `.crd` file, retaining high-precision coordinates and matching the exact fixed-width column specifications. Requires both `--input` and `--psf`.
 - `--check-mol-format`: Validates the integrity of coordinate and topology files (PDB, PSF, CRD, MOL2). Use with `--mol`. This check is also performed internally whenever `pdbwriter` generates an output file.
@@ -171,7 +263,28 @@ Advanced preparation tool for repairing, annotating, and converting coordinate f
 **Examples:**
 ```bash
 # Refine and fix a PDB file
-mstbx pdbwriter -i raw.pdb -o refined.pdb --fix --ph 7.4 --ssbond
+mstbx pdbwriter -i raw.pdb -o refined.pdb --fix-structure --pH 7.4 --ssbond
+
+# Fix while preserving heteroatoms
+mstbx pdbwriter -i raw.pdb -o refined_with_hetatm.pdb \
+                --fix-structure \
+                --fix-keep-hetatoms
+
+# Fix directly from the official RCSB entry, keeping only chain A
+mstbx pdbwriter --fix-structure \
+                --pdb-id 1UBQ \
+                --select-chains A \
+                -o 1ubq_fixed.pdb
+
+# Prepare protein and ligand MOL2 for manual CGenFF Web upload
+mstbx pdbwriter --prepare-cgenff-inputs \
+                --pdb-id 2OI0 \
+                --select-chains A \
+                --pdb-ligand-resname 444 \
+                --pdb-ligand-chain A \
+                --output cgenff_inputs_2oi0 \
+                --ligand-pH 7.4 \
+                --overwrite
 
 # Generate an extended CHARMM-GUI compatible CRD file
 mstbx pdbwriter --psf step3_input.psf -i step3_input.pdb --write-ext-crd -o step3_input.crd
@@ -242,6 +355,7 @@ Navigate directly to each workflow tutorial using the hyperlinks below:
 - [4. Steered Molecular Dynamics (SMD) Pulling](#4-steered-molecular-dynamics-smd-pulling)
 - [5. Glycosylated Protein Simulation (1OAN Dimer)](#5-glycosylated-protein-simulation-1oan-dimer)
 - [6. Automated OpenMM Runner Pipeline (Chignolin)](#6-automated-openmm-runner-pipeline-chignolin)
+- [7. GROMACS CHARMM/CGenFF Layout](#7-gromacs-charmmcgenff-layout)
 
 ---
 
@@ -409,11 +523,51 @@ A complete step-by-step example using `openmm-run` to execute minimization, mult
 
 ---
 
+### 7. GROMACS CHARMM/CGenFF Layout
+A GROMACS workflow that keeps the same solution-system directory names used by the NAMD protocol.
+
+1. **Build the system once**: Create `rep1/01build`, solvate, ionize, and copy the same built system to the requested replicas:
+   ```bash
+   mstbx gmx-build \
+     --protein protein_prepared.pdb \
+     --ligand-mol2 ligand_for_cgenff.mol2 \
+     --ligand-str ligand_for_cgenff.str \
+     --ligand-resname LIG \
+     --output-dir runs \
+     --replicas 3 \
+     --box-distance 1.8 \
+     --pdb2gmx-ter \
+     --pdb2gmx-selection $'1\n1\n'
+   ```
+2. **Write protocols, index, restraints, and runners**:
+   ```bash
+   mstbx gmx-inputs \
+     --runs-dir runs \
+     --replicas 3 \
+     --temperature 310 \
+     --mdtime 100 \
+     --xtc-frequency 50 \
+     --name-group-index-1 Protein_ligand \
+     --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
+     --name-group-index-2 Water_and_ions \
+     --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN"
+   ```
+3. **Submit or run each replica**:
+   ```bash
+   cd runs/rep1
+   ./run_all.sh
+   ```
+
+Use `--pdb2gmx-protonation` only when explicit HIS/ASP/GLU/LYS/ARG protonation choices are required. Otherwise, `pdb2gmx` uses its force-field defaults.
+
+---
+
 ## 🔄 Version History
 
 Track key updates and features added in each version of MSTBx compared to previous releases:
 
 *   **`v0.8.10-beta` (Current Version)**:
+    *   **GROMACS CHARMM/CGenFF Workflow**: Added `gmx-build` and `gmx-inputs` with the MSTBx/NAMD-style layout (`01build`, `02nvt`, `03npt`, `04md`, `restraints`, `toppar`).
     *   **OpenMM Integration**: Implemented the `openmm-run` command to run strict manual OpenMM runner simulations locally.
     *   **Tutorial Overhaul**: Added full step-by-step minitutorials in `README.md` with interactive anchor hyperlinks.
     *   **Testing Relocation**: Moved the `testing/` directory to `mstbx/testing/` to package all development validation assets inside the module.

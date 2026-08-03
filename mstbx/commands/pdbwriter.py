@@ -1,5 +1,6 @@
 import click
-import os
+from pathlib import Path
+from mstbx.core.Build.CGenFFInputs import CGenFFInputConfig, CGenFFInputPreparer
 from mstbx.core.Build.PDBWriter import PDBWriter
 from mstbx.core.Utils.Utils import UnixMessage
 
@@ -9,10 +10,12 @@ from mstbx.core.Utils.Validator import FormatValidator
 @click.option('--input', '-i', type=click.Path(exists=True, dir_okay=False), help="Input PDB/MMCIF file.")
 @click.option('--mol', type=click.Path(exists=True, dir_okay=False), help="Input molecule file for validation only (works with --check-mol-format).")
 @click.option('--psf', type=click.Path(exists=True, dir_okay=False), help="Input PSF file (optional, used for CRD).")
-@click.option('--output', '-o', type=click.Path(dir_okay=False), help="Output file base or PDB.")
-@click.option('--fix', is_flag=True, help="Run PDBFixer to repair missing atoms/residues.")
+@click.option('--output', '-o', type=click.Path(), help="Output file base, PDB, CRD, or CGenFF input directory.")
+@click.option('--fix-structure', is_flag=True, help="Run PDBFixer to repair missing atoms/residues.")
+@click.option('--fix-keep-hetatoms', is_flag=True, help="Keep HETATM records during --fix-structure.")
+@click.option('--fix-add-hydrogens', is_flag=True, help="Add hydrogens during --fix-structure using --pH.")
 @click.option('--internal-only', is_flag=True, default=True, help="If fixing, only repair internal gaps, not terminals.")
-@click.option('--ph', type=float, help="pH for protonation using pdb2pqr.")
+@click.option('--pH', 'ph', type=float, help="pH for protonation using pdb2pqr.")
 @click.option('--ff-out', type=click.Choice(['CHARMM', 'AMBER']), default='CHARMM', help="Force field nomenclature for output.")
 @click.option('--ssbond', is_flag=True, help="Detect disulfide bonds and add SSBOND lines.")
 @click.option('--rename-chain', multiple=True, help="Rename chain: 'old:new' (e.g., 'A:B').")
@@ -20,17 +23,46 @@ from mstbx.core.Utils.Validator import FormatValidator
 @click.option('--segid', help="Add/Modify segid for all atoms.")
 @click.option('--write-ext-crd', is_flag=True, help="Generate an extended CHARMM-GUI style .crd file.")
 @click.option('--check-mol-format', is_flag=True, help="Validate the input format (PDB, PSF, CRD, MOL2) and exit.")
-def pdbwriter(input, mol, psf, output, fix, internal_only, ph, ff_out, ssbond, rename_chain, renumber, segid, write_ext_crd, check_mol_format):
+@click.option('--prepare-cgenff-inputs', is_flag=True, help="Prepare protein PDB and ligand MOL2 for manual CGenFF Web upload.")
+@click.option('--pdb-id', help="RCSB PDB ID used with --fix-structure or --prepare-cgenff-inputs.")
+@click.option('--select-chains', default="", show_default=True, help="Protein chains to keep, separated by commas.")
+@click.option('--ligand', type=click.Path(exists=True, dir_okay=False, path_type=Path), help="External ligand PDB for --prepare-cgenff-inputs.")
+@click.option('--pdb-ligand-resname', help="Ligand resname in the source PDB.")
+@click.option('--pdb-ligand-chain', help="Ligand chain in the source PDB.")
+@click.option('--pdb-ligand-resid', help="Ligand resid in the source PDB.")
+@click.option('--ligand-pH', 'ligand_pH', type=float, default=7.4, show_default=True, help="Ligand pH used by Open Babel.")
+@click.option('--overwrite', is_flag=True, help="Overwrite output directory when preparing CGenFF inputs.")
+def pdbwriter(input, mol, psf, output, fix_structure, fix_keep_hetatoms, fix_add_hydrogens, internal_only, ph, ff_out, ssbond, rename_chain, renumber, segid, write_ext_crd, check_mol_format, prepare_cgenff_inputs, pdb_id, select_chains, ligand, pdb_ligand_resname, pdb_ligand_chain, pdb_ligand_resid, ligand_pH, overwrite):
     """PDBWriter: Advanced PDB preparation module."""
     uxm = UnixMessage()
     
+    if prepare_cgenff_inputs:
+        outdir = Path(output) if output else Path("cgenff_inputs")
+        config = CGenFFInputConfig(
+            output_dir=outdir,
+            protein=Path(input) if input else None,
+            pdb_id=pdb_id,
+            select_chains=select_chains,
+            ligand=ligand,
+            pdb_ligand_resname=pdb_ligand_resname,
+            pdb_ligand_chain=pdb_ligand_chain,
+            pdb_ligand_resid=pdb_ligand_resid,
+            ligand_pH=ligand_pH,
+            overwrite=overwrite,
+        )
+        outputs = CGenFFInputPreparer(config).prepare()
+        uxm.message(message=f"CGenFF input files prepared in {outdir}.", type="info")
+        uxm.message(message=f"Protein: {outputs['protein']}", type="info")
+        uxm.message(message=f"Ligand MOL2: {outputs['ligand_mol2']}", type="info")
+        return
+
     if mol and not check_mol_format:
         uxm.message(message="Error: --mol option can ONLY be used with --check-mol-format flag.", type="error")
         raise click.Abort()
 
     input_file = input or mol
-    if not input_file:
-        uxm.message(message="Error: --input (-i) or --mol must be provided.", type="error")
+    if not input_file and not (fix_structure and pdb_id):
+        uxm.message(message="Error: --input (-i), --mol, or --pdb-id with --fix-structure must be provided.", type="error")
         raise click.Abort()
 
     if check_mol_format:
@@ -48,11 +80,17 @@ def pdbwriter(input, mol, psf, output, fix, internal_only, ph, ff_out, ssbond, r
 
     uxm.message(message=f"Starting PDBWriter for {input_file}", type="info")
     
-    writer = PDBWriter(input_file, psf_file=psf)
+    writer = PDBWriter(input_file, psf_file=psf, pdb_id=pdb_id if fix_structure and not input_file else None)
     
-    if fix:
+    if fix_structure:
         uxm.message(message="Running PDBFixer...", type="info")
-        writer.fix_structure(fix_only_internal=internal_only)
+        writer.fix_structure(
+            fix_only_internal=internal_only,
+            keep_hetatoms=fix_keep_hetatoms,
+            add_hydrogens=fix_add_hydrogens,
+            select_chains=[c.strip() for c in select_chains.split(",") if c.strip()] or None,
+            pH=ph or 7.0,
+        )
     
     if ph is not None:
         uxm.message(message=f"Protonating at pH {ph}...", type="info")

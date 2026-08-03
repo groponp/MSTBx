@@ -6,7 +6,7 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option('--protein', '-p', required=True, help="Protein PDB file.")
 @click.option('--dock', '-d', help="PDBQT file from docking (MODEL 1 will be used).")
 @click.option('--ligand-pdb', help="Ligand PDB file (if not using PDBQT).")
-@click.option('--ph', type=float, default=7.4, help="pH for ligand protonation (default 7.4).")
+@click.option('--pH', 'ph', type=float, default=7.4, help="pH for ligand protonation (default 7.4).")
 @click.option('--output', '-o', required=True, help="Final complex PDB name.")
 def mkdocking_cmplx(protein, dock, ligand_pdb, ph, output):
     """mkdocking-cmplx: Generate protein-ligand complex from docking poses."""

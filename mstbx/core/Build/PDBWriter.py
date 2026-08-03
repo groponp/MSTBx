@@ -1,10 +1,6 @@
-import os
-import sys
-import logging
 from datetime import datetime
+import tempfile
 import MDAnalysis as mda
-from MDAnalysis.core.universe import Merge
-import warnings
 from mstbx.core.Utils.Validator import FormatValidator
 
 # Try importing optional dependencies
@@ -16,12 +12,25 @@ except ImportError:
     PDBFIXER_AVAILABLE = False
 
 class PDBWriter:
-    def __init__(self, input_file, psf_file=None):
+    def __init__(self, input_file=None, psf_file=None, pdb_id=None):
+        """Inicializa o escritor/reparador de estruturas.
+
+        Parameters
+        ----------
+        input_file : str, optional
+            Estrutura local em PDB/mmCIF.
+        psf_file : str, optional
+            Topologia PSF usada para escrita CRD.
+        pdb_id : str, optional
+            Identificador RCSB PDB usado diretamente por PDBFixer.
+        """
         self.input_file = input_file
         self.psf_file = psf_file
+        self.pdb_id = pdb_id
         self.log_messages = []
         self.ssbonds = []
-        self._add_log(f"Initializing PDBWriter with file: {input_file}" + (f" and PSF: {psf_file}" if psf_file else ""))
+        source = input_file or f"RCSB:{pdb_id}"
+        self._add_log(f"Initializing PDBWriter with file: {source}" + (f" and PSF: {psf_file}" if psf_file else ""))
 
     def _add_log(self, message):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -36,54 +45,120 @@ class PDBWriter:
         else:
             self._add_log(f"Internal validation success for {output_file}: {report}")
 
-    def fix_structure(self, replace_nonstandard=True, add_missing_atoms=True, add_missing_residues=True, fix_only_internal=True):
+    def fix_structure(
+        self,
+        replace_nonstandard=True,
+        add_missing_atoms=True,
+        add_missing_residues=True,
+        fix_only_internal=True,
+        keep_hetatoms=False,
+        add_hydrogens=False,
+        select_chains=None,
+        pH=7.0,
+    ):
+        """Repara a estrutura usando PDBFixer com política conservadora.
+
+        Parameters
+        ----------
+        replace_nonstandard : bool, default=True
+            Substitui resíduos não padrão reconhecidos por equivalentes padrão.
+        add_missing_atoms : bool, default=True
+            Preenche átomos pesados ausentes em resíduos já presentes.
+        add_missing_residues : bool, default=True
+            Permite reconstruir resíduos ausentes quando o gap é interno.
+        fix_only_internal : bool, default=True
+            Mantém apenas gaps estritamente internos. Gaps nos terminais não
+            são reconstruídos.
+        keep_hetatoms : bool, default=False
+            Mantém HETATM não poliméricos. Por padrão remove águas, íons e
+            ligandos antes do reparo.
+        add_hydrogens : bool, default=False
+            Adiciona hidrogênios via PDBFixer.
+        select_chains : list of str, optional
+            Cadeias a manter antes do reparo.
+        pH : float, default=7.0
+            pH usado apenas quando ``add_hydrogens`` é verdadeiro.
+
+        Returns
+        -------
+        bool
+            ``True`` quando a estrutura foi reparada e escrita no arquivo
+            temporário interno; ``False`` quando PDBFixer/OpenMM não está
+            disponível.
+
+        Raises
+        ------
+        RuntimeError
+            Se a estrutura não tem SEQRES e a reconstrução de gaps internos
+            foi solicitada, pois PDBFixer não pode detectar gaps de forma
+            confiável sem sequência de referência.
+        """
         if not PDBFIXER_AVAILABLE:
             self._add_log("ERROR: PDBFixer or OpenMM not found. Skipping fixing step.")
             return False
 
         self._add_log("Starting PDBFixer process...")
-        fixer = PDBFixer(filename=self.input_file)
+        fixer = PDBFixer(filename=self.input_file) if self.input_file else PDBFixer(pdbid=self.pdb_id)
+
+        if select_chains:
+            present = {chain.id for chain in fixer.topology.chains()}
+            requested = set(select_chains)
+            missing = requested - present
+            if missing:
+                raise RuntimeError(f"Requested chain(s) not found: {sorted(missing)}. Present chains: {sorted(present)}")
+            to_remove = present - requested
+            if to_remove:
+                fixer.removeChains(chainIds=list(to_remove))
+                self._add_log(f"Removed chains before repair: {sorted(to_remove)}")
 
         if replace_nonstandard:
             fixer.findNonstandardResidues()
             self._add_log(f"Found non-standard residues: {fixer.nonstandardResidues}")
             fixer.replaceNonstandardResidues()
 
-        fixer.findMissingResidues()
-        if fix_only_internal:
-            # Filter missing residues to keep only internal gaps
-            new_missing = {}
-            for chain_idx, missing_res in fixer.missingResidues.items():
-                if not missing_res:
-                    continue
-                
-                # Get the range of residues currently in the chain
-                chain = list(fixer.topology.chains())[chain_idx[0] if isinstance(chain_idx, tuple) else chain_idx]
-                residues = list(chain.residues())
-                if not residues:
-                    continue
-                
-                min_idx = residues[0].index
-                max_idx = residues[-1].index
-                
-                # Keep only those missing residues that are between min_idx and max_idx
-                internal_missing = [res for res in missing_res if min_idx < res[0] < max_idx]
-                if internal_missing:
-                    new_missing[chain_idx] = internal_missing
-                    self._add_log(f"Chain {chain_idx}: Keeping internal missing residues {internal_missing}")
-                else:
-                    self._add_log(f"Chain {chain_idx}: No internal missing residues found (ignoring terminals)")
-            
-            fixer.missingResidues = new_missing
+        removed_hetatoms = 0
+        if not keep_hetatoms:
+            atoms_before = sum(1 for _ in fixer.topology.atoms())
+            fixer.removeHeterogens(keepWater=False)
+            atoms_after = sum(1 for _ in fixer.topology.atoms())
+            removed_hetatoms = atoms_before - atoms_after
+            self._add_log(f"Atoms removed by PDBFixer heterogen cleanup: {removed_hetatoms}")
+
+        if add_missing_residues:
+            if not fixer.sequences:
+                raise RuntimeError(
+                    "No SEQRES records found. Internal gaps cannot be detected safely; "
+                    "use an official RCSB PDB source or disable missing-residue repair."
+                )
+            fixer.findMissingResidues()
+            chain_lengths = {i: len(list(chain.residues())) for i, chain in enumerate(fixer.topology.chains())}
+            terminal_gaps = {
+                key: value for key, value in fixer.missingResidues.items()
+                if not (0 < key[1] < chain_lengths[key[0]])
+            }
+            if fix_only_internal:
+                fixer.missingResidues = {
+                    key: value for key, value in fixer.missingResidues.items()
+                    if 0 < key[1] < chain_lengths[key[0]]
+                }
+            self._add_log(f"Internal missing residues kept: {sum(len(v) for v in fixer.missingResidues.values())}")
+            if terminal_gaps:
+                self._add_log(f"Terminal gaps left untouched: {terminal_gaps}")
+        else:
+            fixer.missingResidues = {}
         
         if add_missing_atoms:
             fixer.findMissingAtoms()
             self._add_log(f"Missing atoms found: {len(fixer.missingAtoms)} groups")
             fixer.addMissingAtoms()
 
-        # Save fixed structure to a temporary file for further processing
-        fixed_tmp = "fixed_temp.pdb"
-        with open(fixed_tmp, 'w') as f:
+        if add_hydrogens:
+            fixer.addMissingHydrogens(pH=pH)
+            self._add_log(f"Hydrogens added at pH {pH}")
+
+        handle = tempfile.NamedTemporaryFile("w", suffix=".pdb", prefix="mstbx_fixed_", delete=False)
+        fixed_tmp = handle.name
+        with handle as f:
             PDBFile.writeFile(fixer.topology, fixer.positions, f, keepIds=True)
         
         self.input_file = fixed_tmp

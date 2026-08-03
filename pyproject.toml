@@ -26,8 +26,12 @@ dependencies = [
     "pdb2pqr",
 ]
 
-[tool.setuptools]
-packages = ["mstbx"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mstbx*"]
+
+[tool.setuptools.package-data]
+"mstbx.core.Gromacs" = ["data/**"]
 
 [project.scripts]
 mstbx = "mstbx.cli:cli"
