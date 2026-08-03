@@ -212,10 +212,10 @@ mstbx md-inputs --engine gromacs \
   --mdtime 1 \
   --xtc-frequency 50 \
   --name-group-index-1 Protein_ligand \
-  --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
+  --select-group-index-1 "protein or resname LIG" \
   --name-group-index-2 Water_and_ions \
-  --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN" \
-  --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN or resname LIG and not name H*" \
+  --select-group-index-2 "not (protein or resname LIG)" \
+  --select-atoms-to-restraint "protein and backbone or resname LIG and not name H*" \
   --gmx gmx
 ```
 
@@ -242,10 +242,10 @@ mstbx md-inputs --engine gromacs \
   --mdtime 100 \
   --xtc-frequency 50 \
   --name-group-index-1 Protein_ligand \
-  --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
+  --select-group-index-1 "protein or resname LIG" \
   --name-group-index-2 Water_and_ions \
-  --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN" \
-  --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN or resname LIG and not name H*" \
+  --select-group-index-2 "not (protein or resname LIG)" \
+  --select-atoms-to-restraint "protein and backbone or resname LIG and not name H*" \
   --gmx gmx
 ```
 
@@ -760,10 +760,10 @@ A complete GROMACS workflow for a protein without a ligand. This path does not u
      --mdtime 1 \
      --xtc-frequency 50 \
      --name-group-index-1 Protein \
-     --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
+     --select-group-index-1 "protein" \
      --name-group-index-2 Water_and_ions \
-     --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN" \
-     --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN" \
+     --select-group-index-2 "not protein" \
+     --select-atoms-to-restraint "protein and backbone" \
      --gmx gmx
    ```
 4. **Inspect and run**:
@@ -824,10 +824,10 @@ A complete GROMACS workflow for a protein-ligand system. MSTBx prepares the file
      --mdtime 100 \
      --xtc-frequency 50 \
      --name-group-index-1 Protein_ligand \
-     --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
+     --select-group-index-1 "protein or resname LIG" \
      --name-group-index-2 Water_and_ions \
-     --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN" \
-     --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN or resname LIG and not name H*" \
+     --select-group-index-2 "not (protein or resname LIG)" \
+     --select-atoms-to-restraint "protein and backbone or resname LIG and not name H*" \
      --gmx gmx
    ```
 4. **Inspect and run the system later**:
@@ -855,7 +855,20 @@ pip install -e ".[test]"
 python -m pytest
 ```
 
-The suite validates all registered CLI commands and core input-generation behavior without launching long MD simulations. Engine-specific command-order tests and reproducible examples remain under `mstbx/testing/`.
+The suite validates all registered CLI commands, defaults, supported and
+unsupported option combinations, and core input-generation behavior without
+launching long MD simulations. Engine-specific command-order tests and
+reproducible examples remain under `mstbx/testing/`. When the external tools
+are installed, run the short PDB2PQR/GROMACS regressions explicitly:
+
+```bash
+MSTBX_PDB2PQR="$(command -v pdb2pqr)" \
+MSTBX_GMX="$(command -v gmx)" \
+python -m pytest -m external -q
+```
+
+The external GROMACS test compiles EM, NVT, NPT, and production TPR inputs
+with `grompp`; it does not call `mdrun`.
 
 Use `--pdb2gmx-protonation` only when explicit HIS/ASP/GLU/LYS/ARG protonation choices are required. Otherwise, `pdb2gmx` uses its force-field defaults.
 

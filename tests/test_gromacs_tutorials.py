@@ -46,6 +46,9 @@ def test_protein_tutorial_is_explicitly_ligand_free():
     assert "--ligand" not in script
     assert "--ligand-mol2" not in script
     assert "--prepare-cgenff-inputs" not in script
+    assert '--select-group-index-1 "protein"' in script
+    assert '--select-group-index-2 "not protein"' in script
+    assert '--select-atoms-to-restraint "protein and backbone"' in script
 
 
 def test_main_readme_has_clickable_gromacs_tutorials_seven_and_eight():

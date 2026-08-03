@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 ### Added
+- Added project-wide CLI matrix tests and short workflow-delegation tests for
+  all registered commands, including adversarial option combinations.
+- Added real external regressions for PDB2PQR and GROMACS `grompp` compilation
+  without launching `mdrun`.
+- Updated GROMACS tutorials to use natural MDAnalysis selections (`protein`,
+  `not protein`, and `protein or resname LIG`) and validated the protein-only
+  tutorial script against a real GROMACS installation.
 - Added MDAnalysis atom selection to `pdbwriter`, including `--pdb-id`
   download followed by selection while preserving selected HETATM records.
 - Unified session logging across CLI tools, PDBWriter, and OpenMM with the

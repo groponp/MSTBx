@@ -36,10 +36,10 @@ fi
   --mdtime 100 \
   --xtc-frequency 50 \
   --name-group-index-1 Protein_ligand \
-  --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
+  --select-group-index-1 "protein or resname LIG" \
   --name-group-index-2 Water_and_ions \
-  --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN" \
-  --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN or resname LIG and not name H*" \
+  --select-group-index-2 "not (protein or resname LIG)" \
+  --select-atoms-to-restraint "protein and backbone or resname LIG and not name H*" \
   --gmx "$GMX"
 
 echo "Prepared 2OI0 GROMACS test in: $PWD/runs"

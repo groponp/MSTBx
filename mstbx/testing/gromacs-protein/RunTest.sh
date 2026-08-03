@@ -33,11 +33,11 @@ fi
   --npt-time 5 \
   --mdtime 1 \
   --xtc-frequency 50 \
-  --name-group-index-1 Protein_ligand \
-  --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
+  --name-group-index-1 Protein \
+  --select-group-index-1 "protein" \
   --name-group-index-2 Water_and_ions \
-  --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN" \
-  --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN or resname LIG and not name H*" \
+  --select-group-index-2 "not protein" \
+  --select-atoms-to-restraint "protein and backbone" \
   --gmx "$GMX"
 
 echo "Prepared protein-only GROMACS test in: $PWD/runs"
