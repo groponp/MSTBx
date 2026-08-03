@@ -60,8 +60,15 @@ class CGenFFInputPreparer:
     def prepare(self) -> dict[str, Path]:
         """Gera ``protein_prepared.pdb``, ``ligand_pose.pdb`` e MOL2."""
         self._validate()
-        if self.config.output_dir.exists() and self.config.overwrite:
-            shutil.rmtree(self.config.output_dir)
+        if self.config.output_dir.exists():
+            existing = list(self.config.output_dir.iterdir())
+            if existing and not self.config.overwrite:
+                raise FileExistsError(
+                    f"Output directory is not empty: {self.config.output_dir}. "
+                    "Use --overwrite to replace it."
+                )
+            if self.config.overwrite:
+                shutil.rmtree(self.config.output_dir)
         self.config.output_dir.mkdir(parents=True, exist_ok=True)
         pdb = self._source_pdb()
         protein = self.config.output_dir / "protein_prepared.pdb"
@@ -96,7 +103,11 @@ class CGenFFInputPreparer:
         chains = {c.strip() for c in self.config.select_chains.split(",") if c.strip()}
         lines = []
         for line in pdb.read_text().splitlines():
-            if line.startswith("ATOM") and (not chains or line[21].strip() in chains):
+            if not line.startswith("ATOM"):
+                continue
+            if len(line) < 22:
+                raise ValueError(f"Malformed PDB ATOM record without chain column: {line!r}")
+            if not chains or line[21].strip() in chains:
                 lines.append(line.rstrip())
         output.write_text("\n".join(lines) + "\nEND\n")
 
@@ -104,7 +115,11 @@ class CGenFFInputPreparer:
         """Extrai o ligando do PDB de origem."""
         lines = []
         for line in pdb.read_text().splitlines():
-            ok = line.startswith("HETATM") and line[17:20].strip() == self.config.pdb_ligand_resname
+            if not line.startswith("HETATM"):
+                continue
+            if len(line) < 26:
+                raise ValueError(f"Malformed PDB HETATM record: {line!r}")
+            ok = line[17:20].strip() == self.config.pdb_ligand_resname
             ok &= self.config.pdb_ligand_chain is None or line[21].strip() == self.config.pdb_ligand_chain
             ok &= self.config.pdb_ligand_resid is None or line[22:26].strip() == self.config.pdb_ligand_resid
             if ok:

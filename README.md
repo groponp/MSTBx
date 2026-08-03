@@ -19,7 +19,7 @@ While web-based system builders are convenient, they often struggle with massive
 <p align="justify">
 1. <b>Efficiency</b>: Optimized for large-scale complexes where automation is critical.<br>
 2. <b>Reproducibility</b>: Parameter-driven configuration ensures consistent protocol generation.<br>
-3. <b>Engine Versatility</b>: Native support for NAMD 2/3. We are actively working to expand support for <b>AMBER, GROMACS, and OpenMM</b> in future releases.<br>
+3. <b>Engine Versatility</b>: Native support for NAMD 2/3, GROMACS, and OpenMM, with AMBER planned.<br>
 4. <b>Standardization</b>: Enforces strict geometric symmetries and nomenclature across all modules.
 </p>
 
@@ -549,32 +549,38 @@ A complete step-by-step example using `openmm-run` to execute minimization, mult
 
 ---
 
-### 7. GROMACS CHARMM/CGenFF Layout
-A GROMACS workflow that keeps the same solution-system directory names used by the NAMD protocol. The commands below are the same validation tutorials kept under `mstbx/testing/`: `gromacs-protein` for a protein-only system and `gromacs-2oi0` for the protein-ligand CGenFF case.
+### 7. GROMACS CHARMM/CGenFF Workflow
+A complete GROMACS workflow has two distinct input paths: a protein-only path and a protein-ligand path. For the ligand path, MSTBx prepares the files for CGenFF Web, the user obtains the STR manually, and only then does `topogmx` build the solvated system.
 
-1. **Run the protein-only validation tutorial**: This downloads 1UBQ, prepares one complete system, writes EM/NVT/NPT/MD inputs, index groups, restraints, and `run_all.sh`, then stops before launching simulations.
+1. **Prepare inputs for CGenFF Web** using the 2OI0 validation example:
    ```bash
-   cd mstbx/testing/gromacs-protein
+   cd mstbx/testing/gromacs-2oi0
+   ./PrepareCGenFFInputs.sh
+   ```
+   Upload `work/cgenff_inputs_2oi0/ligand_for_cgenff.mol2`, do not select `Include parameters that are already in CGenFF`, and save the downloaded result as `work/cgenff_inputs_2oi0/ligand_for_cgenff.str`. This manual web step cannot be automated by MSTBx.
+2. **Build and configure the 2OI0 system** after the STR is present:
+   ```bash
+   INPUTS_DIR="$PWD/work/cgenff_inputs_2oi0" ./RunTest.sh
+   ```
+   The script executes `topogmx`, then `md-inputs`; it creates topology, solvation, ions, index groups, restraints, MDPs, and `runs/run_all.sh`, but does not launch a simulation.
+3. **Protein-only validation**: this downloads 1UBQ, extracts a protein-only PDB, builds the same single-system layout, and stops before `mdrun`:
+   ```bash
+   cd ../gromacs-protein
    ./RunTest.sh
    ```
-2. **Run the 2OI0 protein-ligand validation tutorial**: This uses the validated 2OI0 CGenFF inputs from the local staging snapshot and generates the same GROMACS layout.
-   ```bash
-   cd ../gromacs-2oi0
-   ./RunTest.sh
-   ```
-3. **Equivalent explicit 2OI0 commands**: Build the system once, create `runs/01build`, solvate, and ionize it:
+4. **Equivalent explicit 2OI0 topology command**: after preparing the CGenFF inputs and downloading the STR, build the system once:
    ```bash
    mstbx topogmx \
-     --protein protein_prepared.pdb \
-     --ligand-mol2 ligand_for_cgenff.mol2 \
-     --ligand-str ligand_for_cgenff.str \
+     --protein work/cgenff_inputs_2oi0/protein_prepared.pdb \
+     --ligand-mol2 work/cgenff_inputs_2oi0/ligand_for_cgenff.mol2 \
+     --ligand-str work/cgenff_inputs_2oi0/ligand_for_cgenff.str \
      --ligand-resname LIG \
      --output-dir runs \
      --box-distance 1.8 \
      --pdb2gmx-ter \
      --pdb2gmx-selection $'1\n1\n'
    ```
-4. **Write protocols, index, restraints, and runners**: NVT and NPT times are given in ns, following the same time convention used by the NAMD tutorials.
+5. **Write protocols, index, restraints, and runner**: NVT and NPT times are given in ns, following the same time convention used by the NAMD tutorials.
    ```bash
    mstbx md-inputs --engine gromacs \
      --env solution \
@@ -591,13 +597,13 @@ A GROMACS workflow that keeps the same solution-system directory names used by t
      --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN or resname LIG and not name H*" \
      --gmx gmx
    ```
-5. **Submit or run the system later**:
+6. **Inspect and run the system later**:
    ```bash
    cd runs
    ./run_all.sh
    ```
 
-Create replicas only after the system is validated by copying the full directory, for example `cp -a runs rep1`, `cp -a runs rep2`, and `cp -a runs rep3`.
+Create replicas only after the system is validated by copying the full directory, for example `cp -a runs rep1`, `cp -a runs rep2`, and `cp -a runs rep3`. MSTBx deliberately does not manage replicas internally.
 
 Use `--pdb2gmx-protonation` only when explicit HIS/ASP/GLU/LYS/ARG protonation choices are required. Otherwise, `pdb2gmx` uses its force-field defaults.
 

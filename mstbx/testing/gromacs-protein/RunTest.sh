@@ -8,8 +8,13 @@ GMX="${GMX:-gmx}"
 
 cd "$HERE"
 mkdir -p input
-curl -L "https://files.rcsb.org/download/1UBQ.pdb" -o input/1ubq.pdb
-awk '/^(ATOM|TER)/ {print} END {print "END"}' input/1ubq.pdb > input/protein_prepared.pdb
+if [[ ! -s input/protein_prepared.pdb ]]; then
+  "$PYTHON" -m mstbx.cli pdbwriter \
+    --fix-structure \
+    --pdb-id 1UBQ \
+    --select-chains A \
+    --output input/protein_prepared.pdb
+fi
 
 "$PYTHON" -m mstbx.cli topogmx \
   --protein input/protein_prepared.pdb \
