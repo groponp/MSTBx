@@ -54,6 +54,29 @@ mstbx topogmx \
 
 The `--pdb2gmx-selection` text is consumed only when `--pdb2gmx-ter` asks for N-terminal and C-terminal choices. For a different protein, choose the terminal states appropriate to its biology. Omit both flags to use the force-field defaults non-interactively.
 
+## Interactive protonation case
+
+Use this variant when protonation must be chosen manually for each HIS, ASP,
+GLU, LYS, or ARG residue. It is intentionally run directly in a terminal so
+the user can inspect every `pdb2gmx` prompt:
+
+```bash
+mstbx topogmx \
+  --protein input/protein_prepared.pdb \
+  --output-dir runs_interactive \
+  --box-distance 1.8 \
+  --pdb2gmx-ter \
+  --pdb2gmx-protonation \
+  --gmx gmx \
+  --overwrite
+```
+
+Answer the terminal prompts first, followed by the titratable-residue prompts.
+Do not provide `--pdb2gmx-selection` in this command: that option only supplies
+the N-terminal and C-terminal answers and cannot replace the interactive
+protonation decisions. After completion, inspect the generated topology and
+the total charge before running `md-inputs`.
+
 ## 4. Generate protocols, natural index groups, and restraints
 
 ```bash

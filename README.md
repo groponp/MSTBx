@@ -445,6 +445,29 @@ A complete GROMACS workflow for a protein without a ligand. This path does not u
 
 The default output has `01build`, `02nvt`, `03npt`, `04md`, `restraints`, `toppar`, and `run_all.sh`. The validation example uses 50,000 EM steps, 2 ns NVT, 5 ns NPT, 1 ns production, a 2 fs timestep, and XTC frames every 50 ps.
 
+**Interactive protonation variant:** use this case when the protonation state
+of HIS, ASP, GLU, LYS, or ARG must be selected residue by residue. Run the
+command in a terminal and answer every `pdb2gmx` prompt; do not pipe the
+non-interactive `--pdb2gmx-selection` input into this variant because that
+input only covers terminal choices:
+
+```bash
+mstbx topogmx \
+  --protein input/protein_prepared.pdb \
+  --output-dir runs_interactive \
+  --box-distance 1.8 \
+  --pdb2gmx-ter \
+  --pdb2gmx-protonation \
+  --gmx gmx \
+  --overwrite
+```
+
+The prompts first ask for N-terminal and C-terminal states and then show the
+available protonation states for titratable residues. Record the choices in the
+run log and inspect the resulting total charge in `runs_interactive/01build`
+before generating MD inputs. Use the non-interactive selection form only after
+those choices have been intentionally recorded and tested for the same protein.
+
 ### 8. GROMACS Protein-Ligand with CGenFF
 A complete GROMACS workflow for a protein-ligand system. MSTBx prepares the files for CGenFF Web, the user obtains the STR manually, and only then does `topogmx` build the solvated system.
 

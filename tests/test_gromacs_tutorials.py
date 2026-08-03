@@ -102,6 +102,9 @@ def test_tutorials_document_missing_atom_repair_without_hydrogen_duplication():
     assert "--fix-keep-hetatoms" in ligand
     assert "--fix-add-hydrogens" in main
     assert "pdb2gmx" in main
+    assert "--pdb2gmx-protonation" in protein
+    assert "Interactive protonation" in protein
+    assert "--pdb2gmx-protonation" in main
 
 
 def test_docking_tutorial_covers_pose_sources_and_engine_boundaries():
