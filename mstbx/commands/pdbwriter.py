@@ -4,9 +4,27 @@ from pathlib import Path
 import tempfile
 from mstbx.core.Build.CGenFFInputs import CGenFFInputConfig, CGenFFInputPreparer
 from mstbx.core.Build.PDBWriter import PDBWriter
+from mstbx.core.Utils.ClickHelp import grouped_command
 from mstbx.core.Utils.Utils import UnixMessage
 
 from mstbx.core.Utils.Validator import FormatValidator
+
+
+PDBWRITER_OPTION_GROUPS = {
+    "Source": ["input", "mol", "pdb_id", "select_chains"],
+    "Structure repair (trigger: --fix-structure)": [
+        "fix_structure", "fix_keep_hetatoms", "fix_add_hydrogens", "internal_only",
+    ],
+    "Protonation (trigger: --pH)": ["ph", "ff_out"],
+    "Structural edits": ["rename_chain", "renumber", "segid", "ssbond"],
+    "Selection": ["select_atoms"],
+    "CRD / format validation": ["psf", "write_ext_crd", "check_mol_format"],
+    "CGenFF preparation (trigger: --prepare-cgenff-inputs, self-contained)": [
+        "prepare_cgenff_inputs", "ligand", "pdb_ligand_resname",
+        "pdb_ligand_chain", "pdb_ligand_resid", "ligand_pH",
+    ],
+    "Output": ["output", "overwrite"],
+}
 
 
 def _write_selected_chains(source, destination, chains):
@@ -116,25 +134,17 @@ def _validate_flag_combinations(ctx, prepare_cgenff_inputs, ph, ff_out, fix_stru
 
 
 @click.command(
+    cls=grouped_command(PDBWRITER_OPTION_GROUPS),
     help="Advanced PDB preparation (Fix, Protonate, Edit, SSBOND) and CRD generation.",
-    epilog="""Flag groups (flags in one group only take effect together; mixing across
-groups without the group's trigger flag is rejected):
-
-  Source:            --input/-i, --mol, --pdb-id, --select-chains
-  Structure repair:  --fix-structure (trigger), --fix-keep-hetatoms, --fix-add-hydrogens,
-                      --internal-only
-  Protonation:       --pH (trigger), --ff-out
-  Structural edits:  --rename-chain, --renumber, --segid
-  Selection:         --select-atoms/--selection-atoms
-  CRD/validation:    --write-ext-crd, --check-mol-format (use with --mol only)
-  CGenFF prep:       --prepare-cgenff-inputs (trigger, self-contained: ignores
-                      structure-repair/protonation/edit/selection/CRD flags above),
-                      --ligand, --pdb-ligand-resname, --pdb-ligand-chain,
-                      --pdb-ligand-resid, --ligand-pH
+    epilog="""Flags in one group above only take effect together; combining a flag
+with a group other than its own trigger flag (shown in parentheses in the
+group title) is rejected with an error instead of being silently ignored.
 
 Examples:
-  mstbx pdbwriter --pdb-id 7A3S --select-atoms \"chainID B C and protein\" -o bc.pdb
-  mstbx pdbwriter -i complex.pdb --select-atoms \"protein or resname LIG\" -o complex_clean.pdb
+
+\b
+  mstbx pdbwriter --pdb-id 7A3S --select-atoms "chainID B C and protein" -o bc.pdb
+  mstbx pdbwriter -i complex.pdb --select-atoms "protein or resname LIG" -o complex_clean.pdb
   mstbx pdbwriter -i bc.pdb --segid PROB,PROC --ssbond -o bc_charmm.pdb
   mstbx pdbwriter -i protein.pdb --pH 7.4 --ff-out CHARMM -o protein_ph7.pdb
   mstbx pdbwriter -i system.pdb --write-ext-crd -o system.crd

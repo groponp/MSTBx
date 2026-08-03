@@ -121,6 +121,32 @@ def test_pdbwriter_invalid_operation_combinations_fail_without_traceback(tmp_pat
     assert "Traceback" not in result.output
 
 
+def test_pdbwriter_help_groups_options_into_labeled_sections():
+    """--help must render real option-group sections, not a hand-wrapped
+    epilog string (Click rewraps epilog text and destroys manual formatting,
+    which is exactly what happened before this switched to a Command
+    subclass that overrides format_options)."""
+    result = CliRunner().invoke(pdbwriter, ["--help"])
+
+    assert result.exit_code == 0
+    for title in [
+        "Source:", "Structure repair (trigger: --fix-structure):",
+        "Protonation (trigger: --pH):", "Structural edits:", "Selection:",
+        "CRD / format validation:",
+        "CGenFF preparation (trigger: --prepare-cgenff-inputs, self-contained):",
+        "Output:",
+    ]:
+        assert title in result.output, title
+    # each option shows up under its own section header, not just in the
+    # Examples text further down
+    ff_out_line = next(line for line in result.output.splitlines() if line.strip().startswith("--ff-out"))
+    assert "CHARMM|AMBER" in ff_out_line
+    ssbond_line = next(line for line in result.output.splitlines() if line.strip().startswith("--ssbond"))
+    assert "disulfide" in ssbond_line.lower()
+    # the old broken rendering ran unrelated group labels together on one line
+    assert "Protonation:   --pH" not in result.output
+
+
 @pytest.mark.parametrize(
     "extra_args, message",
     [
