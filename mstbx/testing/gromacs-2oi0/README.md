@@ -92,9 +92,35 @@ mstbx topogmx \
   --overwrite
 ```
 
+### Interactive protein-residue protonation
+
+If protonation states must be selected manually for HIS, ASP, GLU, LYS, or ARG,
+run a separate build interactively:
+
+```bash
+mstbx topogmx \
+  --protein work/cgenff_inputs_2oi0/protein_prepared.pdb \
+  --ligand-mol2 work/cgenff_inputs_2oi0/ligand_for_cgenff.mol2 \
+  --ligand-str work/cgenff_inputs_2oi0/ligand_for_cgenff.str \
+  --ligand-resname LIG \
+  --output-dir runs_interactive \
+  --box-distance 1.8 \
+  --pdb2gmx-ter \
+  --pdb2gmx-protonation \
+  --gmx gmx \
+  --overwrite
+```
+
+Answer the N-terminal, C-terminal, and titratable-residue prompts in the
+terminal. Do not pipe `--pdb2gmx-selection` here because it only supplies
+terminal answers. The ligand's protonation is determined before CGenFF Web
+submission and must remain consistent with its MOL2 and STR files.
+
 Then generate the protocols, index groups, restraints, and runner:
 
 ```bash
+PROTEIN_SEL='(protein or resname ARGN ARGN1 ARGN2 ARGN3 ASPH ASPP CYS2 GLUH GLUP HISD HIS1 HISE HISH HSD HSE HSP HSPM LYSN LSN)'
+SOLUTE_SEL="($PROTEIN_SEL) or resname LIG"
 mstbx md-inputs --engine gromacs \
   --env solution \
   --runs-dir runs \
@@ -104,10 +130,10 @@ mstbx md-inputs --engine gromacs \
   --mdtime 100 \
   --xtc-frequency 50 \
   --name-group-index-1 Protein_ligand \
-  --select-group-index-1 "protein or resname LIG" \
+  --select-group-index-1 "$SOLUTE_SEL" \
   --name-group-index-2 Water_and_ions \
-  --select-group-index-2 "not (protein or resname LIG)" \
-  --select-atoms-to-restraint "protein and backbone or resname LIG and not name H*" \
+  --select-group-index-2 "not ($SOLUTE_SEL)" \
+  --select-atoms-to-restraint "$PROTEIN_SEL and name N CA C O or resname LIG and not name H*" \
   --gmx gmx
 ```
 

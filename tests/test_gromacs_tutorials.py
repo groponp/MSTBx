@@ -107,6 +107,10 @@ def test_tutorials_document_missing_atom_repair_without_hydrogen_duplication():
     assert "--pdb2gmx-protonation" in main
     assert "LSN" in protein
     assert "PROTEIN_SEL" in protein
+    assert "--pdb2gmx-protonation" in ligand
+    assert "SOLUTE_SEL" in ligand
+    assert "The ligand's protonation" in ligand
+    assert "--pdb2gmx-protonation" in main[main.index("### 8. GROMACS Protein-Ligand"):]
 
 
 def test_docking_tutorial_covers_pose_sources_and_engine_boundaries():

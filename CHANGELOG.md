@@ -31,6 +31,8 @@ All notable changes to this project will be documented in this file.
   out-of-range bond references.
 - Added a CHARMM-compatible GROMACS protein selection for non-standard
   protonation names such as `LSN`, `ARGN`, `ASPP`, `GLUP`, and `HSD/HSE/HSP`.
+- Extended the protein-ligand GROMACS tutorial with interactive residue
+  protonation and explicit `PROTEIN_SEL`/`SOLUTE_SEL` selections.
 
 ## [0.8.10-beta] - 2026-06-13
 

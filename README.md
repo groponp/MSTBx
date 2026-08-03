@@ -512,8 +512,31 @@ A complete GROMACS workflow for a protein-ligand system. MSTBx prepares the file
      --pdb2gmx-ter \
      --pdb2gmx-selection $'1\n1\n'
    ```
+   **Interactive residue-protonation variant:** if HIS, ASP, GLU, LYS, or ARG
+   states must be chosen manually, use a new output directory and answer the
+   terminal prompts directly:
+   ```bash
+   mstbx topogmx \
+     --protein work/cgenff_inputs_2oi0/protein_prepared.pdb \
+     --ligand-mol2 work/cgenff_inputs_2oi0/ligand_for_cgenff.mol2 \
+     --ligand-str work/cgenff_inputs_2oi0/ligand_for_cgenff.str \
+     --ligand-resname LIG \
+     --output-dir runs_interactive \
+     --box-distance 1.8 \
+     --pdb2gmx-ter \
+     --pdb2gmx-protonation \
+     --gmx gmx \
+     --overwrite
+   ```
+   Do not pipe `--pdb2gmx-selection` into this variant. That option only
+   supplies N-terminal and C-terminal answers; `--pdb2gmx-protonation` adds
+   residue-by-residue HIS/ASP/GLU/LYS/ARG prompts. The ligand is not
+   protonated by `pdb2gmx`; its protonation must be fixed before the CGenFF Web
+   submission and kept consistent with the returned STR.
 3. **Write protocols, index, restraints, and runner**: NVT and NPT times are given in ns, following the same time convention used by the NAMD tutorials.
    ```bash
+   PROTEIN_SEL='(protein or resname ARGN ARGN1 ARGN2 ARGN3 ASPH ASPP CYS2 GLUH GLUP HISD HIS1 HISE HISH HSD HSE HSP HSPM LYSN LSN)'
+   SOLUTE_SEL="($PROTEIN_SEL) or resname LIG"
    mstbx md-inputs --engine gromacs \
      --env solution \
      --runs-dir runs \
@@ -523,10 +546,10 @@ A complete GROMACS workflow for a protein-ligand system. MSTBx prepares the file
      --mdtime 100 \
      --xtc-frequency 50 \
      --name-group-index-1 Protein_ligand \
-     --select-group-index-1 "protein or resname LIG" \
+     --select-group-index-1 "$SOLUTE_SEL" \
      --name-group-index-2 Water_and_ions \
-     --select-group-index-2 "not (protein or resname LIG)" \
-     --select-atoms-to-restraint "protein and backbone or resname LIG and not name H*" \
+     --select-group-index-2 "not ($SOLUTE_SEL)" \
+     --select-atoms-to-restraint "$PROTEIN_SEL and name N CA C O or resname LIG and not name H*" \
      --gmx gmx
    ```
 4. **Inspect and run the system later**:
