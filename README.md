@@ -420,7 +420,7 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
    ```bash
    mstbx pdbwriter --help
    ```
-   The input coordinate file is supplied with `--input`/`-i`; `--output`/`-o` is the output file or directory. Use `--pdb-id` instead of `--input` when the official RCSB record should be downloaded internally. With only `--pdb-id`, PDBWriter downloads `<pdb-id>.pdb` to the current directory; use `--output` to choose another path and `--overwrite` to replace it. `--select-chains` accepts comma-separated chain IDs.
+   The input coordinate file is supplied with `--input`/`-i`; `--output`/`-o` is the output file or directory. Use `--pdb-id` instead of `--input` when the official RCSB record should be downloaded internally. With only `--pdb-id`, PDBWriter downloads `<pdb-id>.pdb` to the current directory; use `--output` to choose another path and `--overwrite` to replace it. `--select-chains` accepts comma-separated chain IDs and is applied during download as well.
 2. **Download a PDB without processing it**:
    ```bash
    mstbx pdbwriter --pdb-id 1AKI

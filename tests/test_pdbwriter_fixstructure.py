@@ -172,3 +172,33 @@ def test_pdb_id_alone_downloads_official_structure(tmp_path, monkeypatch):
 
     assert result.exit_code == 0, result.output
     assert (tmp_path / "1aki.pdb").read_text() == "HEADER 1AKI\nEND\n"
+
+
+def test_pdb_id_download_filters_selected_chains(tmp_path, monkeypatch):
+    """Download mode applies comma-separated chain selection."""
+    def fake_download(url, destination):
+        Path(destination).write_text(
+            "HEADER TEST\n"
+            "SEQRES   1 A    1  ALA\n"
+            "SEQRES   1 B    1  GLY\n"
+            "ATOM      1  CA  ALA A   1       1.000   2.000   3.000\n"
+            "ATOM      2  CA  GLY B   1       4.000   5.000   6.000\n"
+            "ATOM      3  CA  SER C   1       7.000   8.000   9.000\n"
+            "END\n"
+        )
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("mstbx.commands.pdbwriter.urllib.request.urlretrieve", fake_download)
+
+    result = CliRunner().invoke(
+        pdbwriter,
+        ["--pdb-id", "7A3S", "--select-chains", "B,C", "--output", "7a3s_ab_chains.pdb"],
+    )
+
+    assert result.exit_code == 0, result.output
+    text = (tmp_path / "7a3s_ab_chains.pdb").read_text()
+    assert " CA  ALA A" not in text
+    assert " CA  GLY B" in text
+    assert " CA  SER C" in text
+    assert "SEQRES   1 A" not in text
+    assert "SEQRES   1 B" in text

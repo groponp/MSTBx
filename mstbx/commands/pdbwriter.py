@@ -1,11 +1,44 @@
 import click
 import urllib.request
 from pathlib import Path
+import tempfile
 from mstbx.core.Build.CGenFFInputs import CGenFFInputConfig, CGenFFInputPreparer
 from mstbx.core.Build.PDBWriter import PDBWriter
 from mstbx.core.Utils.Utils import UnixMessage
 
 from mstbx.core.Utils.Validator import FormatValidator
+
+
+def _write_selected_chains(source, destination, chains):
+    """Write a PDB containing only the requested chain records."""
+    selected = {chain.strip() for chain in chains.split(",") if chain.strip()}
+    output = []
+    found = set()
+    coordinate_records = {"ATOM", "HETATM"}
+    for line in Path(source).read_text().splitlines():
+        record = line[:6].strip()
+        if record in coordinate_records:
+            chain = line[21].strip() if len(line) > 21 else ""
+            if chain in selected:
+                output.append(line)
+                found.add(chain)
+        elif record == "TER":
+            chain = line[21].strip() if len(line) > 21 else ""
+            if chain in selected:
+                output.append(line)
+        elif record == "SEQRES":
+            chain = line[11].strip() if len(line) > 11 else ""
+            if chain in selected:
+                output.append(line)
+        elif record not in {"CONECT", "MASTER", "END"}:
+            output.append(line)
+    missing = selected - found
+    if missing:
+        raise click.ClickException(
+            f"Requested chain(s) not found in {source}: {', '.join(sorted(missing))}. "
+            f"Found: {', '.join(sorted(found)) or 'none'}."
+        )
+    Path(destination).write_text("\n".join(output) + "\nEND\n")
 
 @click.command(help="Advanced PDB preparation (Fix, Protonate, Edit, SSBOND) and CRD generation.")
 @click.option('--input', '-i', type=click.Path(exists=True, dir_okay=False), help="Input PDB/MMCIF file.")
@@ -64,10 +97,22 @@ def pdbwriter(input, mol, psf, output, fix_structure, fix_keep_hetatoms, fix_add
             raise click.ClickException(f"Output already exists: {destination}. Use --overwrite to replace it.")
         destination.parent.mkdir(parents=True, exist_ok=True)
         url = f"https://files.rcsb.org/download/{pdb_id.upper()}.pdb"
+        temporary = None
+        download_target = destination
+        if select_chains:
+            handle = tempfile.NamedTemporaryFile(suffix=".pdb", prefix="mstbx_download_", delete=False)
+            temporary = Path(handle.name)
+            handle.close()
+            download_target = temporary
         try:
-            urllib.request.urlretrieve(url, destination)
+            urllib.request.urlretrieve(url, download_target)
+            if select_chains:
+                _write_selected_chains(download_target, destination, select_chains)
         except Exception as exc:
             raise click.ClickException(f"Could not download {pdb_id.upper()} from RCSB: {exc}") from exc
+        finally:
+            if temporary:
+                temporary.unlink(missing_ok=True)
         uxm.message(message=f"Downloaded {pdb_id.upper()} to {destination}", type="info")
         return
 
