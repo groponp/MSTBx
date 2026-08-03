@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 - Added automated unit, regression, and adversarial tests for the GROMACS workflow and PDBFixer repair policy.
 - Added unit, regression, and adversarial coverage for CGenFF Web input preparation, including malformed/ambiguous inputs and overwrite protection.
 - Added complete GROMACS tutorials for both protein-only systems and protein-ligand systems, including the manual CGenFF Web upload/download boundary.
+- Added tutorial 0 for complete `pdbwriter` structure preparation, validation, repair, editing, CRD, and CGenFF input options.
 - Added project testing policy requiring unit, regression, and adversarial coverage for new workflows.
 - Extended the testing policy and automated surface coverage to the complete MSTBx project, including NAMD, OpenMM, structure builders, validators, docking, translation, enhanced sampling, and container helpers.
 - Integrated the consolidated OpenMM Runner as the native `mstbx openmm-run` command.

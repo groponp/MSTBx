@@ -375,6 +375,7 @@ mstbx openmm-run -i 04prod/prod.inp -p system.psf -c system.pdb -irst 03eq2/eq2.
 ## 📚 Complete Step-by-Step Examples & Minitutorials
 
 Navigate directly to each workflow tutorial using the hyperlinks below:
+- [0. PDBWriter Structure Preparation](#0-pdbwriter-structure-preparation)
 - [1. Ubiquitin in Solution](#1-ubiquitin-in-solution)
 - [2. Protein-Ligand Complex (BAAT)](#2-protein-ligand-complex-baat)
 - [3. Aquaporin Tetramer in POPC Membrane](#3-aquaporin-tetramer-in-popc-membrane)
@@ -383,6 +384,101 @@ Navigate directly to each workflow tutorial using the hyperlinks below:
 - [6. Automated OpenMM Runner Pipeline (Chignolin)](#6-automated-openmm-runner-pipeline-chignolin)
 - [7. GROMACS Protein-Only](#7-gromacs-protein-only)
 - [8. GROMACS Protein-Ligand with CGenFF](#8-gromacs-protein-ligand-with-cgenff)
+
+---
+
+### 0. PDBWriter Structure Preparation
+Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topogmx`. The normal practice is to repair missing heavy atoms and strictly internal residues, then let the selected simulation engine add hydrogens. Do not add hydrogens with PDBFixer before `pdb2gmx` unless that is explicitly required by a separate workflow.
+
+1. **Inspect all options and defaults**:
+   ```bash
+   mstbx pdbwriter --help
+   ```
+   The input coordinate file is supplied with `--input`/`-i`; `--output`/`-o` is the output file or directory. Use `--pdb-id` instead of `--input` when the official RCSB record should be downloaded internally. `--select-chains` accepts comma-separated chain IDs.
+2. **Repair a local structure**:
+   ```bash
+   mstbx pdbwriter \
+     --input raw.pdb \
+     --output prepared.pdb \
+     --fix-structure \
+     --select-chains A \
+     --internal-only
+   ```
+   `--internal-only` is the safe default: terminal gaps are not rebuilt automatically. For an official structure with SEQRES, download and repair it directly:
+   ```bash
+   mstbx pdbwriter \
+     --pdb-id 1UBQ \
+     --output 1ubq_fixed.pdb \
+     --fix-structure \
+     --select-chains A
+   ```
+3. **Repair while preserving ligands, waters, or ions**:
+   ```bash
+   mstbx pdbwriter \
+     --pdb-id 2OI0 \
+     --output 2oi0_fixed.pdb \
+     --fix-structure \
+     --fix-keep-hetatoms \
+     --select-chains A
+   ```
+   Use `--fix-keep-hetatoms` before ligand extraction. Without it, PDBFixer removes HETATM records by default. Use `--fix-add-hydrogens` only when the downstream workflow requires PDBFixer-generated hydrogens:
+   ```bash
+   mstbx pdbwriter \
+     --input raw.pdb \
+     --output prepared_ph74.pdb \
+     --fix-structure \
+     --fix-add-hydrogens \
+     --pH 7.4
+   ```
+4. **Request pH/force-field nomenclature and disulfide detection**:
+   ```bash
+   mstbx pdbwriter \
+     --input prepared.pdb \
+     --output annotated.pdb \
+     --pH 7.4 \
+     --ff-out CHARMM \
+     --ssbond
+   ```
+   `--ff-out` accepts `CHARMM` or `AMBER`. `--ssbond` detects close CYS SG pairs and writes SSBOND records. Review the generated report and the structure before simulation.
+5. **Apply chain, residue, and segment edits**:
+   ```bash
+   mstbx pdbwriter \
+     --input prepared.pdb \
+     --output edited.pdb \
+     --rename-chain A:B \
+     --rename-chain C:D \
+     --renumber 1 \
+     --segid PROT
+   ```
+   `--rename-chain` may be repeated, `--renumber` sets the starting residue number, and `--segid` sets the segment identifier.
+6. **Generate and validate an extended CHARMM CRD**:
+   ```bash
+   mstbx pdbwriter \
+     --input step3_input.pdb \
+     --psf step3_input.psf \
+     --output step3_input.crd \
+     --write-ext-crd
+
+   mstbx pdbwriter \
+     --mol step3_input.crd \
+     --check-mol-format
+   ```
+   `--mol` is validation input only and must be combined with `--check-mol-format`. The same validator accepts PDB, PSF, CRD, and MOL2 files.
+7. **Prepare CGenFF Web inputs**:
+   ```bash
+   mstbx pdbwriter \
+     --prepare-cgenff-inputs \
+     --pdb-id 2OI0 \
+     --select-chains A \
+     --pdb-ligand-resname 283 \
+     --pdb-ligand-chain A \
+     --output cgenff_inputs_2oi0 \
+     --ligand-pH 7.4 \
+     --overwrite
+   ```
+   For an external ligand PDB, replace the source ligand selectors with `--ligand ligand_pose.pdb`. `--ligand-pH` controls Open Babel MOL2 preparation and defaults to 7.4. Upload the generated MOL2 manually to CGenFF Web and save the returned STR separately.
+
+After this tutorial, use `input/prepared.pdb` or the corresponding edited output as the `--protein` input for `topogmx`. If a local PDB has no SEQRES, prefer `--pdb-id` for reliable internal-gap detection.
 
 ---
 
@@ -563,6 +659,15 @@ A complete GROMACS workflow for a protein without a ligand. This path does not u
      --select-chains A \
      --output input/protein_prepared.pdb
    ```
+   If a local PDB is used and contains missing heavy atoms or internal residues, repair it first:
+   ```bash
+   mstbx pdbwriter \
+     --input raw_protein.pdb \
+     --fix-structure \
+     --select-chains A \
+     --output input/protein_prepared.pdb
+   ```
+   Use an official RCSB structure with SEQRES when possible. Do not use `--fix-add-hydrogens`; `pdb2gmx` adds CHARMM36 hydrogens in the next step. Review terminal gaps manually instead of rebuilding them automatically.
 2. **Build, solvate, and ionize the system**:
    ```bash
    mstbx topogmx \
@@ -616,7 +721,16 @@ A complete GROMACS workflow for a protein-ligand system. MSTBx prepares the file
      --ligand-pH 7.4 \
      --overwrite
    ```
-   Upload `work/cgenff_inputs_2oi0/ligand_for_cgenff.mol2`, do not select `Include parameters that are already in CGenFF`, and save the downloaded result as `work/cgenff_inputs_2oi0/ligand_for_cgenff.str`. This manual web step cannot be automated by MSTBx.
+   If the protein has missing heavy atoms or internal residues, repair it before this extraction and preserve the ligand:
+   ```bash
+   mstbx pdbwriter \
+     --fix-structure \
+     --fix-keep-hetatoms \
+     --pdb-id 2OI0 \
+     --select-chains A \
+     --output work/2oi0_fixed.pdb
+   ```
+   In that case, replace `--pdb-id 2OI0` in the preparation command with `--input work/2oi0_fixed.pdb`. Do not use `--fix-add-hydrogens`; `pdb2gmx` handles protein hydrogens later. Upload `work/cgenff_inputs_2oi0/ligand_for_cgenff.mol2`, do not select `Include parameters that are already in CGenFF`, and save the downloaded result as `work/cgenff_inputs_2oi0/ligand_for_cgenff.str`. This manual web step cannot be automated by MSTBx.
 2. **Build the 2OI0 system** after the STR is present:
    ```bash
    mstbx topogmx \

@@ -59,6 +59,24 @@ def test_main_readme_has_clickable_gromacs_tutorials_seven_and_eight():
     assert readme.index("### 7. GROMACS Protein-Only") < readme.index("### 8. GROMACS Protein-Ligand with CGenFF")
 
 
+def test_main_readme_has_complete_pdbwriter_tutorial():
+    """Tutorial 0 exposes every PDBWriter option family explicitly."""
+    readme = (ROOT / "README.md").read_text()
+    start = readme.index("### 0. PDBWriter Structure Preparation")
+    end = readme.index("### 1. Ubiquitin in Solution")
+    tutorial = readme[start:end]
+
+    for option in [
+        "--input", "--output", "--pdb-id", "--select-chains", "--fix-structure",
+        "--fix-keep-hetatoms", "--fix-add-hydrogens", "--internal-only", "--pH",
+        "--ff-out", "--ssbond", "--rename-chain", "--renumber", "--segid",
+        "--write-ext-crd", "--check-mol-format", "--mol", "--prepare-cgenff-inputs",
+        "--ligand", "--pdb-ligand-resname", "--pdb-ligand-chain", "--ligand-pH",
+        "--overwrite",
+    ]:
+        assert option in tutorial, option
+
+
 def test_cgenff_tutorial_delegates_rcsb_download_to_pdbwriter():
     """CGenFF preparation uses pdbwriter's --pdb-id download path once."""
     readme = (ROOT / "mstbx/testing/gromacs-2oi0/README.md").read_text()
@@ -68,3 +86,16 @@ def test_cgenff_tutorial_delegates_rcsb_download_to_pdbwriter():
     assert "--pdb-id 2OI0" in script
     assert "curl -L" not in readme
     assert "curl -L" not in script
+
+
+def test_tutorials_document_missing_atom_repair_without_hydrogen_duplication():
+    """Tutorials explain heavy-atom repair and preserve ligand HETATM records."""
+    protein = (ROOT / "mstbx/testing/gromacs-protein/README.md").read_text()
+    ligand = (ROOT / "mstbx/testing/gromacs-2oi0/README.md").read_text()
+    main = (ROOT / "README.md").read_text()
+
+    assert "--fix-structure" in protein
+    assert "Do not add hydrogens" in protein
+    assert "--fix-keep-hetatoms" in ligand
+    assert "--fix-add-hydrogens" in main
+    assert "pdb2gmx" in main
