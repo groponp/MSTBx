@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file.
 - Updated GROMACS tutorials to use natural MDAnalysis selections (`protein`,
   `not protein`, and `protein or resname LIG`) and validated the protein-only
   tutorial script against a real GROMACS installation.
+- Removed workflow-specific logging instructions from the README; logging
+  remains an automatic runtime behavior, and README documentation is explicitly
+  required to use English.
 - Added MDAnalysis atom selection to `pdbwriter`, including `--pdb-id`
   download followed by selection while preserving selected HETATM records.
 - Unified session logging across CLI tools, PDBWriter, and OpenMM with the

@@ -49,21 +49,6 @@ The Conda recipe installs `gromacs`, `openbabel`, OpenMM, PDBFixer, MDAnalysis,
 MDTraj, and the Python package. `gromacs` and `obabel` are external executables,
 not Python modules, so a Python-only `pip install` does not provide them.
 
-### Logs de todas las herramientas
-
-Todas las herramientas de MSTBx usan el mismo logger. Cada ejecución escribe
-`mstbx_session.log` en el directorio de trabajo actual y muestra los mensajes
-con nivel y fecha en la terminal. Para centralizar el archivo:
-
-```bash
-export MSTBX_LOG_FILE="$PWD/logs/mstbx_session.log"
-mstbx pdbwriter --pdb-id 1AKI
-```
-
-`pdbwriter` además conserva `pdbwriter_report.log` como reporte detallado de
-la operación específica. Los módulos OpenMM, GROMACS, NAMD, contenedores y
-preparación de estructuras comparten el mismo `mstbx_session.log`.
-
 Verify the installation:
 
 ```bash
@@ -901,6 +886,7 @@ Track key updates and features added in each version of MSTBx compared to previo
 <p align="justify">
 MSTBx follows strict internal standards to ensure reliability:
 - <b>Logging</b>: All output is timestamped: `[LEVEL HH:MM:SS DD/MM/YYYY]`.
+- <b>Documentation</b>: All README documentation must be written in English.
 - <b>Naming</b>: Consistent flags across all modules (`--env`, `--engine`, `--psf`, `--pdb`).
 - <b>Safety</b>: Automated box symmetry checks to prevent periodic boundary condition artifacts.
 - <b>Local Development Skill</b>: Standards are checked locally by the `mstbx-development` skill.
