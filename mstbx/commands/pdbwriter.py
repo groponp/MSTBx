@@ -40,9 +40,99 @@ def _write_selected_chains(source, destination, chains):
         )
     Path(destination).write_text("\n".join(output) + "\nEND\n")
 
+
+def _explicit(ctx, name):
+    """True only if the user typed this flag, not if it came from its default."""
+    return ctx.get_parameter_source(name) == click.core.ParameterSource.COMMANDLINE
+
+
+def _validate_flag_combinations(ctx, prepare_cgenff_inputs, ph, ff_out, fix_structure,
+                                 fix_add_hydrogens, fix_keep_hetatoms, ssbond, rename_chain,
+                                 renumber, segid, select_atoms, write_ext_crd, check_mol_format,
+                                 ligand, pdb_ligand_resname, pdb_ligand_chain, pdb_ligand_resid,
+                                 ligand_pH):
+    """Reject flag combinations that would otherwise be silently ignored.
+
+    Several options only take effect inside one specific code path (protonation,
+    structure repair, or CGenFF preparation). Passing them outside that path used
+    to produce a normal-looking success message with no indication that the flag
+    did nothing, which is exactly what can make a novice user trust and publish
+    an output that was never actually processed the way they asked.
+    """
+    if prepare_cgenff_inputs:
+        ignored = [
+            name for name, value in [
+                ("--fix-structure", fix_structure), ("--pH", ph is not None),
+                ("--ssbond", ssbond), ("--rename-chain", bool(rename_chain)),
+                ("--renumber", renumber is not None), ("--segid", segid),
+                ("--select-atoms", select_atoms), ("--write-ext-crd", write_ext_crd),
+                ("--check-mol-format", check_mol_format),
+            ] if value
+        ]
+        if ignored:
+            raise click.UsageError(
+                f"The following flag(s) have no effect with --prepare-cgenff-inputs: "
+                f"{', '.join(ignored)}. That mode only writes protein_prepared.pdb, "
+                "ligand_pose.pdb, and ligand_for_cgenff.mol2. Run pdbwriter again without "
+                "--prepare-cgenff-inputs to apply them."
+            )
+        return
+
+    if ph is None and _explicit(ctx, "ff_out"):
+        raise click.UsageError(
+            "--ff-out has no effect without --pH: CHARMM/AMBER residue naming is "
+            "written by the --pH protonation step (pdb2pqr), not applied on its own. "
+            "Add --pH <value>, or drop --ff-out if you only want the raw structure."
+        )
+
+    if not fix_structure:
+        no_op = [
+            flag for flag, value in [
+                ("--fix-add-hydrogens", fix_add_hydrogens),
+                ("--fix-keep-hetatoms", fix_keep_hetatoms),
+            ] if value
+        ]
+        if no_op:
+            raise click.UsageError(
+                f"The following flag(s) only apply during --fix-structure: "
+                f"{', '.join(no_op)}. Add --fix-structure, or drop this flag if you are "
+                "not repairing the structure."
+            )
+
+    if not prepare_cgenff_inputs:
+        cgenff_only = [
+            flag for flag, value in [
+                ("--ligand", ligand), ("--pdb-ligand-resname", pdb_ligand_resname),
+                ("--pdb-ligand-chain", pdb_ligand_chain), ("--pdb-ligand-resid", pdb_ligand_resid),
+            ] if value
+        ]
+        if _explicit(ctx, "ligand_pH"):
+            cgenff_only.append("--ligand-pH")
+        if cgenff_only:
+            raise click.UsageError(
+                f"The following flag(s) only apply with --prepare-cgenff-inputs: "
+                f"{', '.join(cgenff_only)}. Add --prepare-cgenff-inputs, or drop this flag."
+            )
+
+
 @click.command(
     help="Advanced PDB preparation (Fix, Protonate, Edit, SSBOND) and CRD generation.",
-    epilog="""Examples:
+    epilog="""Flag groups (flags in one group only take effect together; mixing across
+groups without the group's trigger flag is rejected):
+
+  Source:            --input/-i, --mol, --pdb-id, --select-chains
+  Structure repair:  --fix-structure (trigger), --fix-keep-hetatoms, --fix-add-hydrogens,
+                      --internal-only
+  Protonation:       --pH (trigger), --ff-out
+  Structural edits:  --rename-chain, --renumber, --segid
+  Selection:         --select-atoms/--selection-atoms
+  CRD/validation:    --write-ext-crd, --check-mol-format (use with --mol only)
+  CGenFF prep:       --prepare-cgenff-inputs (trigger, self-contained: ignores
+                      structure-repair/protonation/edit/selection/CRD flags above),
+                      --ligand, --pdb-ligand-resname, --pdb-ligand-chain,
+                      --pdb-ligand-resid, --ligand-pH
+
+Examples:
   mstbx pdbwriter --pdb-id 7A3S --select-atoms \"chainID B C and protein\" -o bc.pdb
   mstbx pdbwriter -i complex.pdb --select-atoms \"protein or resname LIG\" -o complex_clean.pdb
   mstbx pdbwriter -i bc.pdb --segid PROB,PROC --ssbond -o bc_charmm.pdb
@@ -80,7 +170,14 @@ Selections use MDAnalysis syntax: use chainID (not chain) and name H* for hydrog
 def pdbwriter(input, mol, psf, output, fix_structure, fix_keep_hetatoms, fix_add_hydrogens, internal_only, ph, ff_out, ssbond, rename_chain, renumber, segid, select_atoms, write_ext_crd, check_mol_format, prepare_cgenff_inputs, pdb_id, select_chains, ligand, pdb_ligand_resname, pdb_ligand_chain, pdb_ligand_resid, ligand_pH, overwrite):
     """PDBWriter: Advanced PDB preparation module."""
     uxm = UnixMessage()
-    
+
+    _validate_flag_combinations(
+        click.get_current_context(), prepare_cgenff_inputs, ph, ff_out, fix_structure,
+        fix_add_hydrogens, fix_keep_hetatoms, ssbond, rename_chain, renumber, segid,
+        select_atoms, write_ext_crd, check_mol_format, ligand, pdb_ligand_resname,
+        pdb_ligand_chain, pdb_ligand_resid, ligand_pH,
+    )
+
     if prepare_cgenff_inputs:
         outdir = Path(output) if output else Path("cgenff_inputs")
         config = CGenFFInputConfig(

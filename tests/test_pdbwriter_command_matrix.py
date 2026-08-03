@@ -121,6 +121,76 @@ def test_pdbwriter_invalid_operation_combinations_fail_without_traceback(tmp_pat
     assert "Traceback" not in result.output
 
 
+@pytest.mark.parametrize(
+    "extra_args, message",
+    [
+        (["--ff-out", "CHARMM"], "--ff-out"),
+        (["--fix-add-hydrogens"], "--fix-add-hydrogens"),
+        (["--fix-keep-hetatoms"], "--fix-keep-hetatoms"),
+        (["--ligand-pH", "7.0"], "--ligand-pH"),
+    ],
+)
+def test_pdbwriter_rejects_flags_that_would_be_silently_ignored(tmp_path, monkeypatch, extra_args, message):
+    """A flag whose only consumer is a code path the user did not request must
+    fail loudly instead of downloading/writing a file that looks processed but
+    is not (the exact bug: --pdb-id --ff-out CHARMM without --pH used to just
+    download the raw PDB and print a success message)."""
+    def fake_download(url, destination):
+        Path(destination).write_text("ATOM\nEND\n")
+
+    import mstbx.commands.pdbwriter as command
+    monkeypatch.setattr(command.urllib.request, "urlretrieve", fake_download)
+    monkeypatch.chdir(tmp_path)
+
+    result = CliRunner().invoke(
+        pdbwriter, ["--pdb-id", "1AKI", "--output", "out.pdb", *extra_args]
+    )
+
+    assert result.exit_code != 0
+    assert message in result.output
+    assert "Traceback" not in result.output
+    assert not (tmp_path / "out.pdb").exists()
+
+
+def test_pdbwriter_rejects_processing_flags_combined_with_cgenff_prep(tmp_path):
+    """--prepare-cgenff-inputs is a self-contained branch; flags that only
+    matter to the normal repair/protonation/edit path must be rejected there
+    instead of being silently skipped."""
+    source = tmp_path / "input.pdb"
+    _pdb(source)
+
+    result = CliRunner().invoke(
+        pdbwriter,
+        ["--prepare-cgenff-inputs", "--input", str(source), "--fix-structure",
+         "--output", str(tmp_path / "out")],
+    )
+
+    assert result.exit_code != 0
+    assert "--fix-structure" in result.output
+    assert "--prepare-cgenff-inputs" in result.output
+    assert "Traceback" not in result.output
+
+
+def test_pdbwriter_ph_with_ff_out_is_accepted(tmp_path, monkeypatch):
+    """The documented, correct combination (--pH plus --ff-out) still runs."""
+    def fake_download(url, destination):
+        Path(destination).write_text("ATOM\nEND\n")
+
+    FakeWriter.calls = []
+    import mstbx.commands.pdbwriter as command
+    monkeypatch.setattr(command.urllib.request, "urlretrieve", fake_download)
+    monkeypatch.setattr(command, "PDBWriter", FakeWriter)
+    monkeypatch.chdir(tmp_path)
+
+    result = CliRunner().invoke(
+        pdbwriter,
+        ["--pdb-id", "1AKI", "--pH", "7.4", "--ff-out", "CHARMM", "--output", "out.pdb"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert ("protonate", {"pH": 7.4, "ff": "CHARMM"}) in FakeWriter.calls
+
+
 def test_pdbwriter_prepare_cgenff_cli_combination(tmp_path, monkeypatch):
     """The CGenFF preparation branch forwards all ligand selectors."""
     source = tmp_path / "input.pdb"
