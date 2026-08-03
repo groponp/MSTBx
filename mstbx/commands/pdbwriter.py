@@ -55,6 +55,7 @@ def _write_selected_chains(source, destination, chains):
 @click.option('--rename-chain', multiple=True, help="Rename chain: 'old:new' (e.g., 'A:B').")
 @click.option('--renumber', type=int, help="Renumber residues starting from this value.")
 @click.option('--segid', help="Add/Modify segid for all atoms.")
+@click.option('--select-atoms', '--selection-atoms', help="Keep atoms matching an MDAnalysis selection.")
 @click.option('--write-ext-crd', is_flag=True, help="Generate an extended CHARMM-GUI style .crd file.")
 @click.option('--check-mol-format', is_flag=True, help="Validate the input format (PDB, PSF, CRD, MOL2) and exit.")
 @click.option('--prepare-cgenff-inputs', is_flag=True, help="Prepare protein PDB and ligand MOL2 for manual CGenFF Web upload.")
@@ -66,7 +67,7 @@ def _write_selected_chains(source, destination, chains):
 @click.option('--pdb-ligand-resid', help="Ligand resid in the source PDB.")
 @click.option('--ligand-pH', 'ligand_pH', type=float, default=7.4, show_default=True, help="Ligand pH used by Open Babel.")
 @click.option('--overwrite', is_flag=True, help="Overwrite output directory when preparing CGenFF inputs.")
-def pdbwriter(input, mol, psf, output, fix_structure, fix_keep_hetatoms, fix_add_hydrogens, internal_only, ph, ff_out, ssbond, rename_chain, renumber, segid, write_ext_crd, check_mol_format, prepare_cgenff_inputs, pdb_id, select_chains, ligand, pdb_ligand_resname, pdb_ligand_chain, pdb_ligand_resid, ligand_pH, overwrite):
+def pdbwriter(input, mol, psf, output, fix_structure, fix_keep_hetatoms, fix_add_hydrogens, internal_only, ph, ff_out, ssbond, rename_chain, renumber, segid, select_atoms, write_ext_crd, check_mol_format, prepare_cgenff_inputs, pdb_id, select_chains, ligand, pdb_ligand_resname, pdb_ligand_chain, pdb_ligand_resid, ligand_pH, overwrite):
     """PDBWriter: Advanced PDB preparation module."""
     uxm = UnixMessage()
     
@@ -90,7 +91,7 @@ def pdbwriter(input, mol, psf, output, fix_structure, fix_keep_hetatoms, fix_add
         uxm.message(message=f"Ligand MOL2: {outputs['ligand_mol2']}", type="info")
         return
 
-    has_processing = any((fix_structure, ph is not None, ssbond, rename_chain, renumber is not None, segid, write_ext_crd, check_mol_format))
+    has_processing = any((fix_structure, ph is not None, ssbond, rename_chain, renumber is not None, segid, select_atoms, write_ext_crd, check_mol_format))
     if pdb_id and not input and not mol and not has_processing:
         destination = Path(output) if output else Path(f"{pdb_id.lower()}.pdb")
         if destination.exists() and not overwrite:
@@ -115,6 +116,20 @@ def pdbwriter(input, mol, psf, output, fix_structure, fix_keep_hetatoms, fix_add
                 temporary.unlink(missing_ok=True)
         uxm.message(message=f"Downloaded {pdb_id.upper()} to {destination}", type="info")
         return
+
+    # Download first when PDB ID is combined with transformations such as
+    # MDAnalysis selection, SSBOND detection, protonation, or CRD writing.
+    if pdb_id and not input and not mol:
+        handle = tempfile.NamedTemporaryFile(suffix=".pdb", prefix="mstbx_download_", delete=False)
+        input = handle.name
+        handle.close()
+        try:
+            urllib.request.urlretrieve(
+                f"https://files.rcsb.org/download/{pdb_id.upper()}.pdb", input
+            )
+        except Exception as exc:
+            Path(input).unlink(missing_ok=True)
+            raise click.ClickException(f"Could not download {pdb_id.upper()} from RCSB: {exc}") from exc
 
     if mol and not check_mol_format:
         uxm.message(message="Error: --mol option can ONLY be used with --check-mol-format flag.", type="error")
@@ -169,6 +184,10 @@ def pdbwriter(input, mol, psf, output, fix_structure, fix_keep_hetatoms, fix_add
     if chains_dict or renumber is not None or segid:
         uxm.message(message="Applying structural edits...", type="info")
         writer.edit_structure(rename_chains=chains_dict, renumber_residues=renumber, add_segid=segid)
+
+    if select_atoms:
+        uxm.message(message=f"Applying MDAnalysis selection: {select_atoms}", type="info")
+        writer.select_atoms(select_atoms)
     
     if write_ext_crd:
         crd_output = output if output.endswith('.crd') else output.rsplit('.', 1)[0] + '.crd'

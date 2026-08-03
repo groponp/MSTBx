@@ -8,10 +8,9 @@ import sys
 import os
 import shutil
 import glob
-import datetime
 import warnings
-import logging
 from math import *
+from mstbx.core.Utils.Utils import MSTBxLogger
 
 # ==============================================================================
 # Classes and Utility Functions
@@ -30,12 +29,10 @@ class FlushFile(object):
 
 sys.stdout = FlushFile(sys.stdout)
 
-# Setup a local warnings.log
-logging.basicConfig(filename='warnings.log', level=logging.WARNING, 
-                    format='[%(asctime)s] %(message)s', datefmt='%H:%M:%S %d/%m/%Y')
-
 def warn_with_logging(message, category, filename, lineno, file=None, line=None):
-    logging.warning(f"{filename}:{lineno}: {category.__name__}: {message}")
+    MSTBxLogger.setup_logger().warning(
+        f"{filename}:{lineno}: {category.__name__}: {message}"
+    )
 
 warnings.showwarning = warn_with_logging
 
@@ -60,9 +57,10 @@ except ImportError:
 def log_message(level, message, debug_mode=False):
     if level == "DEBUG" and not debug_mode:
         return
-    now = datetime.datetime.now()
-    timestamp = now.strftime("%H:%M:%S %d/%m/%Y")
-    print(f"[{level} {timestamp}] {message}", flush=True)
+    import logging
+    MSTBxLogger.setup_logger().log(
+        getattr(logging, level.upper(), logging.INFO), message
+    )
 
 # ==============================================================================
 # Input Reading

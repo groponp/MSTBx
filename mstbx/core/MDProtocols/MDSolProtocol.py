@@ -16,11 +16,13 @@
 #  1. Adicionando uma classe para o protocolo de md em agua - Quarta-feira 3 de Julho 2024.   #
 #// ****************************************************************************************//#
 
-import os 
+import os
+from mstbx.core.Utils.Utils import UnixMessage
 import shutil
 
 class MDProtocolSol:
     def __init__(self, psf, pdb, temperature, mdtime, dcdfreq=10.0):
+        self.uxm = UnixMessage()
         self.psf = psf
         self.pdb = pdb
         self.temperature = temperature
@@ -587,7 +589,10 @@ run                     $currenttime;     #  %s ns
                     # Clean potential quotes
                     fm = fm.strip('"').strip("'")
                     if not os.path.exists(os.path.join(self.colvar_input, fm)):
-                        print(f"[WARNING] File '{fm}' mentioned in {config_name} was not found in the custom folder.")
+                        self.uxm.message(
+                            f"File '{fm}' mentioned in {config_name} was not found in the custom folder.",
+                            type="warning",
+                        )
 
             # Copy everything from the custom folder to 04md/
             for item in os.listdir(self.colvar_input):
@@ -895,7 +900,10 @@ run                     $currenttime;     # %s ns
                 for fm in files_mentioned:
                     fm = fm.strip('"').strip("'")
                     if not os.path.exists(os.path.join(self.colvar_input, fm)):
-                        print(f"[WARNING] File '{fm}' mentioned in {config_name} was not found in the custom folder.")
+                        self.uxm.message(
+                            f"File '{fm}' mentioned in {config_name} was not found in the custom folder.",
+                            type="warning",
+                        )
 
             # Copy all files
             for item in os.listdir(self.colvar_input):

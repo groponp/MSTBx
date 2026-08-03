@@ -43,6 +43,9 @@ include = ["mstbx*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "external: exercises installed external tools without running a production simulation",
+]
 
 [project.scripts]
 mstbx = "mstbx.cli:cli"

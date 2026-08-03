@@ -19,6 +19,7 @@ from mstbx.core.Gromacs.Ligand import (
     set_ligand_resname,
     write_ligand_pdb,
 )
+from mstbx.core.Utils.Utils import UnixMessage
 
 
 DEFAULT_FORCEFIELD_DIR = Path(__file__).resolve().parent / "data" / "charmm36-feb2026_cgenff-5.0.ff"
@@ -87,6 +88,7 @@ class GromacsBuilder:
         """
         self.config = config
         self.build = config.output_dir / "01build"
+        self.uxm = UnixMessage()
 
     def build_system(self) -> None:
         """Executa a montagem completa de ``01build``."""
@@ -153,6 +155,7 @@ class GromacsBuilder:
         top.write_text("\n".join(lines) + "\n")
 
     def _run(self, command: list[object], stdin: str | None = None) -> None:
+        self.uxm.message("Running: " + " ".join(map(str, command)), type="info")
         subprocess.run(command, cwd=self.build, input=stdin, text=True, check=True)
 
     @staticmethod

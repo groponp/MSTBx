@@ -5,11 +5,13 @@ from pathlib import Path
 import MDAnalysis as mda
 from MDAnalysis.core.universe import Merge
 import warnings
+from mstbx.core.Utils.Utils import UnixMessage
 
 class ComplexBuilder:
     def __init__(self, protein_pdb, output_name):
         self.protein_pdb = Path(protein_pdb).resolve()
         self.output_name = Path(output_name).resolve()
+        self.uxm = UnixMessage()
         
         # Suppress MDAnalysis warnings
         warnings.filterwarnings("ignore", category=UserWarning, module="MDAnalysis.coordinates.PDB")
@@ -19,7 +21,7 @@ class ComplexBuilder:
         try:
             subprocess.run(cmd, shell=True, check=True)
         except subprocess.CalledProcessError as e:
-            print(f"Error executing: {cmd}")
+            self.uxm.message(f"Error executing: {cmd}: {e}", type="error")
             return False
         return True
 

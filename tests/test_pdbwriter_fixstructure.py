@@ -202,3 +202,89 @@ def test_pdb_id_download_filters_selected_chains(tmp_path, monkeypatch):
     assert " CA  SER C" in text
     assert "SEQRES   1 A" not in text
     assert "SEQRES   1 B" in text
+
+
+def test_pdb_id_download_then_applies_mdanalysis_selection(tmp_path, monkeypatch):
+    """PDB ID mode can download and then apply an atom selection."""
+    def fake_download(url, destination):
+        Path(destination).write_text(
+            "ATOM      1  CA  ALA B   1       0.000   0.000   0.000  1.00 20.00           C  \n"
+            "ATOM      2  CA  ALA C   1       1.000   0.000   0.000  1.00 20.00           C  \n"
+            "END\n"
+        )
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("mstbx.commands.pdbwriter.urllib.request.urlretrieve", fake_download)
+    result = CliRunner().invoke(
+        pdbwriter,
+        ["--pdb-id", "1AKI", "--select-atoms", "chainID B", "--output", "selected.pdb"],
+    )
+
+    assert result.exit_code == 0, result.output
+    output = (tmp_path / "selected.pdb").read_text()
+    assert " ALA B" in output
+    assert " ALA C" not in output
+
+
+def test_logger_rebinds_to_each_working_directory(tmp_path, monkeypatch):
+    """Each command writes the session log in its current working directory."""
+    from mstbx.core.Utils.Utils import UnixMessage
+
+    first = tmp_path / "first"
+    second = tmp_path / "second"
+    first.mkdir()
+    second.mkdir()
+    monkeypatch.delenv("MSTBX_LOG_FILE", raising=False)
+
+    monkeypatch.chdir(first)
+    UnixMessage().message("first directory")
+    monkeypatch.chdir(second)
+    UnixMessage().message("second directory")
+
+    assert "first directory" in (first / "mstbx_session.log").read_text()
+    assert "second directory" in (second / "mstbx_session.log").read_text()
+    assert "second directory" not in (first / "mstbx_session.log").read_text()
+
+
+def test_logger_honors_explicit_log_file(tmp_path, monkeypatch):
+    """MSTBX_LOG_FILE allows a caller to centralize logs explicitly."""
+    from mstbx.core.Utils.Utils import UnixMessage
+
+    log_file = tmp_path / "logs" / "session.log"
+    monkeypatch.setenv("MSTBX_LOG_FILE", str(log_file))
+    UnixMessage().message("centralized")
+
+    assert "centralized" in log_file.read_text()
+
+
+def test_select_atoms_keeps_protein_and_ligand_without_fixing(tmp_path, monkeypatch):
+    """An MDAnalysis selection preserves chosen HETATM without PDBFixer."""
+    source = tmp_path / "complex.pdb"
+    source.write_text(
+        "ATOM      1  N   ALA A   1       1.000   2.000   3.000  1.00 20.00           N  \n"
+        "ATOM      2  CA  ALA A   1       2.000   2.000   3.000  1.00 20.00           C  \n"
+        "ATOM      3  H   ALA A   1       2.000   2.000   4.000  1.00 20.00           H  \n"
+        "HETATM    4  C1  LIG B   2       4.000   5.000   6.000  1.00 20.00           C  \n"
+        "HETATM    5  O1  LIG B   2       5.000   5.000   6.000  1.00 20.00           O  \n"
+        "HETATM    6  O   HOH C   3       7.000   8.000   9.000  1.00 20.00           O  \n"
+        "END\n"
+    )
+    monkeypatch.chdir(tmp_path)
+    writer = PDBWriter(str(source))
+    assert writer.select_atoms("protein or resname LIG") == 5
+    output = tmp_path / "selected.pdb"
+    writer.write_final_pdb(output)
+
+    text = output.read_text()
+    assert text.count("ATOM") == 3
+    assert text.count("HETATM") == 2
+    assert "HOH" not in text
+
+
+def test_select_atoms_rejects_empty_selection(tmp_path):
+    """Empty MDAnalysis selections fail instead of writing an empty PDB."""
+    source = tmp_path / "protein.pdb"
+    source.write_text("ATOM      1  CA  ALA A   1       1.000   2.000   3.000\nEND\n")
+
+    with pytest.raises(ValueError, match="Empty MDAnalysis selection"):
+        PDBWriter(str(source)).select_atoms("resname LIG")

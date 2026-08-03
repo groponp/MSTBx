@@ -6,6 +6,7 @@ import tempfile
 from pathlib import Path
 import MDAnalysis as mda
 from mstbx.core.Utils.Validator import FormatValidator
+from mstbx.core.Utils.Utils import MSTBxLogger
 
 # Try importing optional dependencies
 try:
@@ -39,13 +40,13 @@ class PDBWriter:
     def _add_log(self, message):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.log_messages.append(f"[{timestamp}] {message}")
+        MSTBxLogger.setup_logger().info(message)
 
     def _validate_output(self, output_file):
         """Internal helper to validate written files."""
         valid, report = FormatValidator.validate(output_file)
         if not valid:
             self._add_log(f"WARNING: Internal validation failed for {output_file}: {report}")
-            print(f"[WARNING] Internal validation failed for {output_file}: {report}")
         else:
             self._add_log(f"Internal validation success for {output_file}: {report}")
 
@@ -275,6 +276,43 @@ class PDBWriter:
         self.input_file = "edited_temp.pdb"
         self._add_log("Structural edits completed.")
 
+    def select_atoms(self, selection):
+        """Mantém somente os átomos de uma seleção MDAnalysis.
+
+        Parameters
+        ----------
+        selection : str
+            Expressão MDAnalysis, por exemplo ``"protein or resname LIG"``
+            ou ``"chain A B and not H*"``.
+
+        Returns
+        -------
+        int
+            Número de átomos selecionados.
+
+        Raises
+        ------
+        ValueError
+            Se a expressão for inválida ou não selecionar átomos.
+        """
+        try:
+            universe = mda.Universe(self.input_file)
+            atoms = universe.select_atoms(selection)
+        except Exception as exc:
+            hint = " Use 'chainID' for PDB chains and 'name H*' for hydrogen names."
+            raise ValueError(
+                f"Invalid MDAnalysis selection: {selection!r}: {exc}.{hint}"
+            ) from exc
+        if not len(atoms):
+            raise ValueError(f"Empty MDAnalysis selection: {selection}")
+        handle = tempfile.NamedTemporaryFile("w", suffix=".pdb", prefix="mstbx_selected_", delete=False)
+        selected_file = Path(handle.name)
+        handle.close()
+        atoms.write(selected_file)
+        self.input_file = str(selected_file)
+        self._add_log(f"Selected {len(atoms)} atoms with MDAnalysis: {selection}")
+        return len(atoms)
+
     def write_final_pdb(self, output_file):
         # We read the final state and write it with SSBOND lines if any
         with open(self.input_file, 'r') as f:
@@ -340,4 +378,4 @@ class PDBWriter:
     def save_log(self):
         with open("pdbwriter_report.log", "w") as f:
             f.write("\n".join(self.log_messages))
-        print("Detailed log saved to pdbwriter_report.log")
+        MSTBxLogger.setup_logger().info("Detailed log saved to pdbwriter_report.log")

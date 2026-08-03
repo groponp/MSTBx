@@ -49,6 +49,21 @@ The Conda recipe installs `gromacs`, `openbabel`, OpenMM, PDBFixer, MDAnalysis,
 MDTraj, and the Python package. `gromacs` and `obabel` are external executables,
 not Python modules, so a Python-only `pip install` does not provide them.
 
+### Logs de todas las herramientas
+
+Todas las herramientas de MSTBx usan el mismo logger. Cada ejecución escribe
+`mstbx_session.log` en el directorio de trabajo actual y muestra los mensajes
+con nivel y fecha en la terminal. Para centralizar el archivo:
+
+```bash
+export MSTBX_LOG_FILE="$PWD/logs/mstbx_session.log"
+mstbx pdbwriter --pdb-id 1AKI
+```
+
+`pdbwriter` además conserva `pdbwriter_report.log` como reporte detallado de
+la operación específica. Los módulos OpenMM, GROMACS, NAMD, contenedores y
+preparación de estructuras comparten el mismo `mstbx_session.log`.
+
 Verify the installation:
 
 ```bash
@@ -303,6 +318,7 @@ Advanced preparation tool for repairing, annotating, and converting coordinate f
 - `--fix-structure`: Repairs missing atoms and internal residues.
 - `--fix-keep-hetatoms`: Keeps waters, ions, ligands, and other HETATM records during structure repair.
 - `--fix-add-hydrogens`: Adds hydrogens during structure repair using `--pH`; by default repair stays heavy-atom-only.
+- `--select-atoms`/`--selection-atoms`: Writes only atoms matching an MDAnalysis selection, without invoking PDBFixer or removing HETATM records.
 - `--pH`: Runs PDB2PQR/PROPKA at the requested pH (e.g., `--pH 7.4`) and writes the protonated PDB.
 - `--ff-out CHARMM`: Uses CHARMM names such as `HSD`, `HSE`, `HSP`, `ASPP`, and `GLUP`; this is the default shared naming scheme for NAMD and CHARMM36/CGenFF in GROMACS.
 - `--ff-out AMBER`: Uses AMBER naming instead; select this only for an AMBER-based topology.
@@ -444,7 +460,22 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
      --fix-structure \
      --select-chains A
    ```
-4. **Repair while preserving ligands, waters, or ions**:
+4. **Select a protein and ligand without fixing the structure**:
+   ```bash
+   mstbx pdbwriter \
+     --input complex.pdb \
+     --select-atoms "protein or resname X" \
+     --output protein_ligand.pdb
+   ```
+   This uses MDAnalysis directly. For PDB chain identifiers, use the MDAnalysis keyword `chainID`, and use `name` for atom-name patterns:
+   ```bash
+   mstbx pdbwriter \
+     --input complex.pdb \
+     --select-atoms "chainID A B and not name H*" \
+     --output heavy_atoms.pdb
+   ```
+   `--select-atoms` does not call PDBFixer, so selected HETATM records remain available. An empty or invalid MDAnalysis selection stops with an error.
+5. **Repair while preserving ligands, waters, or ions**:
    ```bash
    mstbx pdbwriter \
      --pdb-id 2OI0 \
@@ -462,7 +493,7 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
      --fix-add-hydrogens \
      --pH 7.4
    ```
-5. **Request pH/force-field nomenclature and disulfide detection**:
+6. **Request pH/force-field nomenclature and disulfide detection**:
    ```bash
    mstbx pdbwriter \
      --input prepared.pdb \
@@ -472,7 +503,7 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
      --ssbond
    ```
    `--ff-out` accepts `CHARMM` or `AMBER`. With `CHARMM`, PDB2PQR runs with CHARMM input/output naming and applies PROPKA titration states. `--ssbond` detects close CYS SG pairs and writes SSBOND records. Review the generated report and the structure before simulation.
-6. **Apply chain, residue, and segment edits**:
+7. **Apply chain, residue, and segment edits**:
    ```bash
    mstbx pdbwriter \
      --input prepared.pdb \
@@ -483,7 +514,7 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
      --segid PROT
    ```
    `--rename-chain` may be repeated, `--renumber` sets the starting residue number, and `--segid` sets the segment identifier.
-7. **Generate and validate an extended CHARMM CRD**:
+8. **Generate and validate an extended CHARMM CRD**:
    ```bash
    mstbx pdbwriter \
      --input step3_input.pdb \
@@ -496,7 +527,7 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
      --check-mol-format
    ```
    `--mol` is validation input only and must be combined with `--check-mol-format`. The same validator accepts PDB, PSF, CRD, and MOL2 files.
-8. **Prepare CGenFF Web inputs**:
+9. **Prepare CGenFF Web inputs**:
    ```bash
    mstbx pdbwriter \
      --prepare-cgenff-inputs \

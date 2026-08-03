@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Added
+- Added MDAnalysis atom selection to `pdbwriter`, including `--pdb-id`
+  download followed by selection while preserving selected HETATM records.
+- Unified session logging across CLI tools, PDBWriter, and OpenMM with the
+  `MSTBX_LOG_FILE` override and working-directory-aware handlers.
+
 ## [0.8.10-beta] - 2026-06-13
 
 ### Added
