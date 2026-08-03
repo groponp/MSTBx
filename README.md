@@ -23,9 +23,6 @@ While web-based system builders are convenient, they often struggle with massive
 4. <b>Standardization</b>: Enforces strict geometric symmetries and nomenclature across all modules.
 </p>
 
-Project history, stable workflow decisions, future tasks, and engineering rules
-are recorded in [`PLAN.md`](PLAN.md).
-
 ---
 
 ## Installation
