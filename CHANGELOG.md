@@ -23,6 +23,12 @@ All notable changes to this project will be documented in this file.
   `MSTBX_LOG_FILE` override and working-directory-aware handlers.
 - Added a complete docking-pose tutorial covering PDBQT/PDB inputs, PDBWriter
   cleanup, and GROMACS/NAMD continuation boundaries.
+- Expanded the docking tutorial into case studies with navigation links and
+  added unit, regression, and adversarial coverage for PDBQT extraction,
+  complex construction, and MOL2 validation.
+- Hardened `mkdocking-cmplx` and MOL2 validation against missing `MODEL 1`,
+  failed conversions, truncated sections, invalid counts, coordinates, and
+  out-of-range bond references.
 
 ## [0.8.10-beta] - 2026-06-13
 

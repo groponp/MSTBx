@@ -512,6 +512,12 @@ The repository scripts under `mstbx/testing/gromacs-2oi0/` validate this same se
 
 ### 9. Docking Pose to a Protein-Ligand System
 
+Every tutorial follows the same rule: explain the starting files, identify the
+case in which the workflow applies, show commands in execution order, state
+what each command creates, and finish with validation and failure cases. Use
+the case-study guide for docking at
+[`mstbx/testing/mkdocking/README.md`](mstbx/testing/mkdocking/README.md).
+
 Use `mkdocking-cmplx` to combine a receptor with a docking pose. It accepts
 either a PDBQT result or an already converted ligand PDB, and exactly one
 ligand source is required:

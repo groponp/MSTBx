@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 
 import click
 from mstbx.core.Docking.ComplexBuilder import ComplexBuilder
@@ -40,7 +41,12 @@ def mkdocking_cmplx(protein, dock, ligand_pdb, ph, output):
     is_pdbqt = True if dock else False
     ligand_input = dock if dock else ligand_pdb
     
-    if not builder.build(ligand_input, ligand_pH=ph, is_pdbqt=is_pdbqt):
+    try:
+        built = builder.build(ligand_input, ligand_pH=ph, is_pdbqt=is_pdbqt)
+    except (FileNotFoundError, OSError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
+        uxm.message(message=str(error), type="error")
+        raise click.ClickException(str(error)) from error
+    if not built:
         message = "Failed to build complex."
         uxm.message(message=message, type="error")
         raise click.ClickException(message)

@@ -114,5 +114,9 @@ def test_docking_tutorial_covers_pose_sources_and_engine_boundaries():
     assert "MODEL 1" in readme
     assert "topogmx" in readme
     assert "topopsfgen" in readme
+    assert "## Choose the matching case" in readme
+    assert "Case Study 1: Receptor Preparation" in readme
+    assert "--select-group-index-1" in readme
+    assert "--input-dir" not in readme
     assert "### 9. Docking Pose to a Protein-Ligand System" in main
     assert "mstbx/testing/mkdocking/README.md" in main

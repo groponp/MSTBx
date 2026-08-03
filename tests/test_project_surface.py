@@ -51,7 +51,12 @@ def test_format_validator_covers_supported_formats(tmp_path):
     crd = tmp_path / "system.crd"
     crd.write_text("       1  EXT\n" + " " * 99 + "1\n")
     mol2 = tmp_path / "ligand.mol2"
-    mol2.write_text("@<TRIPOS>MOLECULE\nLIG\n@<TRIPOS>ATOM\n")
+    mol2.write_text(
+        "@<TRIPOS>MOLECULE\nLIG\n 1 0 1 0 0\nSMALL\nGASTEIGER\n"
+        "@<TRIPOS>ATOM\n"
+        "      1 C1 1.0 2.0 3.0 C.3 1 LIG 0.0\n"
+        "@<TRIPOS>BOND\n"
+    )
 
     for path in [pdb, psf, crd, mol2]:
         valid, report = FormatValidator.validate(path)

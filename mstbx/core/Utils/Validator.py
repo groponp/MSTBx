@@ -130,19 +130,58 @@ class FormatValidator:
 
     @staticmethod
     def _validate_mol2(filepath):
-        """Validate MOL2 format: required TRIPOS sections."""
-        errors = []
-        has_molecule = False
-        has_atom = False
-        
-        with open(filepath, 'r') as f:
-            for line in f:
-                if line.startswith('@<TRIPOS>MOLECULE'): has_molecule = True
-                if line.startswith('@<TRIPOS>ATOM'): has_atom = True
-        
-        if not has_molecule: errors.append("Missing '@<TRIPOS>MOLECULE' section.")
-        if not has_atom: errors.append("Missing '@<TRIPOS>ATOM' section.")
-        
-        if errors:
-            return False, "; ".join(errors)
+        """Validate MOL2 sections, counts, atom records, and coordinates."""
+        with open(filepath, 'r') as handle:
+            lines = handle.read().splitlines()
+        sections = {}
+        current = None
+        for line in lines:
+            if line.startswith('@<TRIPOS>'):
+                current = line.strip()
+                sections[current] = []
+            elif current:
+                sections[current].append(line)
+
+        required = ('@<TRIPOS>MOLECULE', '@<TRIPOS>ATOM', '@<TRIPOS>BOND')
+        missing = [section for section in required if section not in sections]
+        if missing:
+            return False, "Missing MOL2 section(s): " + ", ".join(missing)
+
+        molecule = [line.strip() for line in sections['@<TRIPOS>MOLECULE'] if line.strip()]
+        if len(molecule) < 2:
+            return False, "Incomplete MOL2 MOLECULE section."
+        counts = molecule[1].split()
+        if len(counts) < 2:
+            return False, "Missing MOL2 atom/bond counts."
+        try:
+            atom_count, bond_count = int(counts[0]), int(counts[1])
+        except ValueError:
+            return False, "Invalid MOL2 atom/bond counts."
+        if atom_count < 1 or bond_count < 0:
+            return False, "MOL2 atom/bond counts are out of range."
+
+        atoms = [line.split() for line in sections['@<TRIPOS>ATOM'] if line.strip()]
+        bonds = [line.split() for line in sections['@<TRIPOS>BOND'] if line.strip()]
+        if len(atoms) != atom_count:
+            return False, f"MOL2 atom count mismatch: expected {atom_count}, found {len(atoms)}."
+        if len(bonds) != bond_count:
+            return False, f"MOL2 bond count mismatch: expected {bond_count}, found {len(bonds)}."
+        for index, atom in enumerate(atoms, start=1):
+            if len(atom) < 6:
+                return False, f"MOL2 atom record {index} is incomplete."
+            if atom[0] != str(index):
+                return False, f"MOL2 atom numbering is invalid at record {index}."
+            try:
+                float(atom[2]); float(atom[3]); float(atom[4])
+            except ValueError:
+                return False, f"MOL2 atom record {index} has invalid coordinates."
+        for index, bond in enumerate(bonds, start=1):
+            if len(bond) < 4:
+                return False, f"MOL2 bond record {index} is incomplete."
+            try:
+                int(bond[0]); atom_a = int(bond[1]); atom_b = int(bond[2])
+            except ValueError:
+                return False, f"MOL2 bond record {index} has invalid atom indices."
+            if not (1 <= atom_a <= atom_count and 1 <= atom_b <= atom_count):
+                return False, f"MOL2 bond record {index} references an unknown atom."
         return True, "Valid MOL2 format."

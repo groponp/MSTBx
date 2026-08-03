@@ -4,7 +4,29 @@ This tutorial starts with a receptor structure and a pose produced by a docking
 program. It covers PDBQT and PDB poses, PDBWriter cleanup, and the boundary
 between complex construction and engine-specific topology generation.
 
-## 1. Prepare the receptor
+## Choose the matching case
+
+Use the case that matches the files you have:
+
+| Situation | Start here | Why |
+| --- | --- | --- |
+| Vina or another program produced a multi-model `.pdbqt` | [Case 2](#case-study-2-pdbqt-docking-pose) | `MODEL 1` is extracted and converted with Open Babel. |
+| Docking produced a ligand `.pdb` | [Case 3](#case-study-3-existing-ligand-pdb) | The pose is already converted, so no PDBQT parsing is needed. |
+| The receptor has missing heavy atoms or internal gaps | [Case 1](#case-study-1-receptor-preparation) | Repair before docking and avoid changing the docking receptor afterward. |
+| The complex is ready and you need GROMACS | [Case 5](#case-study-5-gromacs-with-cgenff) | The MOL2/STR boundary is explicit and manual. |
+| The complex is ready and you need NAMD | [Case 6](#case-study-6-namd-with-a-matching-psf) | A matching PSF and CHARMM parameters are required. |
+
+## Contents
+
+- [Case Study 1: Receptor Preparation](#case-study-1-receptor-preparation)
+- [Case Study 2: PDBQT Docking Pose](#case-study-2-pdbqt-docking-pose)
+- [Case Study 3: Existing Ligand PDB](#case-study-3-existing-ligand-pdb)
+- [Case Study 4: PDBWriter Cleanup and Validation](#case-study-4-pdbwriter-cleanup-and-validation)
+- [Case Study 5: GROMACS with CGenFF](#case-study-5-gromacs-with-cgenff)
+- [Case Study 6: NAMD with a Matching PSF](#case-study-6-namd-with-a-matching-psf)
+- [Validation Checklist](#validation-checklist)
+
+## Case Study 1: Receptor Preparation
 
 For a receptor downloaded from the PDB, use PDBWriter to select the chain and
 apply only the structural operations required by the project:
@@ -27,7 +49,7 @@ before docking. Do not use `--fix-structure` when the intent is only atom
 selection: PDBFixer may add atoms and hydrogens, which changes the input used by
 the docking calculation.
 
-## 2. Build a complex from a PDBQT docking result
+## Case Study 2: PDBQT Docking Pose
 
 `mkdocking-cmplx` uses `MODEL 1` from a multi-model PDBQT file. It converts the
 pose with Open Babel, removes PDBQT hydrogens, assigns residue name `LIG` and
@@ -46,7 +68,7 @@ The command requires exactly one ligand source. Passing both `--dock` and
 complex only; it does not create a PSF, a GROMACS topology, or force-field
 parameters.
 
-## 3. Build a complex from an already converted PDB pose
+## Case Study 3: Existing Ligand PDB
 
 Use this form when the docking program or a previous conversion already
 produced a ligand PDB:
@@ -66,7 +88,7 @@ Inspect the result before generating topology files:
 mstbx pdbwriter --mol complex_pose1.pdb --check-mol-format
 ```
 
-## 4. Apply PDBWriter operations to the complex
+## Case Study 4: PDBWriter Cleanup and Validation
 
 Selections use MDAnalysis syntax. `chainID` is the PDB chain identifier; use
 `protein` and residue names when they are more stable than chain labels:
@@ -97,7 +119,7 @@ mstbx pdbwriter --input receptor_raw.pdb \
   --overwrite
 ```
 
-## 5. Continue to GROMACS with CGenFF
+## Case Study 5: GROMACS with CGenFF
 
 Generate the protein and ligand inputs required by the CGenFF web service:
 
@@ -136,16 +158,16 @@ Create engine inputs with natural MDAnalysis selections:
 
 ```bash
 mstbx md-inputs --engine gromacs \
-  --input-dir runs \
-  --group-index-1 "protein or resname LIG" \
-  --group-index-2 "not (protein or resname LIG)" \
+  --runs-dir runs \
+  --select-group-index-1 "protein or resname LIG" \
+  --select-group-index-2 "not (protein or resname LIG)" \
   --select-atoms-to-restraint "protein and backbone or resname LIG and not name H*"
 ```
 
 Before running, inspect `runs/01build/topol.top`, `runs/01build/ionized.gro`,
 the generated restraint files, and the generated `run_all.sh`.
 
-## 6. Continue to NAMD
+## Case Study 6: NAMD with a Matching PSF
 
 `mkdocking-cmplx` intentionally stops at the combined PDB. For NAMD, generate
 a PSF whose atom order exactly matches the final PDB and obtain the ligand
@@ -168,7 +190,7 @@ mstbx md-inputs --engine namd \
 Do not reuse a PSF generated before changing chain selection, residue names,
 protonation, or atom order. Validate the PDB/PSF pair before starting dynamics.
 
-## Common failures
+## Validation Checklist
 
 - `mkdocking-cmplx` rejects missing or ambiguous ligand sources.
 - A PDBQT without `MODEL 1` must be converted or exported as a single-pose
