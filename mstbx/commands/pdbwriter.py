@@ -1,4 +1,5 @@
 import click
+import urllib.request
 from pathlib import Path
 from mstbx.core.Build.CGenFFInputs import CGenFFInputConfig, CGenFFInputPreparer
 from mstbx.core.Build.PDBWriter import PDBWriter
@@ -24,7 +25,7 @@ from mstbx.core.Utils.Validator import FormatValidator
 @click.option('--write-ext-crd', is_flag=True, help="Generate an extended CHARMM-GUI style .crd file.")
 @click.option('--check-mol-format', is_flag=True, help="Validate the input format (PDB, PSF, CRD, MOL2) and exit.")
 @click.option('--prepare-cgenff-inputs', is_flag=True, help="Prepare protein PDB and ligand MOL2 for manual CGenFF Web upload.")
-@click.option('--pdb-id', help="RCSB PDB ID used with --fix-structure or --prepare-cgenff-inputs.")
+@click.option('--pdb-id', help="RCSB PDB ID; can be used alone to download the official PDB file.")
 @click.option('--select-chains', default="", show_default=True, help="Protein chains to keep, separated by commas.")
 @click.option('--ligand', type=click.Path(exists=True, dir_okay=False, path_type=Path), help="External ligand PDB for --prepare-cgenff-inputs.")
 @click.option('--pdb-ligand-resname', help="Ligand resname in the source PDB.")
@@ -54,6 +55,20 @@ def pdbwriter(input, mol, psf, output, fix_structure, fix_keep_hetatoms, fix_add
         uxm.message(message=f"CGenFF input files prepared in {outdir}.", type="info")
         uxm.message(message=f"Protein: {outputs['protein']}", type="info")
         uxm.message(message=f"Ligand MOL2: {outputs['ligand_mol2']}", type="info")
+        return
+
+    has_processing = any((fix_structure, ph is not None, ssbond, rename_chain, renumber is not None, segid, write_ext_crd, check_mol_format))
+    if pdb_id and not input and not mol and not has_processing:
+        destination = Path(output) if output else Path(f"{pdb_id.lower()}.pdb")
+        if destination.exists() and not overwrite:
+            raise click.ClickException(f"Output already exists: {destination}. Use --overwrite to replace it.")
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        url = f"https://files.rcsb.org/download/{pdb_id.upper()}.pdb"
+        try:
+            urllib.request.urlretrieve(url, destination)
+        except Exception as exc:
+            raise click.ClickException(f"Could not download {pdb_id.upper()} from RCSB: {exc}") from exc
+        uxm.message(message=f"Downloaded {pdb_id.upper()} to {destination}", type="info")
         return
 
     if mol and not check_mol_format:

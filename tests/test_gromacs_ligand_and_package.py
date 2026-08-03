@@ -13,6 +13,13 @@ def test_default_forcefield_and_converter_are_packaged():
     assert DEFAULT_CGENFF_CONVERTER.exists()
 
 
+def test_shared_charmm_toppar_is_present_for_installed_package():
+    """The wheel must retain shared CHARMM parameters used by NAMD workflows."""
+    toppar = Path(__file__).parents[1] / "mstbx/core/toppar"
+    assert (toppar / "par_all36m_prot.prm").exists()
+    assert (toppar / "toppar_water_ions.str").exists()
+
+
 def test_cgenff_resi_and_moleculetype_parsing(tmp_path):
     """Extrai nomes internos sem exigir argumentos manuais redundantes."""
     str_file = tmp_path / "ligand.str"

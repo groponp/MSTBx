@@ -10,26 +10,27 @@ readme = "README.md"
 authors = [{ name = "Ropón-Palacios G.", email = "georcki.ropon@unesp.br" }]
 requires-python = ">=3.12"
 dependencies = [
-    "click",
-    "biopython",
-    "mdanalysis",
-    "numpy",
-    "pandas",
-    "matplotlib",
-    "seaborn",
-    "scikit-learn",
-    "scipy",
-    "statsmodels",
-    "pdbfixer",
-    "openmm",
-    "colorama",
-    "pdb2pqr",
-    "networkx",
+    "click>=8.1",
+    "biopython>=1.80",
+    "mdanalysis>=2.7",
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "matplotlib>=3.7",
+    "seaborn>=0.12",
+    "scikit-learn>=1.3",
+    "scipy>=1.10",
+    "statsmodels>=0.14",
+    "pdbfixer>=1.9",
+    "openmm>=8.1",
+    "mdtraj>=1.9",
+    "colorama>=0.4",
+    "pdb2pqr>=3.6",
+    "networkx>=2.3,<3",
 ]
 
 [project.optional-dependencies]
 test = [
-    "pytest",
+    "pytest>=8",
 ]
 
 [tool.setuptools.packages.find]
@@ -38,6 +39,7 @@ include = ["mstbx*"]
 
 [tool.setuptools.package-data]
 "mstbx.core.Gromacs" = ["data/**"]
+"mstbx.core" = ["toppar/**"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

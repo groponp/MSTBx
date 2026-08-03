@@ -36,7 +36,9 @@ def md_inputs(engine, env, psf, pdb, temperature, mdtime, nvt_time, npt_time, dc
 
     if engine == 'gromacs':
         if env != 'solution':
-            uxm.message("GROMACS md-inputs currently supports only --env solution.", "error")
+            message = "GROMACS md-inputs currently supports only --env solution."
+            uxm.message(message, "error")
+            click.echo(message)
             return
         protocol = GromacsProtocolConfig(
             runs_dir=runs_dir,

@@ -3,9 +3,11 @@
 from pathlib import Path
 
 import pytest
+from click.testing import CliRunner
 
 import mstbx.core.Build.PDBWriter as pdbwriter_module
 from mstbx.core.Build.PDBWriter import PDBWriter
+from mstbx.commands.pdbwriter import pdbwriter
 
 
 class FakeChain:
@@ -109,3 +111,64 @@ def test_fix_structure_keeps_only_internal_missing_residues(monkeypatch, tmp_pat
     assert writer.fix_structure()
     assert Path(writer.input_file).read_text() == "HEADER FAKE\nEND\n"
     assert "Internal missing residues kept: 1" in "\n".join(writer.log_messages)
+
+
+def test_protonate_runs_pdb2pqr_with_charmm_nomenclature(monkeypatch, tmp_path):
+    """CHARMM protonation invokes PDB2PQR and updates the working PDB."""
+    source = tmp_path / "input.pdb"
+    source.write_text("HEADER TEST\nEND\n")
+
+    def fake_run(command, check):
+        output = Path(command[command.index("--pdb-output") + 1])
+        output.write_text("ATOM      1  CA  ALA A   1       1.000   2.000   3.000\nEND\n")
+        assert command[:3] == ["pdb2pqr", "--ff", "CHARMM"]
+        assert command[command.index("--ffout") + 1] == "CHARMM"
+        assert command[command.index("--with-ph") + 1] == "7.4"
+        assert "--titration-state-method" in command
+
+    monkeypatch.setattr(pdbwriter_module.shutil, "which", lambda name: name)
+    monkeypatch.setattr(pdbwriter_module.subprocess, "run", fake_run)
+
+    writer = PDBWriter(str(source))
+    output = writer.protonate(pH=7.4, ff="CHARMM")
+
+    assert output == Path(writer.input_file)
+    assert output.read_text().startswith("ATOM")
+
+
+def test_extended_crd_uses_charmm_residue_indices_and_masses(tmp_path, monkeypatch):
+    """Extended CRD follows CHARMM-GUI's sequential index and mass columns."""
+    source = tmp_path / "input.pdb"
+    source.write_text(
+        "ATOM      1  N   ALA A   8       1.000   2.000   3.000  1.00 20.00           N  \n"
+        "ATOM      2  CA  ALA A   8       2.000   2.000   3.000  1.00 20.00           C  \n"
+        "ATOM      3  CA  GLY A   9       3.000   2.000   3.000  1.00 20.00           C  \n"
+        "END\n"
+    )
+    monkeypatch.chdir(tmp_path)
+    output = tmp_path / "system.crd"
+
+    writer = PDBWriter(str(source))
+    writer.write_ext_crd(output)
+    records = [line.split() for line in output.read_text().splitlines() if line.strip() and not line.startswith("*") and "EXT" not in line]
+
+    assert records[0][0:4] == ["1", "1", "ALA", "N"]
+    assert records[1][0:4] == ["2", "1", "ALA", "CA"]
+    assert records[2][0:4] == ["3", "2", "GLY", "CA"]
+    assert records[0][8] == "8"
+    assert float(records[0][9]) > 14.0
+
+
+def test_pdb_id_alone_downloads_official_structure(tmp_path, monkeypatch):
+    """A bare PDB ID is a download operation with a predictable filename."""
+    def fake_download(url, destination):
+        assert url == "https://files.rcsb.org/download/1AKI.pdb"
+        Path(destination).write_text("HEADER 1AKI\nEND\n")
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("mstbx.commands.pdbwriter.urllib.request.urlretrieve", fake_download)
+
+    result = CliRunner().invoke(pdbwriter, ["--pdb-id", "1AKI"])
+
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / "1aki.pdb").read_text() == "HEADER 1AKI\nEND\n"

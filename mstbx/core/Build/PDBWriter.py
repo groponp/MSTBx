@@ -1,5 +1,9 @@
 from datetime import datetime
+import shutil
+import subprocess
+import sys
 import tempfile
+from pathlib import Path
 import MDAnalysis as mda
 from mstbx.core.Utils.Validator import FormatValidator
 
@@ -185,24 +189,68 @@ class PDBWriter:
         self._add_log(f"Total SSBONDs detected: {found}")
         return self.ssbonds
 
-    def protonate(self, pH=7.0, ff="CHARMM"):
-        self._add_log(f"Protonating structure at pH {pH} with {ff} nomenclature using pdb2pqr...")
-        # This will require pdb2pqr to be installed and in PATH
-        # For now, we will simulate the call or use a placeholder if not found
-        output_pqr = "protonated.pqr"
-        output_pdb = "protonated.pdb"
-        
-        cmd = f"pdb2pqr --ff={ff} --ffout={ff} --with-ph={pH} --ph-calc-method=propka {self.input_file} {output_pqr}"
-        self._add_log(f"Running command: {cmd}")
-        
-        # In a real scenario, we would run:
-        # try:
-        #     subprocess.run(cmd, shell=True, check=True)
-        #     self.input_file = output_pdb # pdb2pqr can also output PDB
-        # except:
-        #     self._add_log("ERROR: pdb2pqr failed or not found.")
-        
-        self._add_log("Protonation step placeholder executed (requires pdb2pqr installed).")
+    def protonate(self, pH=7.0, ff="CHARMM", executable="pdb2pqr"):
+        """Aplica estados de protonação e nomenclatura de um campo de força.
+
+        Parameters
+        ----------
+        pH : float, default=7.0
+            pH usado pelo cálculo PROPKA de estados tituláveis.
+        ff : {"CHARMM", "AMBER"}, default="CHARMM"
+            Campo de força de origem e esquema de nomes da estrutura escrita.
+            ``CHARMM`` produz nomes como ``HSD``, ``HSE``, ``HSP``, ``ASPP``
+            e ``GLUP``, compatíveis com CHARMM/NAMD e com CHARMM36 no GROMACS.
+        executable : str, default="pdb2pqr"
+            Executável PDB2PQR.
+
+        Returns
+        -------
+        pathlib.Path
+            Arquivo PDB protonado usado nas etapas seguintes.
+
+        Raises
+        ------
+        RuntimeError
+            Se PDB2PQR não estiver instalado ou não gerar o PDB de saída.
+        """
+        ff = ff.upper()
+        if ff not in {"CHARMM", "AMBER"}:
+            raise ValueError("ff must be CHARMM or AMBER")
+        command = shutil.which(executable)
+        if command is None:
+            sibling = Path(sys.executable).with_name(executable)
+            command = str(sibling) if sibling.is_file() else executable
+        pqr = tempfile.NamedTemporaryFile(suffix=".pqr", prefix="mstbx_pdb2pqr_", delete=False)
+        pdb = tempfile.NamedTemporaryFile(suffix=".pdb", prefix="mstbx_protonated_", delete=False)
+        pqr.close()
+        pdb.close()
+        args = [
+            command,
+            "--ff", ff,
+            "--ffout", ff,
+            "--with-ph", str(pH),
+            "--titration-state-method", "propka",
+            "--keep-chain",
+            "--pdb-output", pdb.name,
+            str(self.input_file),
+            pqr.name,
+        ]
+        self._add_log(f"Protonating at pH {pH} with {ff} nomenclature.")
+        self._add_log("Running command: " + " ".join(args))
+        try:
+            subprocess.run(args, check=True)
+        except FileNotFoundError as exc:
+            raise RuntimeError(
+                "PDB2PQR was not found. Install it with `pip install pdb2pqr` "
+                "or use the MSTBx Conda environment."
+            ) from exc
+        finally:
+            Path(pqr.name).unlink(missing_ok=True)
+        if not Path(pdb.name).is_file() or not Path(pdb.name).stat().st_size:
+            raise RuntimeError("PDB2PQR completed without producing a PDB output.")
+        self.input_file = pdb.name
+        self._add_log(f"Protonated PDB written with {ff} nomenclature: {pdb.name}")
+        return Path(pdb.name)
 
     def edit_structure(self, rename_chains=None, renumber_residues=None, add_segid=None):
         u = mda.Universe(self.input_file)
@@ -272,13 +320,13 @@ class PDBWriter:
             
             for i, atom in enumerate(u.atoms):
                 atomno = i + 1
-                resno = atom.resid
+                resno = atom.resindex + 1
                 resname = atom.resname
                 atomname = atom.name
                 x, y, z = atom.position
-                segname = atom.segid if hasattr(atom, 'segid') else 'PROA'
+                segname = (getattr(atom, "segid", "") or "PROA")[:8]
                 resid = str(atom.resid)
-                weight = getattr(atom, 'charge', 0.0)
+                weight = float(getattr(atom, "mass", 0.0) or 0.0)
                 
                 line = "{:10d}{:10d}  {:<8s}  {:<8s}{:20.10f}{:20.10f}{:20.10f}  {:<8s}  {:<8s}{:20.10f}\n".format(
                     atomno, resno, resname, atomname, x, y, z, segname, resid, weight

@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file.
 - Added unit, regression, and adversarial coverage for CGenFF Web input preparation, including malformed/ambiguous inputs and overwrite protection.
 - Added complete GROMACS tutorials for both protein-only systems and protein-ligand systems, including the manual CGenFF Web upload/download boundary.
 - Added tutorial 0 for complete `pdbwriter` structure preparation, validation, repair, editing, CRD, and CGenFF input options.
+- Added a Conda installation recipe, explicit external-tool checks, version floors for Python dependencies, and wheel packaging for shared CHARMM topology data.
+- Made `pdbwriter --pH` execute PDB2PQR/PROPKA with real CHARMM or AMBER naming and corrected extended CHARMM CRD residue-index and mass fields.
 - Added project testing policy requiring unit, regression, and adversarial coverage for new workflows.
 - Extended the testing policy and automated surface coverage to the complete MSTBx project, including NAMD, OpenMM, structure builders, validators, docking, translation, enhanced sampling, and container helpers.
 - Integrated the consolidated OpenMM Runner as the native `mstbx openmm-run` command.

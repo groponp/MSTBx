@@ -29,23 +29,47 @@ While web-based system builders are convenient, they often struggle with massive
 
 ### 1. Environment Management (Conda)
 <p align="justify">
-It is highly recommended to use a dedicated environment to isolate dependencies (Python >= 3.12):
+Use the repository Conda recipe to install MSTBx together with the executable tools required by the validated GROMACS workflows (Python >= 3.12):
 </p>
 
 ```bash
-conda create -n mstbx python=3.12
+conda env create -f environment.yml
 conda activate mstbx
-
-git clone git@github.com:groponp/MSTBx.git
-cd MSTBx
-pip install -e .
 ```
 
-For development and validation, install the test extra:
+For a fresh checkout, the equivalent commands are:
 
 ```bash
+conda create -n mstbx python=3.12 pip
+conda activate mstbx
 pip install -e ".[test]"
 ```
+
+The Conda recipe installs `gromacs`, `openbabel`, OpenMM, PDBFixer, MDAnalysis,
+MDTraj, and the Python package. `gromacs` and `obabel` are external executables,
+not Python modules, so a Python-only `pip install` does not provide them.
+
+Verify the installation:
+
+```bash
+mstbx --help
+gmx --version
+obabel -V
+python -m pytest
+```
+
+VMD/NAMD and Apptainer are optional external programs for the corresponding
+workflows. Install them through the provider or cluster module system and verify
+them separately:
+
+```bash
+vmd -dispdev text -eofexit
+namd2 --version
+apptainer --version
+```
+
+The GROMACS force field and CGenFF converter are packaged inside the Python
+wheel. The CHARMM-GUI/CGenFF Web service remains a manual external step.
 
 ### 2. Persistent Shell Completion
 <p align="justify">
@@ -279,7 +303,9 @@ Advanced preparation tool for repairing, annotating, and converting coordinate f
 - `--fix-structure`: Repairs missing atoms and internal residues.
 - `--fix-keep-hetatoms`: Keeps waters, ions, ligands, and other HETATM records during structure repair.
 - `--fix-add-hydrogens`: Adds hydrogens during structure repair using `--pH`; by default repair stays heavy-atom-only.
-- `--pH`: Sets target pH for protonation (e.g., `--pH 7.4`).
+- `--pH`: Runs PDB2PQR/PROPKA at the requested pH (e.g., `--pH 7.4`) and writes the protonated PDB.
+- `--ff-out CHARMM`: Uses CHARMM names such as `HSD`, `HSE`, `HSP`, `ASPP`, and `GLUP`; this is the default shared naming scheme for NAMD and CHARMM36/CGenFF in GROMACS.
+- `--ff-out AMBER`: Uses AMBER naming instead; select this only for an AMBER-based topology.
 - `--prepare-cgenff-inputs`: Prepares `protein_prepared.pdb`, `ligand_pose.pdb`, and `ligand_for_cgenff.mol2` for manual CGenFF Web upload.
 - `--ligand-pH`: Sets ligand pH for Open Babel when preparing CGenFF inputs (Default: 7.4).
 - `--ssbond`: Heuristic detection of disulfide bridges.
@@ -394,8 +420,14 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
    ```bash
    mstbx pdbwriter --help
    ```
-   The input coordinate file is supplied with `--input`/`-i`; `--output`/`-o` is the output file or directory. Use `--pdb-id` instead of `--input` when the official RCSB record should be downloaded internally. `--select-chains` accepts comma-separated chain IDs.
-2. **Repair a local structure**:
+   The input coordinate file is supplied with `--input`/`-i`; `--output`/`-o` is the output file or directory. Use `--pdb-id` instead of `--input` when the official RCSB record should be downloaded internally. With only `--pdb-id`, PDBWriter downloads `<pdb-id>.pdb` to the current directory; use `--output` to choose another path and `--overwrite` to replace it. `--select-chains` accepts comma-separated chain IDs.
+2. **Download a PDB without processing it**:
+   ```bash
+   mstbx pdbwriter --pdb-id 1AKI
+   mstbx pdbwriter --pdb-id 1AKI --output input/1aki.pdb --overwrite
+   ```
+   The first form only downloads the official RCSB PDB file and does not run PDBFixer or protonation.
+3. **Repair a local structure**:
    ```bash
    mstbx pdbwriter \
      --input raw.pdb \
@@ -412,7 +444,7 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
      --fix-structure \
      --select-chains A
    ```
-3. **Repair while preserving ligands, waters, or ions**:
+4. **Repair while preserving ligands, waters, or ions**:
    ```bash
    mstbx pdbwriter \
      --pdb-id 2OI0 \
@@ -430,7 +462,7 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
      --fix-add-hydrogens \
      --pH 7.4
    ```
-4. **Request pH/force-field nomenclature and disulfide detection**:
+5. **Request pH/force-field nomenclature and disulfide detection**:
    ```bash
    mstbx pdbwriter \
      --input prepared.pdb \
@@ -439,8 +471,8 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
      --ff-out CHARMM \
      --ssbond
    ```
-   `--ff-out` accepts `CHARMM` or `AMBER`. `--ssbond` detects close CYS SG pairs and writes SSBOND records. Review the generated report and the structure before simulation.
-5. **Apply chain, residue, and segment edits**:
+   `--ff-out` accepts `CHARMM` or `AMBER`. With `CHARMM`, PDB2PQR runs with CHARMM input/output naming and applies PROPKA titration states. `--ssbond` detects close CYS SG pairs and writes SSBOND records. Review the generated report and the structure before simulation.
+6. **Apply chain, residue, and segment edits**:
    ```bash
    mstbx pdbwriter \
      --input prepared.pdb \
@@ -451,7 +483,7 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
      --segid PROT
    ```
    `--rename-chain` may be repeated, `--renumber` sets the starting residue number, and `--segid` sets the segment identifier.
-6. **Generate and validate an extended CHARMM CRD**:
+7. **Generate and validate an extended CHARMM CRD**:
    ```bash
    mstbx pdbwriter \
      --input step3_input.pdb \
@@ -464,7 +496,7 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
      --check-mol-format
    ```
    `--mol` is validation input only and must be combined with `--check-mol-format`. The same validator accepts PDB, PSF, CRD, and MOL2 files.
-7. **Prepare CGenFF Web inputs**:
+8. **Prepare CGenFF Web inputs**:
    ```bash
    mstbx pdbwriter \
      --prepare-cgenff-inputs \
