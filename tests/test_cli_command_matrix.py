@@ -59,6 +59,7 @@ def test_cli_rejects_incomplete_required_options():
         ["pdbwriter", "--fix-structure"],
         ["resetpsf"],
         ["openmm-run"],
+        ["md-inputs", "--env", "solution"],
     ]
 
     for args in cases:
@@ -66,7 +67,7 @@ def test_cli_rejects_incomplete_required_options():
         assert result.exit_code != 0, args
         assert (
             "Missing option" in result.output
-            or "required" in result.output.lower()
+            or "require" in result.output.lower()
             or "must be provided" in result.output
         )
         assert "Traceback" not in result.output
@@ -108,6 +109,20 @@ def test_help_defaults_are_exposed_for_gromacs_and_openmm():
     assert "[default: 1.8]" in gmx.output
     assert "[default: runs]" in md.output
     assert "--mk-inp" in openmm.output
+
+
+def test_md_inputs_help_groups_options_by_engine():
+    """md-inputs --help must render real NAMD/GROMACS sections, not a
+    hand-wrapped epilog string (see the pdbwriter epilog regression)."""
+    result = CliRunner().invoke(cli, ["md-inputs", "--help"])
+
+    assert result.exit_code == 0
+    for title in ["General:", "NAMD (trigger: --engine namd):", "GROMACS (trigger: --engine gromacs):"]:
+        assert title in result.output, title
+    gromacs_section = result.output.split("GROMACS (trigger: --engine gromacs):")[1]
+    assert "--force" in gromacs_section and "2092" in gromacs_section
+    namd_section = result.output.split("NAMD (trigger: --engine namd):")[1]
+    assert "--dcdfreq" in namd_section and "DCD" in namd_section
 
 
 def test_gromacs_cli_rejects_membrane_until_supported(tmp_path):
