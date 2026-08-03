@@ -3,7 +3,7 @@
 # Module Reference and Technical Documentation
 
 This is the flag-by-flag reference for every MSTBx module. For runnable,
-narrated walkthroughs, use the [tutorials index](tutorials/index.md) instead —
+narrated walkthroughs, use the [tutorials index](tutorials/index.md) instead:
 this page intentionally does not repeat full worked examples where a tutorial
 already covers the same command sequence.
 

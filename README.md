@@ -85,8 +85,8 @@ eval "$(_MSTBX_COMPLETE=zsh_source $HOME/miniconda3/envs/mstbx/bin/mstbx)"
 
 ## 📚 Documentation Map
 
-Start with the tutorials — they are the primary documentation and cover every
-workflow end to end, one file per engine:
+Start with the tutorials: they are the primary documentation and cover every
+workflow end to end, one file per engine.
 
 - **[Tutorials index](docs/tutorials/index.md)**
   - [0. PDBWriter Structure Preparation](docs/tutorials/pdbwriter.md)
@@ -94,12 +94,12 @@ workflow end to end, one file per engine:
   - [GROMACS workflows](docs/tutorials/gromacs.md) (protein-only and protein-ligand/CGenFF)
   - [OpenMM workflows](docs/tutorials/openmm.md)
   - [Docking workflows](docs/tutorials/docking.md)
-- **[Module Reference](docs/REFERENCE.md)** — flag-by-flag reference for
+- **[Module Reference](docs/REFERENCE.md)**: flag-by-flag reference for
   every command, for when a tutorial's defaults need to be looked up or
   changed.
-- **[Testing Manual](docs/Testing_Manual.md)** — verification checklist per
+- **[Testing Manual](docs/Testing_Manual.md)**: verification checklist per
   workflow.
-- **[Changelog](CHANGELOG.md)** — version history.
+- **[Changelog](CHANGELOG.md)**: version history.
 
 ---
 
@@ -156,9 +156,9 @@ MSTBx follows strict internal standards to ensure reliability:
 
 ## Module Reference and Technical Documentation
 
-The full flag-by-flag reference for every module — `topopsfgen`,
+The full flag-by-flag reference for every module (`topopsfgen`,
 `md-inputs` (NAMD and GROMACS engines), `topogmx`, `smd-inputs`,
-`metad-inputs`, `pdbwriter`, `resetpsf`, `md-translate`, and `openmm-run` —
+`metad-inputs`, `pdbwriter`, `resetpsf`, `md-translate`, and `openmm-run`),
 including the engine architecture table, generated directory layouts, and
 default constants, has moved to **[docs/REFERENCE.md](docs/REFERENCE.md)**.
 

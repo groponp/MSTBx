@@ -27,7 +27,7 @@ OpenMM, and docking workflows.
 
 ## See also
 
-- [Module Reference](../REFERENCE.md) — full command/flag reference for every
+- [Module Reference](../REFERENCE.md): full command/flag reference for every
   MSTBx module.
-- [Testing Manual](../Testing_Manual.md) — verification checklist for each
+- [Testing Manual](../Testing_Manual.md): verification checklist for each
   workflow.
