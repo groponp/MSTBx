@@ -78,13 +78,7 @@ Defaults are 50,000 EM steps, 2 ns NVT, 5 ns NPT, 100 ns production, 2 fs timest
 
 ## 5. Inspect and run
 
-The tutorial script runs all preparation commands above but stops before `mdrun`:
-
-```bash
-./RunTest.sh
-```
-
-Inspect `runs/01build/topol.top`, `runs/01build/ionized.gro`, the restraint file, and the generated `runs/run_all.sh`. Run only after inspection:
+The commands above are the complete tutorial and stop before `mdrun`. Inspect `runs/01build/topol.top`, `runs/01build/ionized.gro`, the restraint file, and the generated `runs/run_all.sh`. Run only after inspection:
 
 ```bash
 cd runs
@@ -98,3 +92,5 @@ cp -a runs rep1
 cp -a runs rep2
 cp -a runs rep3
 ```
+
+`RunTest.sh` is a repository validation helper; it is not required to reproduce the tutorial commands above.

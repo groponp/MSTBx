@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Added unit, regression, and adversarial coverage for CGenFF Web input preparation, including malformed/ambiguous inputs and overwrite protection.
 - Added complete GROMACS tutorials for both protein-only systems and protein-ligand systems, including the manual CGenFF Web upload/download boundary.
 - Added project testing policy requiring unit, regression, and adversarial coverage for new workflows.
+- Extended the testing policy and automated surface coverage to the complete MSTBx project, including NAMD, OpenMM, structure builders, validators, docking, translation, enhanced sampling, and container helpers.
 - Integrated the consolidated OpenMM Runner as the native `mstbx openmm-run` command.
 - Created `mstbx/core/MDProtocols/OpenMMRunner.py` containing the core simulation logic (Minimization, NVT/NPT Equilibration, and Production).
 - Created the Click interface wrapper in `mstbx/commands/openmm_run.py` to parse all original arguments (`-i`, `-p`, `-c`, `-irst`, `-orst`, `--rewrap`, `--mk-inp`, etc.).

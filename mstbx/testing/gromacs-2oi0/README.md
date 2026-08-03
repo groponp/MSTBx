@@ -23,7 +23,16 @@ pip install -e ".[test]"
 The example uses PDB entry 2OI0, chain A, and ligand residue `283`:
 
 ```bash
-./PrepareCGenFFInputs.sh
+mkdir -p work/cgenff_inputs_2oi0
+curl -L https://files.rcsb.org/download/2OI0.pdb -o work/cgenff_inputs_2oi0/2oi0.pdb
+mstbx pdbwriter --prepare-cgenff-inputs \
+  --input work/cgenff_inputs_2oi0/2oi0.pdb \
+  --select-chains A \
+  --pdb-ligand-resname 283 \
+  --pdb-ligand-chain A \
+  --output work/cgenff_inputs_2oi0 \
+  --ligand-pH 7.4 \
+  --overwrite
 ```
 
 This writes `work/cgenff_inputs_2oi0/` containing:
@@ -35,7 +44,7 @@ ligand_for_cgenff.mol2
 cgenff_inputs_log.json
 ```
 
-The command is equivalent to:
+When working from this repository, the downloaded PDB can be replaced by the validation copy:
 
 ```bash
 mstbx pdbwriter --prepare-cgenff-inputs \
@@ -62,11 +71,43 @@ The STR and the selected CHARMM36/CGenFF force field must use compatible CGenFF 
 
 After the STR download, continue with:
 
+Run the topology builder explicitly:
+
 ```bash
-INPUTS_DIR="$PWD/work/cgenff_inputs_2oi0" ./RunTest.sh
+mstbx topogmx \
+  --protein work/cgenff_inputs_2oi0/protein_prepared.pdb \
+  --ligand-mol2 work/cgenff_inputs_2oi0/ligand_for_cgenff.mol2 \
+  --ligand-str work/cgenff_inputs_2oi0/ligand_for_cgenff.str \
+  --ligand-resname LIG \
+  --forcefield-dir "$(python -c 'from mstbx.core.Gromacs.Build import DEFAULT_FORCEFIELD_DIR; print(DEFAULT_FORCEFIELD_DIR)')" \
+  --output-dir runs \
+  --box-distance 1.8 \
+  --pdb2gmx-ter \
+  --pdb2gmx-selection $'0\n0\n' \
+  --gmx gmx \
+  --overwrite
 ```
 
-`RunTest.sh` runs `topogmx` first, then `md-inputs`. It creates one validated system and does not launch `mdrun`:
+Then generate the protocols, index groups, restraints, and runner:
+
+```bash
+mstbx md-inputs --engine gromacs \
+  --env solution \
+  --runs-dir runs \
+  --temperature 310 \
+  --nvt-time 2 \
+  --npt-time 5 \
+  --mdtime 100 \
+  --xtc-frequency 50 \
+  --name-group-index-1 Protein_ligand \
+  --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
+  --name-group-index-2 Water_and_ions \
+  --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN" \
+  --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN or resname LIG and not name H*" \
+  --gmx gmx
+```
+
+These commands create one validated system and do not launch `mdrun`:
 
 ```text
 runs/
@@ -83,7 +124,7 @@ Defaults used by this validation are 1.8 nm box distance, 50,000 EM steps, 2 ns 
 
 ## 5. Inspect, then run
 
-Before running, inspect the generated topology and the `grompp` commands in `runs/run_all.sh`. When the system is approved:
+Before running, inspect `runs/01build/topol.top`, `runs/01build/ionized.gro`, the generated restraint files, and the `grompp` commands in `runs/run_all.sh`. When the system is approved:
 
 ```bash
 cd runs
@@ -103,3 +144,5 @@ cp -a runs rep1
 cp -a runs rep2
 cp -a runs rep3
 ```
+
+`PrepareCGenFFInputs.sh` and `RunTest.sh` are repository validation helpers only; the tutorial above intentionally exposes every command instead of hiding the workflow inside a script.

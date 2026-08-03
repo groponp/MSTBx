@@ -552,23 +552,22 @@ A complete step-by-step example using `openmm-run` to execute minimization, mult
 ### 7. GROMACS CHARMM/CGenFF Workflow
 A complete GROMACS workflow has two distinct input paths: a protein-only path and a protein-ligand path. For the ligand path, MSTBx prepares the files for CGenFF Web, the user obtains the STR manually, and only then does `topogmx` build the solvated system.
 
-1. **Prepare inputs for CGenFF Web** using the 2OI0 validation example:
+1. **Prepare inputs for CGenFF Web**:
    ```bash
    cd mstbx/testing/gromacs-2oi0
-   ./PrepareCGenFFInputs.sh
+   mkdir -p work/cgenff_inputs_2oi0
+   curl -L https://files.rcsb.org/download/2OI0.pdb -o work/cgenff_inputs_2oi0/2oi0.pdb
+   mstbx pdbwriter --prepare-cgenff-inputs \
+     --input work/cgenff_inputs_2oi0/2oi0.pdb \
+     --select-chains A \
+     --pdb-ligand-resname 283 \
+     --pdb-ligand-chain A \
+     --output work/cgenff_inputs_2oi0 \
+     --ligand-pH 7.4 \
+     --overwrite
    ```
    Upload `work/cgenff_inputs_2oi0/ligand_for_cgenff.mol2`, do not select `Include parameters that are already in CGenFF`, and save the downloaded result as `work/cgenff_inputs_2oi0/ligand_for_cgenff.str`. This manual web step cannot be automated by MSTBx.
-2. **Build and configure the 2OI0 system** after the STR is present:
-   ```bash
-   INPUTS_DIR="$PWD/work/cgenff_inputs_2oi0" ./RunTest.sh
-   ```
-   The script executes `topogmx`, then `md-inputs`; it creates topology, solvation, ions, index groups, restraints, MDPs, and `runs/run_all.sh`, but does not launch a simulation.
-3. **Protein-only validation**: this downloads 1UBQ, extracts a protein-only PDB, builds the same single-system layout, and stops before `mdrun`:
-   ```bash
-   cd ../gromacs-protein
-   ./RunTest.sh
-   ```
-4. **Equivalent explicit 2OI0 topology command**: after preparing the CGenFF inputs and downloading the STR, build the system once:
+2. **Build the 2OI0 system** after the STR is present:
    ```bash
    mstbx topogmx \
      --protein work/cgenff_inputs_2oi0/protein_prepared.pdb \
@@ -580,7 +579,7 @@ A complete GROMACS workflow has two distinct input paths: a protein-only path an
      --pdb2gmx-ter \
      --pdb2gmx-selection $'1\n1\n'
    ```
-5. **Write protocols, index, restraints, and runner**: NVT and NPT times are given in ns, following the same time convention used by the NAMD tutorials.
+3. **Write protocols, index, restraints, and runner**: NVT and NPT times are given in ns, following the same time convention used by the NAMD tutorials.
    ```bash
    mstbx md-inputs --engine gromacs \
      --env solution \
@@ -597,13 +596,32 @@ A complete GROMACS workflow has two distinct input paths: a protein-only path an
      --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN or resname LIG and not name H*" \
      --gmx gmx
    ```
-6. **Inspect and run the system later**:
+4. **Inspect and run the system later**:
    ```bash
    cd runs
    ./run_all.sh
    ```
 
 Create replicas only after the system is validated by copying the full directory, for example `cp -a runs rep1`, `cp -a runs rep2`, and `cp -a runs rep3`. MSTBx deliberately does not manage replicas internally.
+
+The repository scripts under `mstbx/testing/gromacs-2oi0/` validate this same sequence, but the tutorial intentionally shows each command explicitly.
+
+### Project-wide testing
+
+The testing policy applies to every MSTBx workflow, including the existing NAMD, GROMACS, OpenMM, structure preparation, PSF/system construction, docking, translation, enhanced-sampling, and container modules. Each maintained workflow must have:
+
+- unit tests for pure logic, parsers, defaults, and generated files;
+- regression tests for validated command order, file layout, and protocol constants;
+- adversarial tests for malformed input, invalid option combinations, missing metadata, incomplete selections, and unavailable external tools.
+
+Run the complete automated suite from the repository root:
+
+```bash
+pip install -e ".[test]"
+python -m pytest
+```
+
+The suite validates all registered CLI commands and core input-generation behavior without launching long MD simulations. Engine-specific command-order tests and reproducible examples remain under `mstbx/testing/`.
 
 Use `--pdb2gmx-protonation` only when explicit HIS/ASP/GLU/LYS/ARG protonation choices are required. Otherwise, `pdb2gmx` uses its force-field defaults.
 
