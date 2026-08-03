@@ -270,7 +270,17 @@ class PDBWriter:
 
         if add_segid:
             self._add_log(f"Adding/Modifying segid: {add_segid}")
-            u.atoms.segids = add_segid
+            segids = [value.strip() for value in str(add_segid).split(",") if value.strip()]
+            if len(segids) == 1:
+                u.segments.segids = segids * len(u.segments)
+            elif len(segids) == len(u.segments):
+                u.segments.segids = segids
+            else:
+                raise ValueError(
+                    f"--segid received {len(segids)} values, but the structure has "
+                    f"{len(u.segments)} segments. Use one value for all segments or "
+                    "one comma-separated value per segment."
+                )
 
         u.atoms.write("edited_temp.pdb")
         self.input_file = "edited_temp.pdb"
@@ -283,7 +293,7 @@ class PDBWriter:
         ----------
         selection : str
             Expressão MDAnalysis, por exemplo ``"protein or resname LIG"``
-            ou ``"chain A B and not H*"``.
+            ou ``"chainID A B and not name H*"``.
 
         Returns
         -------

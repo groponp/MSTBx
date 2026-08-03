@@ -475,6 +475,13 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
      --output heavy_atoms.pdb
    ```
    `--select-atoms` does not call PDBFixer, so selected HETATM records remain available. An empty or invalid MDAnalysis selection stops with an error.
+   To assign CHARMM segment IDs, use one value for all segments or one comma-separated value per segment:
+   ```bash
+   mstbx pdbwriter \
+     --input bc.pdb \
+     --segid PROB,PROC \
+     --output bc_charmm.pdb
+   ```
 5. **Repair while preserving ligands, waters, or ions**:
    ```bash
    mstbx pdbwriter \

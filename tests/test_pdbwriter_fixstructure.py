@@ -288,3 +288,18 @@ def test_select_atoms_rejects_empty_selection(tmp_path):
 
     with pytest.raises(ValueError, match="Empty MDAnalysis selection"):
         PDBWriter(str(source)).select_atoms("resname LIG")
+
+
+def test_edit_structure_assigns_segids_at_segment_level(tmp_path):
+    """Comma-separated segids map to MDAnalysis segments after selection."""
+    source = tmp_path / "chains.pdb"
+    source.write_text(
+        "ATOM      1  CA  ALA B   1       1.000   2.000   3.000  1.00 20.00           C  \n"
+        "ATOM      2  CA  ALA C   1       4.000   5.000   6.000  1.00 20.00           C  \n"
+        "END\n"
+    )
+    writer = PDBWriter(str(source))
+    writer.edit_structure(add_segid="PROB,PROC")
+    universe = pdbwriter_module.mda.Universe(writer.input_file)
+
+    assert list(universe.segments.segids) == ["PROB", "PROC"]

@@ -40,7 +40,17 @@ def _write_selected_chains(source, destination, chains):
         )
     Path(destination).write_text("\n".join(output) + "\nEND\n")
 
-@click.command(help="Advanced PDB preparation (Fix, Protonate, Edit, SSBOND) and CRD generation.")
+@click.command(
+    help="Advanced PDB preparation (Fix, Protonate, Edit, SSBOND) and CRD generation.",
+    epilog="""Examples:
+  mstbx pdbwriter --pdb-id 7A3S --select-atoms \"chainID B C and protein\" -o bc.pdb
+  mstbx pdbwriter -i complex.pdb --select-atoms \"protein or resname LIG\" -o complex_clean.pdb
+  mstbx pdbwriter -i bc.pdb --segid PROB,PROC --ssbond -o bc_charmm.pdb
+  mstbx pdbwriter -i protein.pdb --pH 7.4 --ff-out CHARMM -o protein_ph7.pdb
+  mstbx pdbwriter -i system.pdb --write-ext-crd -o system.crd
+
+Selections use MDAnalysis syntax: use chainID (not chain) and name H* for hydrogens.""",
+)
 @click.option('--input', '-i', type=click.Path(exists=True, dir_okay=False), help="Input PDB/MMCIF file.")
 @click.option('--mol', type=click.Path(exists=True, dir_okay=False), help="Input molecule file for validation only (works with --check-mol-format).")
 @click.option('--psf', type=click.Path(exists=True, dir_okay=False), help="Input PSF file (optional, used for CRD).")
@@ -54,7 +64,7 @@ def _write_selected_chains(source, destination, chains):
 @click.option('--ssbond', is_flag=True, help="Detect disulfide bonds and add SSBOND lines.")
 @click.option('--rename-chain', multiple=True, help="Rename chain: 'old:new' (e.g., 'A:B').")
 @click.option('--renumber', type=int, help="Renumber residues starting from this value.")
-@click.option('--segid', help="Add/Modify segid for all atoms.")
+@click.option('--segid', help="Segment ID: one value for all segments or comma-separated values (e.g. PROB,PROC).")
 @click.option('--select-atoms', '--selection-atoms', help="Keep atoms matching an MDAnalysis selection.")
 @click.option('--write-ext-crd', is_flag=True, help="Generate an extended CHARMM-GUI style .crd file.")
 @click.option('--check-mol-format', is_flag=True, help="Validate the input format (PDB, PSF, CRD, MOL2) and exit.")
@@ -171,23 +181,27 @@ def pdbwriter(input, mol, psf, output, fix_structure, fix_keep_hetatoms, fix_add
         uxm.message(message=f"Protonating at pH {ph}...", type="info")
         writer.protonate(pH=ph, ff=ff_out)
     
-    if ssbond:
-        uxm.message(message="Detecting S-S bonds...", type="info")
-        writer.find_ssbonds()
-    
     chains_dict = {}
     for rc in rename_chain:
         if ':' in rc:
             old, new = rc.split(':')
             chains_dict[old] = new
     
-    if chains_dict or renumber is not None or segid:
+    if chains_dict:
         uxm.message(message="Applying structural edits...", type="info")
-        writer.edit_structure(rename_chains=chains_dict, renumber_residues=renumber, add_segid=segid)
+        writer.edit_structure(rename_chains=chains_dict)
 
     if select_atoms:
         uxm.message(message=f"Applying MDAnalysis selection: {select_atoms}", type="info")
         writer.select_atoms(select_atoms)
+
+    if ssbond:
+        uxm.message(message="Detecting S-S bonds...", type="info")
+        writer.find_ssbonds()
+
+    if renumber is not None or segid:
+        uxm.message(message="Applying structural edits...", type="info")
+        writer.edit_structure(renumber_residues=renumber, add_segid=segid)
     
     if write_ext_crd:
         crd_output = output if output.endswith('.crd') else output.rsplit('.', 1)[0] + '.crd'
