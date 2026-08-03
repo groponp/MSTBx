@@ -55,6 +55,19 @@ eval "$(_MSTBX_COMPLETE=zsh_source $HOME/miniconda3/envs/mstbx/bin/mstbx)"
 
 ## Module Reference and Technical Documentation
 
+### Engine Architecture
+
+MSTBx keeps topology/system construction separate from protocol generation:
+
+| Engine | Topology/system builder | Standard MD inputs | Runner |
+| --- | --- | --- | --- |
+| NAMD | `topopsfgen` | `md-inputs --engine namd` | generated NAMD runner |
+| GROMACS | `topogmx` | `md-inputs --engine gromacs` | generated `run_all.sh` |
+| AMBER | `topotleap` | planned `md-inputs --engine amber` | planned |
+| OpenMM | CHARMM-style inputs or translated systems | planned `md-inputs --engine openmm` | `openmm-run` |
+
+This keeps `topo*` commands responsible for topology/system generation and `md-inputs` responsible for engine-specific equilibration and production inputs.
+
 ### 1. `topopsfgen` - System Assembly and Solvation
 
 <p align="justify">
@@ -104,7 +117,7 @@ mstbx md-inputs --engine namd \
 ```
 *Logic*: Generates a NAMD protocol for a protein-ligand system. Note the use of `--lparm` to include the specific ligand parameter file (`tyl.prm`). The output includes a step-by-step pipeline (Minimization -> NVT -> NPT -> Production).
 
-### 2b. `gmx-build` and `gmx-inputs` - GROMACS CHARMM/CGenFF Workflow
+### 2b. `topogmx` and `md-inputs --engine gromacs` - GROMACS CHARMM/CGenFF Workflow
 
 <p align="justify">
 These commands prepare GROMACS systems while preserving the same MSTBx directory nomenclature used by the NAMD solution workflow: `01build`, `02nvt`, `03npt`, `04md`, `restraints`, and `toppar`. The minimization MDP is written inside `01build` so the stage layout remains consistent across engines.
@@ -137,7 +150,7 @@ rep1/
 
 **Protein-only example:**
 ```bash
-mstbx gmx-build \
+mstbx topogmx \
   --protein protein_prepared.pdb \
   --output-dir runs \
   --replicas 3 \
@@ -146,7 +159,8 @@ mstbx gmx-build \
   --pdb2gmx-selection $'1\n1\n' \
   --gmx gmx
 
-mstbx gmx-inputs \
+mstbx md-inputs --engine gromacs \
+  --env solution \
   --runs-dir runs \
   --replicas 3 \
   --name-group-index-1 Protein_ligand \
@@ -159,7 +173,7 @@ mstbx gmx-inputs \
 
 **Protein-ligand CGenFF example:**
 ```bash
-mstbx gmx-build \
+mstbx topogmx \
   --protein cgenff_inputs_2oi0/protein_prepared.pdb \
   --ligand-mol2 cgenff_inputs_2oi0/ligand_for_cgenff.mol2 \
   --ligand-str cgenff_inputs_2oi0/ligand_for_cgenff.str \
@@ -172,7 +186,8 @@ mstbx gmx-build \
   --gmx gmx \
   --overwrite
 
-mstbx gmx-inputs \
+mstbx md-inputs --engine gromacs \
+  --env solution \
   --runs-dir runs \
   --replicas 3 \
   --temperature 310 \
@@ -528,7 +543,7 @@ A GROMACS workflow that keeps the same solution-system directory names used by t
 
 1. **Build the system once**: Create `rep1/01build`, solvate, ionize, and copy the same built system to the requested replicas:
    ```bash
-   mstbx gmx-build \
+   mstbx topogmx \
      --protein protein_prepared.pdb \
      --ligand-mol2 ligand_for_cgenff.mol2 \
      --ligand-str ligand_for_cgenff.str \
@@ -541,7 +556,8 @@ A GROMACS workflow that keeps the same solution-system directory names used by t
    ```
 2. **Write protocols, index, restraints, and runners**:
    ```bash
-   mstbx gmx-inputs \
+   mstbx md-inputs --engine gromacs \
+     --env solution \
      --runs-dir runs \
      --replicas 3 \
      --temperature 310 \
@@ -567,7 +583,7 @@ Use `--pdb2gmx-protonation` only when explicit HIS/ASP/GLU/LYS/ARG protonation c
 Track key updates and features added in each version of MSTBx compared to previous releases:
 
 *   **`v0.8.10-beta` (Current Version)**:
-    *   **GROMACS CHARMM/CGenFF Workflow**: Added `gmx-build` and `gmx-inputs` with the MSTBx/NAMD-style layout (`01build`, `02nvt`, `03npt`, `04md`, `restraints`, `toppar`).
+    *   **GROMACS CHARMM/CGenFF Workflow**: Added `topogmx` for topology/system construction and `md-inputs --engine gromacs` for protocol, index, restraint, and runner generation.
     *   **OpenMM Integration**: Implemented the `openmm-run` command to run strict manual OpenMM runner simulations locally.
     *   **Tutorial Overhaul**: Added full step-by-step minitutorials in `README.md` with interactive anchor hyperlinks.
     *   **Testing Relocation**: Moved the `testing/` directory to `mstbx/testing/` to package all development validation assets inside the module.

@@ -9,7 +9,7 @@ mkdir -p input
 curl -L "https://files.rcsb.org/download/1UBQ.pdb" -o input/1ubq.pdb
 awk '/^(ATOM|TER)/ {print} END {print "END"}' input/1ubq.pdb > input/protein_prepared.pdb
 
-"$PYTHON" -m mstbx.cli gmx-build \
+"$PYTHON" -m mstbx.cli topogmx \
   --protein input/protein_prepared.pdb \
   --output-dir runs \
   --replicas 3 \
@@ -19,7 +19,8 @@ awk '/^(ATOM|TER)/ {print} END {print "END"}' input/1ubq.pdb > input/protein_pre
   --gmx "$GMX" \
   --overwrite
 
-"$PYTHON" -m mstbx.cli gmx-inputs \
+"$PYTHON" -m mstbx.cli md-inputs --engine gromacs \
+  --env solution \
   --runs-dir runs \
   --replicas 3 \
   --temperature 310 \

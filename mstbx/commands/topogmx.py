@@ -1,4 +1,4 @@
-"""Comando MSTBx para montar sistemas GROMACS."""
+"""Comando MSTBx para montar topologias e sistemas GROMACS."""
 
 from pathlib import Path
 
@@ -8,7 +8,7 @@ from mstbx.core.Gromacs.Build import DEFAULT_CGENFF_CONVERTER, DEFAULT_FORCEFIEL
 from mstbx.core.Utils.Utils import UnixMessage
 
 
-@click.command(help="Builds GROMACS systems using the MSTBx replica layout.")
+@click.command(help="Builds GROMACS topologies and systems using the MSTBx replica layout.")
 @click.option("--protein", type=click.Path(exists=True, dir_okay=False, path_type=Path), required=True, help="Prepared protein PDB.")
 @click.option("--ligand-mol2", type=click.Path(exists=True, dir_okay=False, path_type=Path), help="Ligand MOL2 used for CGenFF.")
 @click.option("--ligand-str", type=click.Path(exists=True, dir_okay=False, path_type=Path), help="Ligand STR downloaded from CGenFF.")
@@ -23,8 +23,8 @@ from mstbx.core.Utils.Utils import UnixMessage
 @click.option("--pdb2gmx-selection", help="Text sent to pdb2gmx stdin, for example $'1\\n1\\n'.")
 @click.option("--pdb2gmx-protonation", is_flag=True, help="Ask pdb2gmx for HIS/ASP/GLU/LYS/ARG states.")
 @click.option("--overwrite", is_flag=True, help="Overwrite the output directory.")
-def gmx_build(**kwargs):
-    """Executa o comando ``gmx-build``.
+def topogmx(**kwargs):
+    """Executa o comando ``topogmx``.
 
     Parameters
     ----------

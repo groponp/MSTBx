@@ -6,7 +6,7 @@ PYTHON="${PYTHON:-/home/groponp/miniconda3/envs/mstbx/bin/python}"
 GMX="${GMX:-gmx}"
 SOURCE="${SOURCE:-$ROOT/staging/gromacs_prepare/gmxpy_snapshot/2OI0/cgenff_inputs_2oi0}"
 
-"$PYTHON" -m mstbx.cli gmx-build \
+"$PYTHON" -m mstbx.cli topogmx \
   --protein "$SOURCE/protein_prepared.pdb" \
   --ligand-mol2 "$SOURCE/ligand_for_cgenff.mol2" \
   --ligand-str "$SOURCE/ligand_for_cgenff.str" \
@@ -19,7 +19,8 @@ SOURCE="${SOURCE:-$ROOT/staging/gromacs_prepare/gmxpy_snapshot/2OI0/cgenff_input
   --gmx "$GMX" \
   --overwrite
 
-"$PYTHON" -m mstbx.cli gmx-inputs \
+"$PYTHON" -m mstbx.cli md-inputs --engine gromacs \
+  --env solution \
   --runs-dir runs \
   --replicas 3 \
   --temperature 310 \

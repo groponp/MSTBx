@@ -1,8 +1,6 @@
 import click
 from mstbx.commands import (
     colabfold,
-    gmx_build,
-    gmx_inputs,
     md_inputs,
     md_translate,
     metad_inputs,
@@ -11,6 +9,7 @@ from mstbx.commands import (
     pdbwriter,
     resetpsf,
     smd_inputs,
+    topogmx,
     topopsfgen,
     topotleap,
 )
@@ -24,6 +23,7 @@ def cli():
 
 # Registramos los módulos con nombres claros y descripciones
 cli.add_command(topopsfgen.topopsfgen, name="topopsfgen")
+cli.add_command(topogmx.topogmx, name="topogmx")
 cli.add_command(topotleap.topotleap, name="topotleap")
 cli.add_command(md_inputs.md_inputs, name="md-inputs")
 cli.add_command(smd_inputs.smd_inputs, name="smd-inputs")
@@ -34,8 +34,6 @@ cli.add_command(mkdocking_cmplx.mkdocking_cmplx, name="mkdocking-cmplx")
 cli.add_command(md_translate.md_translate, name="md-translate")
 cli.add_command(resetpsf.resetpsf, name="resetpsf")
 cli.add_command(openmm_run.openmm_run, name="openmm-run")
-cli.add_command(gmx_build.gmx_build, name="gmx-build")
-cli.add_command(gmx_inputs.gmx_inputs, name="gmx-inputs")
 
 
 
