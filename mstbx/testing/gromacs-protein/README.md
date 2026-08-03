@@ -27,6 +27,18 @@ mstbx pdbwriter \
 
 `pdbwriter --fix-structure` keeps only internal missing-residue repair by default, does not add hydrogens unless requested, and removes heterogens. GROMACS `pdb2gmx` adds the force-field hydrogens in the next step.
 
+If you already inspected a local PDB and it contains missing heavy atoms or internal residues, repair that file before `topogmx`:
+
+```bash
+mstbx pdbwriter \
+  --input raw_protein.pdb \
+  --fix-structure \
+  --select-chains A \
+  --output input/protein_prepared.pdb
+```
+
+For reliable internal-gap detection, prefer an official RCSB input with SEQRES, for example `--pdb-id 1UBQ`. Do not add hydrogens with `--fix-add-hydrogens` in this GROMACS workflow; let `pdb2gmx` create hydrogens using the selected force field. If the structure has only terminal gaps, review them biologically rather than automatically rebuilding them.
+
 ## 3. Build, solvate, and ionize the system
 
 ```bash

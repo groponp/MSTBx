@@ -18,7 +18,25 @@ Install MSTBx in editable mode if needed:
 pip install -e ".[test]"
 ```
 
-## 2. Generate files for CGenFF Web
+## 2. Check and, if necessary, repair the input structure
+
+If the downloaded structure has missing heavy atoms or internal residues, repair it before extracting the ligand. Preserve HETATM records so residue `283` remains available for CGenFF:
+
+```bash
+mkdir -p work/cgenff_inputs_2oi0
+mstbx pdbwriter \
+  --fix-structure \
+  --fix-keep-hetatoms \
+  --pdb-id 2OI0 \
+  --select-chains A \
+  --output work/2oi0_fixed.pdb
+```
+
+Then use the repaired file in the next step by replacing `--pdb-id 2OI0` with `--input work/2oi0_fixed.pdb`. If the official structure has no relevant missing atoms, the direct `--pdb-id 2OI0` command below is sufficient. Do not use `--fix-add-hydrogens`; `pdb2gmx` will add force-field hydrogens later.
+
+For a local PDB without SEQRES, use an official RCSB structure when possible. MSTBx intentionally refuses to infer internal missing residues from a local file without sequence metadata.
+
+## 3. Generate files for CGenFF Web
 
 The example uses PDB entry 2OI0, chain A, and ligand residue `283`:
 
@@ -43,7 +61,7 @@ ligand_for_cgenff.mol2
 cgenff_inputs_log.json
 ```
 
-## 3. Submit the ligand manually to CGenFF Web
+## 4. Submit the ligand manually to CGenFF Web
 
 Upload `work/cgenff_inputs_2oi0/ligand_for_cgenff.mol2` to the CGenFF Web service. Do not select `Include parameters that are already in CGenFF`. Download the generated STR file and save it exactly as:
 
@@ -53,7 +71,7 @@ work/cgenff_inputs_2oi0/ligand_for_cgenff.str
 
 The STR and the selected CHARMM36/CGenFF force field must use compatible CGenFF versions. The packaged default is `charmm36-feb2026_cgenff-5.0.ff`.
 
-## 4. Build the solvated and ionized GROMACS system
+## 5. Build the solvated and ionized GROMACS system
 
 After the STR download, continue with:
 
@@ -108,7 +126,7 @@ runs/
 
 Defaults used by this validation are 1.8 nm box distance, 50,000 EM steps, 2 ns NVT, 5 ns NPT, 100 ns production, 2 fs timestep, and XTC frames every 50 ps. The default restraint selection is protein backbone plus ligand heavy atoms at 5 kcal mol-1 A-2 converted to GROMACS units.
 
-## 5. Inspect, then run
+## 6. Inspect, then run
 
 Before running, inspect `runs/01build/topol.top`, `runs/01build/ionized.gro`, the generated restraint files, and the `grompp` commands in `runs/run_all.sh`. When the system is approved:
 
