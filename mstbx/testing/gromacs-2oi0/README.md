@@ -152,6 +152,9 @@ runs/
 
 Defaults used by this validation are 1.8 nm box distance, 50,000 EM steps, 2 ns NVT, 5 ns NPT, 100 ns production, 2 fs timestep, and XTC frames every 50 ps. The default restraint selection is protein backbone plus ligand heavy atoms at 5 kcal mol-1 A-2 converted to GROMACS units.
 
+For the reason behind `PROTEIN_SEL` and `SOLUTE_SEL`, see the
+[GROMACS protonation and selection consistency reference](../../README.md#protonation-and-selection-consistency).
+
 ## 6. Inspect, then run
 
 Before running, inspect `runs/01build/topol.top`, `runs/01build/ionized.gro`, the generated restraint files, and the `grompp` commands in `runs/run_all.sh`. When the system is approved:

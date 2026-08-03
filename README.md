@@ -800,6 +800,26 @@ runs/
 - Default CHARMM/CGenFF force field: packaged `charmm36-feb2026_cgenff-5.0.ff`.
 - Default CGenFF converter: packaged `cgenff_charmm2gmx_py3.py`.
 
+### Protonation and selection consistency
+
+- Add `--pdb2gmx-protonation` when HIS, ASP, GLU, LYS, or ARG states must be
+  selected interactively. Run `topogmx` in a terminal and answer all prompts.
+- `--pdb2gmx-selection` supplies only N-terminal and C-terminal answers; it
+  does not replace the residue-protonation prompts.
+- CHARMM36 may write `LSN` for the neutral `LYSN` state, along with aliases
+  such as `ARGN`, `ASPP`, `GLUP`, `HSD`, `HSE`, and `HSP`. MDAnalysis does not
+  classify every alias as `protein`, so use the documented `PROTEIN_SEL` when
+  custom groups or restraints follow interactive protonation.
+- In protein-ligand systems, define `SOLUTE_SEL` as
+  `($PROTEIN_SEL) or resname LIG`, and define the solvent/ion group as
+  `not ($SOLUTE_SEL)`. Keep the ligand restraint branch as
+  `resname LIG and not name H*`.
+- Ligand protonation is decided before CGenFF Web submission. Do not expect
+  `pdb2gmx` to change the protonation state of the CGenFF ligand.
+- After building, inspect the generated `topol.top`, `ionized.gro`, index
+  groups, restraint files, and total charge before running `md-inputs` or
+  `mdrun`.
+
 **Protein-only example:**
 ```bash
 mstbx topogmx \

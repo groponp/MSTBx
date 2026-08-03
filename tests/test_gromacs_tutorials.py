@@ -111,6 +111,8 @@ def test_tutorials_document_missing_atom_repair_without_hydrogen_duplication():
     assert "SOLUTE_SEL" in ligand
     assert "The ligand's protonation" in ligand
     assert "--pdb2gmx-protonation" in main[main.index("### 8. GROMACS Protein-Ligand"):]
+    assert "### Protonation and selection consistency" in main
+    assert "GROMACS protonation and selection consistency reference" in ligand
 
 
 def test_docking_tutorial_covers_pose_sources_and_engine_boundaries():
