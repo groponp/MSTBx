@@ -19,9 +19,7 @@ class RestraintConfig:
     Parameters
     ----------
     runs_dir
-        Diretório raiz das réplicas.
-    replicas
-        Número de réplicas.
+        Diretório raiz do sistema.
     selection
         Seleção MDAnalysis para restringir.
     force
@@ -29,32 +27,29 @@ class RestraintConfig:
     """
 
     runs_dir: Path
-    replicas: int = 1
     selection: str = DEFAULT_SELECTION
     force: int = DEFAULT_FORCE
 
 
 class GromacsRestraints:
-    """Aplica restraints no ``rep1`` e copia para as demais réplicas."""
+    """Aplica restraints no sistema GROMACS."""
 
     def __init__(self, config: RestraintConfig):
         """Inicializa o aplicador."""
         self.config = config
-        self.build = config.runs_dir / "rep1/01build"
+        self.build = config.runs_dir / "01build"
 
     def apply_all(self) -> tuple[int, int]:
-        """Aplica restraints e replica topologias modificadas.
+        """Aplica restraints e atualiza topologias.
 
         Returns
         -------
         tuple[int, int]
             Número de átomos de proteína e ligando restringidos.
         """
-        counts = self._apply_to_rep1()
-        self._copy_to_replicas()
-        return counts
+        return self._apply()
 
-    def _apply_to_rep1(self) -> tuple[int, int]:
+    def _apply(self) -> tuple[int, int]:
         import MDAnalysis as mda
 
         universe = mda.Universe(str(self.build / "ionized.gro"))
@@ -69,30 +64,13 @@ class GromacsRestraints:
         if protein_ids:
             posre = self.build / "posre_backbone.itp"
             posre.write_text(self._block(protein_ids, "POSRES"))
-            shutil.copy2(posre, self.config.runs_dir / "rep1/restraints/posre_backbone.itp")
+            shutil.copy2(posre, self.config.runs_dir / "restraints/posre_backbone.itp")
             self._replace_posre(self._protein_topology(), "posre_backbone.itp")
         if ligand_ids:
             itp = self._ligand_topology()
             itp.write_text(self._without_block(itp.read_text(), "POSRES_LIGAND") + "\n\n" + self._block(ligand_ids, "POSRES_LIGAND"))
-            shutil.copy2(itp, self.config.runs_dir / "rep1/toppar/ligand.itp")
+            shutil.copy2(itp, self.config.runs_dir / "toppar/ligand.itp")
         return len(protein_ids), len(ligand_ids)
-
-    def _copy_to_replicas(self) -> None:
-        files = [self.build / "topol.top", *self.build.glob("*.itp"), *self.build.glob("*.prm")]
-        for rep in range(2, self.config.replicas + 1):
-            dst = self.config.runs_dir / f"rep{rep}/01build"
-            for src in files:
-                if src.exists():
-                    shutil.copy2(src, dst / src.name)
-            rest = self.config.runs_dir / f"rep{rep}/restraints"
-            toppar = self.config.runs_dir / f"rep{rep}/toppar"
-            rest.mkdir(exist_ok=True)
-            toppar.mkdir(exist_ok=True)
-            for src in (self.config.runs_dir / "rep1/restraints").glob("*"):
-                shutil.copy2(src, rest / src.name)
-            for src in (self.config.runs_dir / "rep1/toppar").glob("*"):
-                if src.is_file():
-                    shutil.copy2(src, toppar / src.name)
 
     @staticmethod
     def _local_ids(atoms, reference) -> list[int]:

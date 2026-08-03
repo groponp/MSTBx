@@ -8,4 +8,4 @@ The script expects the validated CGenFF inputs and force field from the local st
 ./RunTest.sh
 ```
 
-It builds three replicas and writes GROMACS inputs, index groups, restraints, and one `run_all.sh` per replica. It does not execute any simulation.
+It builds one complete system and writes GROMACS inputs, index groups, restraints, and `run_all.sh`. It does not execute any simulation. Copy the full output directory later if independent replicas are needed.

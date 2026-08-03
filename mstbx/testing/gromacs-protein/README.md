@@ -6,4 +6,4 @@ This folder contains a lightweight protein-only example for the MSTBx GROMACS wo
 ./RunTest.sh
 ```
 
-The script downloads 1UBQ, prepares three replicas, writes the MSTBx-style GROMACS layout, and stops before running simulations.
+The script downloads 1UBQ, prepares one complete MSTBx-style GROMACS system, and stops before running simulations. Copy the full output directory later if independent replicas are needed.

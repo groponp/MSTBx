@@ -41,6 +41,12 @@ cd MSTBx
 pip install -e .
 ```
 
+For development and validation, install the test extra:
+
+```bash
+pip install -e ".[test]"
+```
+
 ### 2. Persistent Shell Completion
 <p align="justify">
 To enable robust TAB completion for all MSTBx modules, add the following to your `~/.zshrc` (or `~/.bashrc`):
@@ -123,9 +129,9 @@ mstbx md-inputs --engine namd \
 These commands prepare GROMACS systems while preserving the same MSTBx directory nomenclature used by the NAMD solution workflow: `01build`, `02nvt`, `03npt`, `04md`, `restraints`, and `toppar`. The minimization MDP is written inside `01build` so the stage layout remains consistent across engines.
 </p>
 
-**Generated layout per replica:**
+**Generated layout:**
 ```text
-rep1/
+runs/
   01build/      # topology, coordinates, ionized.gro, em.mdp, index.ndx
   02nvt/        # nvt.mdp
   03npt/        # npt.mdp
@@ -139,7 +145,7 @@ rep1/
 - `--box-distance`: 1.8 nm.
 - `--ligand-resname`: `LIG`.
 - EM minimization: 50,000 steps.
-- NVT: 5 ns at 2 fs.
+- NVT: 2 ns at 2 fs, matching the NAMD solution protocol scheme.
 - NPT: 5 ns at 2 fs.
 - Production: 100 ns by default.
 - XTC writing frequency: 50 ps.
@@ -153,7 +159,6 @@ rep1/
 mstbx topogmx \
   --protein protein_prepared.pdb \
   --output-dir runs \
-  --replicas 3 \
   --box-distance 1.8 \
   --pdb2gmx-ter \
   --pdb2gmx-selection $'1\n1\n' \
@@ -162,7 +167,11 @@ mstbx topogmx \
 mstbx md-inputs --engine gromacs \
   --env solution \
   --runs-dir runs \
-  --replicas 3 \
+  --temperature 310 \
+  --nvt-time 2 \
+  --npt-time 5 \
+  --mdtime 1 \
+  --xtc-frequency 50 \
   --name-group-index-1 Protein_ligand \
   --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
   --name-group-index-2 Water_and_ions \
@@ -179,7 +188,6 @@ mstbx topogmx \
   --ligand-str cgenff_inputs_2oi0/ligand_for_cgenff.str \
   --ligand-resname LIG \
   --output-dir runs \
-  --replicas 3 \
   --box-distance 1.8 \
   --pdb2gmx-ter \
   --pdb2gmx-selection $'1\n1\n' \
@@ -189,8 +197,9 @@ mstbx topogmx \
 mstbx md-inputs --engine gromacs \
   --env solution \
   --runs-dir runs \
-  --replicas 3 \
   --temperature 310 \
+  --nvt-time 2 \
+  --npt-time 5 \
   --mdtime 100 \
   --xtc-frequency 50 \
   --name-group-index-1 Protein_ligand \
@@ -201,11 +210,13 @@ mstbx md-inputs --engine gromacs \
   --gmx gmx
 ```
 
-To run a prepared replica later:
+To run the prepared system later:
 ```bash
-cd runs/rep1
+cd runs
 ./run_all.sh
 ```
+
+To create independent replicas, copy the complete `runs` directory after validation, for example `cp -a runs rep1`, `cp -a runs rep2`, and `cp -a runs rep3`.
 
 ### 3. `smd-inputs` - Steered Molecular Dynamics
 
@@ -539,9 +550,19 @@ A complete step-by-step example using `openmm-run` to execute minimization, mult
 ---
 
 ### 7. GROMACS CHARMM/CGenFF Layout
-A GROMACS workflow that keeps the same solution-system directory names used by the NAMD protocol.
+A GROMACS workflow that keeps the same solution-system directory names used by the NAMD protocol. The commands below are the same validation tutorials kept under `mstbx/testing/`: `gromacs-protein` for a protein-only system and `gromacs-2oi0` for the protein-ligand CGenFF case.
 
-1. **Build the system once**: Create `rep1/01build`, solvate, ionize, and copy the same built system to the requested replicas:
+1. **Run the protein-only validation tutorial**: This downloads 1UBQ, prepares one complete system, writes EM/NVT/NPT/MD inputs, index groups, restraints, and `run_all.sh`, then stops before launching simulations.
+   ```bash
+   cd mstbx/testing/gromacs-protein
+   ./RunTest.sh
+   ```
+2. **Run the 2OI0 protein-ligand validation tutorial**: This uses the validated 2OI0 CGenFF inputs from the local staging snapshot and generates the same GROMACS layout.
+   ```bash
+   cd ../gromacs-2oi0
+   ./RunTest.sh
+   ```
+3. **Equivalent explicit 2OI0 commands**: Build the system once, create `runs/01build`, solvate, and ionize it:
    ```bash
    mstbx topogmx \
      --protein protein_prepared.pdb \
@@ -549,30 +570,34 @@ A GROMACS workflow that keeps the same solution-system directory names used by t
      --ligand-str ligand_for_cgenff.str \
      --ligand-resname LIG \
      --output-dir runs \
-     --replicas 3 \
      --box-distance 1.8 \
      --pdb2gmx-ter \
      --pdb2gmx-selection $'1\n1\n'
    ```
-2. **Write protocols, index, restraints, and runners**:
+4. **Write protocols, index, restraints, and runners**: NVT and NPT times are given in ns, following the same time convention used by the NAMD tutorials.
    ```bash
    mstbx md-inputs --engine gromacs \
      --env solution \
      --runs-dir runs \
-     --replicas 3 \
      --temperature 310 \
+     --nvt-time 2 \
+     --npt-time 5 \
      --mdtime 100 \
      --xtc-frequency 50 \
      --name-group-index-1 Protein_ligand \
      --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
      --name-group-index-2 Water_and_ions \
-     --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN"
+     --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN" \
+     --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN or resname LIG and not name H*" \
+     --gmx gmx
    ```
-3. **Submit or run each replica**:
+5. **Submit or run the system later**:
    ```bash
-   cd runs/rep1
+   cd runs
    ./run_all.sh
    ```
+
+Create replicas only after the system is validated by copying the full directory, for example `cp -a runs rep1`, `cp -a runs rep2`, and `cp -a runs rep3`.
 
 Use `--pdb2gmx-protonation` only when explicit HIS/ASP/GLU/LYS/ARG protonation choices are required. Otherwise, `pdb2gmx` uses its force-field defaults.
 
@@ -609,6 +634,22 @@ MSTBx follows strict internal standards to ensure reliability:
 - <b>Safety</b>: Automated box symmetry checks to prevent periodic boundary condition artifacts.
 - <b>Local Development Skill</b>: Standards are checked locally by the `mstbx-development` skill.
 </p>
+
+### Testing Policy
+
+Every workflow change must be covered by:
+
+- **Unit tests** for pure logic, CLI contracts, constants, and file writers.
+- **Regression tests** for validated layouts, defaults, packaged data, and command architecture.
+- **Adversarial tests** for malformed inputs, missing metadata, empty or overlapping selections, and unsafe repair conditions.
+
+Run the automated suite with:
+
+```bash
+python -m pytest tests
+```
+
+Workflow examples that are too heavy for the automated suite live in `mstbx/testing/<workflow>/` and must stop before long MD production unless the test explicitly targets runtime execution.
 
 ## Author
 **Ropón-Palacios G.**  

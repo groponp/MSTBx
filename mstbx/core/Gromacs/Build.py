@@ -37,13 +37,11 @@ class GromacsBuildConfig:
         Diretório ``*.ff`` do campo de força CHARMM/CGenFF. Quando omitido,
         usa a versão empacotada no MSTBx.
     output_dir
-        Diretório raiz das réplicas.
+        Diretório raiz do sistema.
     ligand_mol2, ligand_str
         Arquivos do ligando. Ambos devem ser informados juntos.
     ligand_resname
         Nome de resíduo final para o ligando.
-    replicas
-        Número de réplicas a criar.
     box_distance
         Distância soluto-borda em nm.
     gmx
@@ -67,7 +65,6 @@ class GromacsBuildConfig:
     ligand_mol2: Path | None = None
     ligand_str: Path | None = None
     ligand_resname: str = "LIG"
-    replicas: int = 1
     box_distance: float = 1.8
     gmx: str = "gmx"
     cgenff_converter: Path = DEFAULT_CGENFF_CONVERTER
@@ -78,7 +75,7 @@ class GromacsBuildConfig:
 
 
 class GromacsBuilder:
-    """Monta ``01build`` e replica o sistema para o layout MSTBx."""
+    """Monta um sistema GROMACS no layout MSTBx."""
 
     def __init__(self, config: GromacsBuildConfig):
         """Inicializa o construtor.
@@ -89,10 +86,10 @@ class GromacsBuilder:
             Configuração validada pelo comando.
         """
         self.config = config
-        self.build = config.output_dir / "rep1" / "01build"
+        self.build = config.output_dir / "01build"
 
     def build_system(self) -> None:
-        """Executa a montagem completa de ``rep1/01build`` e copia réplicas."""
+        """Executa a montagem completa de ``01build``."""
         self._validate()
         if self.config.output_dir.exists() and self.config.overwrite:
             shutil.rmtree(self.config.output_dir)
@@ -113,7 +110,6 @@ class GromacsBuilder:
         (self.build / "ions.mdp").write_text("integrator=steep\nemtol=1000\nnsteps=500\ncoulombtype=PME\n")
         self._run([self.config.gmx, "grompp", "-f", "ions.mdp", "-c", "solv.pdb", "-p", "topol.top", "-o", "ions.tpr", "-maxwarn", "2"])
         self._run([self.config.gmx, "genion", "-s", "ions.tpr", "-p", "topol.top", "-o", "ionized.gro", "-neutral", "-conc", "0.15"], "SOL\n")
-        self._copy_replicas()
 
     def _validate(self) -> None:
         paths = [self.config.protein, self.config.forcefield_dir, self.config.ligand_mol2, self.config.ligand_str]
@@ -124,10 +120,8 @@ class GromacsBuilder:
             raise ValueError("Use ligand MOL2 and STR together, or omit both for a protein-only system.")
 
     def _make_tree(self) -> None:
-        for rep in range(1, self.config.replicas + 1):
-            root = self.config.output_dir / f"rep{rep}"
-            for stage in ["01build", "02nvt", "03npt", "04md", "restraints", "toppar"]:
-                (root / stage).mkdir(parents=True, exist_ok=True)
+        for stage in ["01build", "02nvt", "03npt", "04md", "restraints", "toppar"]:
+            (self.config.output_dir / stage).mkdir(parents=True, exist_ok=True)
 
     def _prepare_ligand(self) -> None:
         assert self.config.ligand_mol2 and self.config.ligand_str
@@ -157,10 +151,6 @@ class GromacsBuilder:
         lines[idx + 1:idx + 1] = ["", '#include "ligand.prm"', '#include "ligand.itp"']
         lines.append(f"{molecule_type(self.build / 'ligand.itp'):<16s} 1")
         top.write_text("\n".join(lines) + "\n")
-
-    def _copy_replicas(self) -> None:
-        for rep in range(2, self.config.replicas + 1):
-            shutil.copytree(self.build, self.config.output_dir / f"rep{rep}/01build", dirs_exist_ok=True)
 
     def _run(self, command: list[object], stdin: str | None = None) -> None:
         subprocess.run(command, cwd=self.build, input=stdin, text=True, check=True)

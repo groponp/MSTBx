@@ -2,9 +2,11 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PYTHON="${PYTHON:-/home/groponp/miniconda3/envs/mstbx/bin/python}"
 GMX="${GMX:-gmx}"
 
+cd "$HERE"
 mkdir -p input
 curl -L "https://files.rcsb.org/download/1UBQ.pdb" -o input/1ubq.pdb
 awk '/^(ATOM|TER)/ {print} END {print "END"}' input/1ubq.pdb > input/protein_prepared.pdb
@@ -12,7 +14,6 @@ awk '/^(ATOM|TER)/ {print} END {print "END"}' input/1ubq.pdb > input/protein_pre
 "$PYTHON" -m mstbx.cli topogmx \
   --protein input/protein_prepared.pdb \
   --output-dir runs \
-  --replicas 3 \
   --box-distance 1.8 \
   --pdb2gmx-ter \
   --pdb2gmx-selection $'1\n1\n' \
@@ -22,8 +23,9 @@ awk '/^(ATOM|TER)/ {print} END {print "END"}' input/1ubq.pdb > input/protein_pre
 "$PYTHON" -m mstbx.cli md-inputs --engine gromacs \
   --env solution \
   --runs-dir runs \
-  --replicas 3 \
   --temperature 310 \
+  --nvt-time 2 \
+  --npt-time 5 \
   --mdtime 1 \
   --xtc-frequency 50 \
   --name-group-index-1 Protein_ligand \

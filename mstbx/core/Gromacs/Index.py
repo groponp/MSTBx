@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import shutil
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
@@ -31,19 +30,16 @@ class IndexGroup:
 class GromacsIndex:
     """Escreve ``index.ndx`` para os grupos de acoplamento térmico."""
 
-    def __init__(self, runs_dir: Path, replicas: int, groups: list[IndexGroup]):
+    def __init__(self, runs_dir: Path, groups: list[IndexGroup]):
         """Inicializa o escritor de índice."""
         self.runs_dir = runs_dir
-        self.replicas = replicas
         self.groups = groups
 
     def write_all(self) -> Path:
-        """Escreve ``rep1`` e copia o índice para as demais réplicas."""
-        source = self.runs_dir / "rep1/01build/index.ndx"
-        self.write_index(self.runs_dir / "rep1/01build/ionized.gro", source)
-        for rep in range(2, self.replicas + 1):
-            shutil.copy2(source, self.runs_dir / f"rep{rep}/01build/index.ndx")
-        return source
+        """Escreve o índice do sistema."""
+        output = self.runs_dir / "01build/index.ndx"
+        self.write_index(self.runs_dir / "01build/ionized.gro", output)
+        return output
 
     def write_index(self, coordinates: Path, output: Path) -> None:
         """Escreve um arquivo de índice.

@@ -24,6 +24,12 @@ dependencies = [
     "openmm",
     "colorama",
     "pdb2pqr",
+    "networkx",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
 ]
 
 [tool.setuptools.packages.find]
@@ -32,6 +38,9 @@ include = ["mstbx*"]
 
 [tool.setuptools.package-data]
 "mstbx.core.Gromacs" = ["data/**"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [project.scripts]
 mstbx = "mstbx.cli:cli"

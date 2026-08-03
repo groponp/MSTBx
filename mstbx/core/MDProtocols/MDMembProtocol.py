@@ -82,7 +82,7 @@ foreach file $files {
 }
 
 ################### Running Script ###################
-exec tr "\[:upper:\]" "\[:lower:\]" < ../01build/step3_pbcsetup.str | sed -e "s/ =//g" > step3_input.str
+exec tr "[:upper:]" "[:lower:]" < ../01build/step3_pbcsetup.str | sed -e "s/ =//g" > step3_input.str
 source                  step3_input.str
 
 cellBasisVector1     $a   0.0   0.0;        # vector to the next image

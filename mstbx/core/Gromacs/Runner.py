@@ -6,25 +6,22 @@ from pathlib import Path
 
 
 class GromacsRunner:
-    """Escreve ``run_all.sh`` na raiz de cada réplica."""
+    """Escreve ``run_all.sh`` na raiz do sistema."""
 
-    def __init__(self, runs_dir: Path, replicas: int, gmx: str = "gmx"):
+    def __init__(self, runs_dir: Path, gmx: str = "gmx"):
         """Inicializa o escritor do runner."""
         self.runs_dir = runs_dir
-        self.replicas = replicas
         self.gmx = gmx
 
     def write_all(self) -> list[Path]:
-        """Escreve o runner em todas as réplicas."""
-        paths = []
-        for rep in range(1, self.replicas + 1):
-            path = self.runs_dir / f"rep{rep}/run_all.sh"
-            self.write(path)
-            paths.append(path)
-        return paths
+        """Escreve o runner do sistema."""
+        path = self.runs_dir / "run_all.sh"
+        self.write(path)
+        return [path]
 
     def write(self, path: Path) -> None:
         """Escreve um runner compatível com GPU e CPU."""
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(
             "#!/usr/bin/env bash\n"
             "set -euo pipefail\n\n"

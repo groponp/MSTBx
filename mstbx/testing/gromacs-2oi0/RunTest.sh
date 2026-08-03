@@ -2,17 +2,18 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PYTHON="${PYTHON:-/home/groponp/miniconda3/envs/mstbx/bin/python}"
 GMX="${GMX:-gmx}"
 SOURCE="${SOURCE:-$ROOT/staging/gromacs_prepare/gmxpy_snapshot/2OI0/cgenff_inputs_2oi0}"
 
+cd "$HERE"
 "$PYTHON" -m mstbx.cli topogmx \
   --protein "$SOURCE/protein_prepared.pdb" \
   --ligand-mol2 "$SOURCE/ligand_for_cgenff.mol2" \
   --ligand-str "$SOURCE/ligand_for_cgenff.str" \
   --ligand-resname LIG \
   --output-dir runs \
-  --replicas 3 \
   --box-distance 1.8 \
   --pdb2gmx-ter \
   --pdb2gmx-selection $'1\n1\n' \
@@ -22,8 +23,9 @@ SOURCE="${SOURCE:-$ROOT/staging/gromacs_prepare/gmxpy_snapshot/2OI0/cgenff_input
 "$PYTHON" -m mstbx.cli md-inputs --engine gromacs \
   --env solution \
   --runs-dir runs \
-  --replicas 3 \
   --temperature 310 \
+  --nvt-time 2 \
+  --npt-time 5 \
   --mdtime 100 \
   --xtc-frequency 50 \
   --name-group-index-1 Protein_ligand \

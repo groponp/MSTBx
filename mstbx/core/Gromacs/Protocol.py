@@ -27,21 +27,24 @@ class GromacsProtocolConfig:
     Parameters
     ----------
     runs_dir
-        Diretório raiz com ``rep1``, ``rep2`` etc.
-    replicas
-        Número de réplicas.
+        Diretório raiz do sistema.
     temperature
         Temperatura em Kelvin.
     mdtime
         Tempo de produção em ns.
+    nvt_time
+        Tempo de NVT em ns.
+    npt_time
+        Tempo de NPT em ns.
     xtc_frequency
         Frequência de escrita de XTC em ps.
     """
 
     runs_dir: Path
-    replicas: int = 1
     temperature: float = 310.0
     mdtime: float = 100.0
+    nvt_time: float = 2.0
+    npt_time: float = 5.0
     xtc_frequency: float = 50.0
 
 
@@ -59,21 +62,17 @@ class GromacsProtocol:
         self.config = config
 
     def write_all(self) -> list[Path]:
-        """Escreve todos os MDPs em todas as réplicas.
+        """Escreve todos os MDPs no sistema.
 
         Returns
         -------
         list[pathlib.Path]
             Arquivos criados.
         """
-        written = []
-        for rep in range(1, self.config.replicas + 1):
-            root = self.config.runs_dir / f"rep{rep}"
-            written += self.write_replica(root)
-        return written
+        return self.write_system(self.config.runs_dir)
 
-    def write_replica(self, root: Path) -> list[Path]:
-        """Escreve os MDPs de uma réplica.
+    def write_system(self, root: Path) -> list[Path]:
+        """Escreve os MDPs de um sistema.
 
         Parameters
         ----------
@@ -85,8 +84,8 @@ class GromacsProtocol:
         eq = self._equilibration_block(xtc)
         files = {
             root / "01build/em.mdp": f"define = {define}\nintegrator = steep\nemtol = 1000.0\nnsteps = 50000\n{COMMON}",
-            root / "02nvt/nvt.mdp": f"define = {define}\n{eq}\nnsteps = {self._steps(5)}\ncontinuation = no\npcoupl = no\ngen-vel = yes\ngen-temp = {self.config.temperature}\ngen-seed = -1",
-            root / "03npt/npt.mdp": f"define = {define}\n{eq}\nnsteps = {self._steps(5)}\ncontinuation = yes\npcoupl = C-rescale\npcoupltype = isotropic\ntau_p = 5.0\ncompressibility = 4.5e-5\nref_p = 1.0\ngen-vel = no",
+            root / "02nvt/nvt.mdp": f"define = {define}\n{eq}\nnsteps = {self._steps(self.config.nvt_time)}\ncontinuation = no\npcoupl = no\ngen-vel = yes\ngen-temp = {self.config.temperature}\ngen-seed = -1",
+            root / "03npt/npt.mdp": f"define = {define}\n{eq}\nnsteps = {self._steps(self.config.npt_time)}\ncontinuation = yes\npcoupl = C-rescale\npcoupltype = isotropic\ntau_p = 5.0\ncompressibility = 4.5e-5\nref_p = 1.0\ngen-vel = no",
             root / "04md/md.mdp": f"{eq}\nnsteps = {self._steps(self.config.mdtime)}\ncontinuation = yes\npcoupl = C-rescale\npcoupltype = isotropic\ntau_p = 5.0\ncompressibility = 4.5e-5\nref_p = 1.0",
         }
         for path, text in files.items():
