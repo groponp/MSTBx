@@ -155,3 +155,22 @@ def test_topogmx_rejects_only_one_ligand_file(tmp_path):
     assert result.exit_code != 0
     assert "MOL2 and STR" in result.output
     assert "Traceback" not in result.output
+
+
+def test_topogmx_rejects_pdb2gmx_selection_with_protonation(tmp_path):
+    """--pdb2gmx-protonation adds interactive residue prompts on top of the
+    terminal prompts; piping --pdb2gmx-selection's short stdin into that
+    would silently answer the wrong prompt instead of failing loudly."""
+    protein = tmp_path / "protein.pdb"
+    protein.write_text("END\n")
+
+    result = CliRunner().invoke(
+        cli,
+        ["topogmx", "--protein", str(protein), "--output-dir", str(tmp_path / "runs"),
+         "--pdb2gmx-selection", "0\n0\n", "--pdb2gmx-protonation"],
+    )
+
+    assert result.exit_code != 0
+    assert "--pdb2gmx-selection" in result.output
+    assert "--pdb2gmx-protonation" in result.output
+    assert "Traceback" not in result.output

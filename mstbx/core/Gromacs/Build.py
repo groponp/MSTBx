@@ -120,6 +120,15 @@ class GromacsBuilder:
             raise FileNotFoundError(", ".join(missing))
         if bool(self.config.ligand_mol2) != bool(self.config.ligand_str):
             raise ValueError("Use ligand MOL2 and STR together, or omit both for a protein-only system.")
+        if self.config.pdb2gmx_selection and self.config.pdb2gmx_protonation:
+            raise ValueError(
+                "Do not combine --pdb2gmx-selection with --pdb2gmx-protonation: "
+                "--pdb2gmx-protonation adds interactive HIS/ASP/GLU/LYS/ARG prompts on top of "
+                "the terminal prompts, and --pdb2gmx-selection only supplies terminal answers. "
+                "The extra prompts would consume mismatched stdin lines from --pdb2gmx-selection, "
+                "silently answering the wrong protonation-state question. Run pdb2gmx-protonation "
+                "interactively in a terminal instead."
+            )
 
     def _make_tree(self) -> None:
         for stage in ["01build", "02nvt", "03npt", "04md", "restraints", "toppar"]:
