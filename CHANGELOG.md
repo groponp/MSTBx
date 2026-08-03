@@ -35,6 +35,8 @@ All notable changes to this project will be documented in this file.
   protonation and explicit `PROTEIN_SEL`/`SOLUTE_SEL` selections.
 - Consolidated the GROMACS protonation, CHARMM alias, ligand-protonation, and
   post-build validation rules in the technical documentation.
+- Added `PLAN.md` as the project handover document with completed work, an empty
+  task area, and consolidated engineering/workflow rules.
 
 ## [0.8.10-beta] - 2026-06-13
 
