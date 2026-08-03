@@ -5,12 +5,6 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 ### Added
-- Added `docs/SCIENTIFIC_BACKGROUND.md`, a literature-cited explanation of the
-  physical/chemical rationale behind every MD default MSTBx generates
-  (thermostat/barostat choice, PME electrostatics, constraint algorithms,
-  restraint force constants, box construction, and CHARMM protonation-state
-  chemistry), grounded directly in the GROMACS/NAMD/OpenMM generator source
-  code rather than assumed defaults.
 - Split the README's inline tutorials into `docs/tutorials/` (one file per
   engine: `pdbwriter.md`, `namd.md`, `gromacs.md`, `openmm.md`, `docking.md`,
   plus an `index.md`) and moved the full command/flag reference into

@@ -2,8 +2,7 @@
 
 These are complete, reproducible step-by-step case studies. Each tutorial
 states when the case applies, the required inputs, the commands in execution
-order, the generated outputs, and validation/failure notes, per the
-documentation rules in [`PLAN.md`](../../PLAN.md).
+order, the generated outputs, and validation/failure notes.
 
 Start with [PDBWriter Structure Preparation](pdbwriter.md) before any engine
 tutorial: it is the shared structure-quality step used across NAMD, GROMACS,
@@ -28,9 +27,6 @@ OpenMM, and docking workflows.
 
 ## See also
 
-- [Scientific Background](../SCIENTIFIC_BACKGROUND.md) — the physical and
-  chemical rationale behind each simulation stage and default parameter used
-  by these tutorials.
 - [Module Reference](../REFERENCE.md) — full command/flag reference for every
   MSTBx module.
 - [Testing Manual](../Testing_Manual.md) — verification checklist for each

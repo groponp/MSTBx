@@ -23,16 +23,6 @@ While web-based system builders are convenient, they often struggle with massive
 4. <b>Standardization</b>: Enforces strict geometric symmetries and nomenclature across all modules.
 </p>
 
-<p align="justify">
-These are not just conventions: MSTBx deliberately matches the same restraint
-force constant, switching-function window, timestep, and electrostatics
-treatment (PME) across GROMACS, NAMD, and OpenMM, so that moving a system
-between engines does not silently change the physics being simulated. See
-<a href="docs/SCIENTIFIC_BACKGROUND.md">Scientific Background</a> for the
-literature-grounded rationale behind every default, confirmed directly
-against the generator source code.
-</p>
-
 ---
 
 ## Installation
@@ -95,28 +85,21 @@ eval "$(_MSTBX_COMPLETE=zsh_source $HOME/miniconda3/envs/mstbx/bin/mstbx)"
 
 ## 📚 Documentation Map
 
-MSTBx documentation is split by purpose so each page stays focused:
+Start with the tutorials — they are the primary documentation and cover every
+workflow end to end, one file per engine:
 
-- **[Tutorials](docs/tutorials/index.md)** — reproducible, step-by-step case
-  studies, one file per engine: [PDBWriter](docs/tutorials/pdbwriter.md),
-  [NAMD](docs/tutorials/namd.md), [GROMACS](docs/tutorials/gromacs.md),
-  [OpenMM](docs/tutorials/openmm.md), [Docking](docs/tutorials/docking.md).
-  Start here to run a real system end to end.
-- **[Scientific Background](docs/SCIENTIFIC_BACKGROUND.md)** — the physics
-  and chemistry behind every default: why EM precedes NVT/NPT/production,
-  which thermostat/barostat each engine uses, what the CHARMM protonation
-  aliases (`HSD`/`HSE`/`HSP`/`ASPP`/`GLUP`/`LYSN`...) mean chemically, and the
-  literature references for each algorithm and force field, all confirmed
-  against the generator source code.
+- **[Tutorials index](docs/tutorials/index.md)**
+  - [0. PDBWriter Structure Preparation](docs/tutorials/pdbwriter.md)
+  - [NAMD workflows](docs/tutorials/namd.md) (Ubiquitin, protein-ligand, membrane, SMD, glycosylated systems)
+  - [GROMACS workflows](docs/tutorials/gromacs.md) (protein-only and protein-ligand/CGenFF)
+  - [OpenMM workflows](docs/tutorials/openmm.md)
+  - [Docking workflows](docs/tutorials/docking.md)
 - **[Module Reference](docs/REFERENCE.md)** — flag-by-flag reference for
-  every command (`topopsfgen`, `md-inputs`, `topogmx`, `pdbwriter`,
-  `resetpsf`, `smd-inputs`, `metad-inputs`, `md-translate`, `openmm-run`).
+  every command, for when a tutorial's defaults need to be looked up or
+  changed.
 - **[Testing Manual](docs/Testing_Manual.md)** — verification checklist per
   workflow.
 - **[Changelog](CHANGELOG.md)** — version history.
-
-New users: read [Scientific Background](docs/SCIENTIFIC_BACKGROUND.md) once,
-then follow the [Tutorials](docs/tutorials/index.md) for the engine you need.
 
 ---
 
@@ -178,9 +161,6 @@ The full flag-by-flag reference for every module — `topopsfgen`,
 `metad-inputs`, `pdbwriter`, `resetpsf`, `md-translate`, and `openmm-run` —
 including the engine architecture table, generated directory layouts, and
 default constants, has moved to **[docs/REFERENCE.md](docs/REFERENCE.md)**.
-
-For the physical/chemical reasoning behind those defaults, see
-**[docs/SCIENTIFIC_BACKGROUND.md](docs/SCIENTIFIC_BACKGROUND.md)**.
 
 ---
 

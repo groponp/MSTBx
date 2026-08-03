@@ -42,4 +42,4 @@ See [`openmm-run` in the Module Reference](../REFERENCE.md#8-openmm-run---strict
 
 ---
 
-[← Back to tutorial index](index.md) · See also: [Scientific Background](../SCIENTIFIC_BACKGROUND.md) · [Module Reference](../REFERENCE.md)
+[← Back to tutorial index](index.md) · See also: [Module Reference](../REFERENCE.md)

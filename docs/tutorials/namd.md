@@ -141,4 +141,4 @@ A robust workflow to handle glycosylated systems by converting topology/coordina
 
 ---
 
-[← Back to tutorial index](index.md) · See also: [Scientific Background](../SCIENTIFIC_BACKGROUND.md) · [Module Reference](../REFERENCE.md)
+[← Back to tutorial index](index.md) · See also: [Module Reference](../REFERENCE.md)

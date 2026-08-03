@@ -5,9 +5,7 @@
 This is the flag-by-flag reference for every MSTBx module. For runnable,
 narrated walkthroughs, use the [tutorials index](tutorials/index.md) instead —
 this page intentionally does not repeat full worked examples where a tutorial
-already covers the same command sequence. For the physical/chemical rationale
-behind the defaults quoted here, see the
-[Scientific Background](SCIENTIFIC_BACKGROUND.md).
+already covers the same command sequence.
 
 ## Engine Architecture
 
@@ -89,9 +87,7 @@ runs/
 - CHARMM36 may write `LSN` for the neutral `LYSN` state, along with aliases
   such as `ARGN`, `ASPP`, `GLUP`, `HSD`, `HSE`, and `HSP`. MDAnalysis does not
   classify every alias as `protein`, so use the documented `PROTEIN_SEL` when
-  custom groups or restraints follow interactive protonation. See
-  [Protonation States](SCIENTIFIC_BACKGROUND.md#protonation-states) for the
-  chemistry behind each alias.
+  custom groups or restraints follow interactive protonation.
 - In protein-ligand systems, define `SOLUTE_SEL` as
   `($PROTEIN_SEL) or resname LIG`, and define the solvent/ion group as
   `not ($SOLUTE_SEL)`. Keep the ligand restraint branch as
@@ -228,4 +224,4 @@ See [Automated OpenMM Runner Pipeline (Chignolin)](tutorials/openmm.md#6-automat
 
 ---
 
-[← Back to README](../README.md) · [Tutorials index](tutorials/index.md) · [Scientific Background](SCIENTIFIC_BACKGROUND.md)
+[← Back to README](../README.md) · [Tutorials index](tutorials/index.md)

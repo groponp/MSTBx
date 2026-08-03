@@ -5,10 +5,7 @@
 These tutorials build CHARMM36/CGenFF GROMACS systems with `topogmx` and
 generate protocol/index/restraint/runner files with
 `md-inputs --engine gromacs`. Run [PDBWriter Structure Preparation](pdbwriter.md)
-first if the starting structure needs repair. See
-[Scientific Background](../SCIENTIFIC_BACKGROUND.md) for why each default
-(box distance, EM steps, restraint force, protonation aliases) is set the way
-it is.
+first if the starting structure needs repair.
 
 - [7. GROMACS Protein-Only](#7-gromacs-protein-only)
 - [8. GROMACS Protein-Ligand with CGenFF](#8-gromacs-protein-ligand-with-cgenff)
@@ -193,4 +190,4 @@ The repository scripts under `mstbx/testing/gromacs-2oi0/` validate this same se
 
 ---
 
-[← Back to tutorial index](index.md) · See also: [Scientific Background](../SCIENTIFIC_BACKGROUND.md) · [Module Reference](../REFERENCE.md#2b-topogmx-and-md-inputs---engine-gromacs---gromacs-charmmcgenff-workflow) · [Docking workflows](docking.md)
+[← Back to tutorial index](index.md) · See also: [Module Reference](../REFERENCE.md#2b-topogmx-and-md-inputs---engine-gromacs---gromacs-charmmcgenff-workflow) · [Docking workflows](docking.md)

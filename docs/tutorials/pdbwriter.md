@@ -80,7 +80,7 @@ Use `pdbwriter` as the first structure-quality step before `topopsfgen` or `topo
      --ff-out CHARMM \
      --ssbond
    ```
-   `--ff-out` accepts `CHARMM` or `AMBER`. With `CHARMM`, PDB2PQR runs with CHARMM input/output naming and applies PROPKA titration states. `--ssbond` detects close CYS SG pairs and writes SSBOND records. Review the generated report and the structure before simulation. See [Scientific Background](../SCIENTIFIC_BACKGROUND.md#protonation-states) for what these titration-state names mean chemically.
+   `--ff-out` accepts `CHARMM` or `AMBER`. With `CHARMM`, PDB2PQR runs with CHARMM input/output naming and applies PROPKA titration states. `--ssbond` detects close CYS SG pairs and writes SSBOND records. Review the generated report and the structure before simulation.
 7. **Apply chain, residue, and segment edits**:
    ```bash
    mstbx pdbwriter \
