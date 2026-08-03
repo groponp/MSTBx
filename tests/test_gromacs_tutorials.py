@@ -52,8 +52,8 @@ def test_protein_tutorial_is_explicitly_ligand_free():
 
 
 def test_main_readme_has_clickable_gromacs_tutorials_seven_and_eight():
-    """The main tutorial index exposes separate protein and ligand links."""
-    readme = (ROOT / "README.md").read_text()
+    """The GROMACS tutorial file exposes separate protein and ligand links."""
+    readme = (ROOT / "docs/tutorials/gromacs.md").read_text()
 
     assert "[7. GROMACS Protein-Only](#7-gromacs-protein-only)" in readme
     assert "[8. GROMACS Protein-Ligand with CGenFF](#8-gromacs-protein-ligand-with-cgenff)" in readme
@@ -61,12 +61,15 @@ def test_main_readme_has_clickable_gromacs_tutorials_seven_and_eight():
     assert "### 8. GROMACS Protein-Ligand with CGenFF" in readme
     assert readme.index("### 7. GROMACS Protein-Only") < readme.index("### 8. GROMACS Protein-Ligand with CGenFF")
 
+    main = (ROOT / "README.md").read_text()
+    assert "docs/tutorials/gromacs.md" in main
+
 
 def test_main_readme_has_complete_pdbwriter_tutorial():
     """Tutorial 0 exposes every PDBWriter option family explicitly."""
-    readme = (ROOT / "README.md").read_text()
+    readme = (ROOT / "docs/tutorials/pdbwriter.md").read_text()
     start = readme.index("### 0. PDBWriter Structure Preparation")
-    end = readme.index("### 1. Ubiquitin in Solution")
+    end = readme.index("[← Back to tutorial index]", start)
     tutorial = readme[start:end]
 
     for option in [
@@ -95,30 +98,34 @@ def test_tutorials_document_missing_atom_repair_without_hydrogen_duplication():
     """Tutorials explain heavy-atom repair and preserve ligand HETATM records."""
     protein = (ROOT / "mstbx/testing/gromacs-protein/README.md").read_text()
     ligand = (ROOT / "mstbx/testing/gromacs-2oi0/README.md").read_text()
-    main = (ROOT / "README.md").read_text()
+    pdbwriter_tutorial = (ROOT / "docs/tutorials/pdbwriter.md").read_text()
+    gromacs_tutorial = (ROOT / "docs/tutorials/gromacs.md").read_text()
+    reference = (ROOT / "docs/REFERENCE.md").read_text()
 
     assert "--fix-structure" in protein
     assert "Do not add hydrogens" in protein
     assert "--fix-keep-hetatoms" in ligand
-    assert "--fix-add-hydrogens" in main
-    assert "pdb2gmx" in main
+    assert "--fix-add-hydrogens" in pdbwriter_tutorial
+    assert "pdb2gmx" in gromacs_tutorial
     assert "--pdb2gmx-protonation" in protein
     assert "Interactive protonation" in protein
-    assert "--pdb2gmx-protonation" in main
+    assert "--pdb2gmx-protonation" in gromacs_tutorial
     assert "LSN" in protein
     assert "PROTEIN_SEL" in protein
     assert "--pdb2gmx-protonation" in ligand
     assert "SOLUTE_SEL" in ligand
     assert "The ligand's protonation" in ligand
-    assert "--pdb2gmx-protonation" in main[main.index("### 8. GROMACS Protein-Ligand"):]
-    assert "### Protonation and selection consistency" in main
+    assert "--pdb2gmx-protonation" in gromacs_tutorial[gromacs_tutorial.index("### 8. GROMACS Protein-Ligand"):]
+    assert "#### Protonation and selection consistency" in reference
     assert "GROMACS protonation and selection consistency reference" in ligand
+    assert "docs/REFERENCE.md#protonation-and-selection-consistency" in ligand
 
 
 def test_docking_tutorial_covers_pose_sources_and_engine_boundaries():
     """The docking tutorial covers PDBQT, PDB, PDBWriter, GROMACS, and NAMD."""
     readme = (ROOT / "mstbx/testing/mkdocking/README.md").read_text()
-    main = (ROOT / "README.md").read_text()
+    docking_tutorial = (ROOT / "docs/tutorials/docking.md").read_text()
+    tutorials_index = (ROOT / "docs/tutorials/index.md").read_text()
 
     for option in ["--dock", "--ligand-pdb", "--select-atoms", "--ssbond", "--segid", "--pH"]:
         assert option in readme
@@ -129,5 +136,6 @@ def test_docking_tutorial_covers_pose_sources_and_engine_boundaries():
     assert "Case Study 1: Receptor Preparation" in readme
     assert "--select-group-index-1" in readme
     assert "--input-dir" not in readme
-    assert "### 9. Docking Pose to a Protein-Ligand System" in main
-    assert "mstbx/testing/mkdocking/README.md" in main
+    assert "### 9. Docking Pose to a Protein-Ligand System" in docking_tutorial
+    assert "mstbx/testing/mkdocking/README.md" in docking_tutorial
+    assert "9. Docking Pose to a Protein-Ligand System" in tutorials_index

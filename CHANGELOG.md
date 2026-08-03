@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 ## Unreleased
 
 ### Added
+- Added `docs/SCIENTIFIC_BACKGROUND.md`, a literature-cited explanation of the
+  physical/chemical rationale behind every MD default MSTBx generates
+  (thermostat/barostat choice, PME electrostatics, constraint algorithms,
+  restraint force constants, box construction, and CHARMM protonation-state
+  chemistry), grounded directly in the GROMACS/NAMD/OpenMM generator source
+  code rather than assumed defaults.
+- Split the README's inline tutorials into `docs/tutorials/` (one file per
+  engine: `pdbwriter.md`, `namd.md`, `gromacs.md`, `openmm.md`, `docking.md`,
+  plus an `index.md`) and moved the full command/flag reference into
+  `docs/REFERENCE.md`, trimming duplicated worked examples down to
+  cross-links. `README.md` is now a short front door with a documentation
+  map; `CHANGELOG.md` and `docs/Testing_Manual.md` are the single sources for
+  version history and the per-workflow testing checklist instead of being
+  duplicated inline in the README.
 - Added project-wide CLI matrix tests and short workflow-delegation tests for
   all registered commands, including adversarial option combinations.
 - Added real external regressions for PDB2PQR and GROMACS `grompp` compilation
