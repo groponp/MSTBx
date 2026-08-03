@@ -23,8 +23,9 @@ def colabfold(input_dir, output_dir, sif, cache):
     
     fasta_files = glob.glob(os.path.join(input_dir, "*.fasta")) + glob.glob(os.path.join(input_dir, "*.fa"))
     if not fasta_files:
-        uxm.message(message="No FASTA files found in input directory.", type="error")
-        return
+        message = "No FASTA files found in input directory."
+        uxm.message(message=message, type="error")
+        raise click.UsageError(message)
 
     uxm.message(message=f"Found {len(fasta_files)} FASTA files. Starting ColabFold...", type="info")
     

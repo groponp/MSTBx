@@ -117,13 +117,15 @@ def test_gromacs_cli_rejects_membrane_until_supported(tmp_path):
         ["md-inputs", "--engine", "gromacs", "--env", "membrane", "--runs-dir", str(tmp_path / "runs")],
     )
 
-    assert result.exit_code == 0
+    assert result.exit_code != 0
     assert "supports only" in result.output
+    assert "Traceback" not in result.output
     assert not (tmp_path / "runs").exists()
 
 
 def test_unimplemented_engine_branches_are_explicit():
-    """AMBER/OpenMM branches report their current support boundary."""
+    """AMBER/OpenMM branches report their current support boundary and fail
+    with a non-zero exit code instead of a misleading success."""
     runner = CliRunner()
     md = runner.invoke(cli, ["md-inputs", "--engine", "amber", "--env", "solution"])
     smd = runner.invoke(
@@ -132,8 +134,9 @@ def test_unimplemented_engine_branches_are_explicit():
          "--selpull", "name CA", "--selanchor", "name N", "--target-center", "5"],
     )
 
-    assert md.exit_code == 0
+    assert md.exit_code != 0
     assert "not yet implemented" in md.output
+    assert "Traceback" not in md.output
     assert smd.exit_code != 0
 
 

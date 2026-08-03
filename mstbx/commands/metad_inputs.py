@@ -24,8 +24,9 @@ def metad_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, sel1, sel2
     uxm = UnixMessage()
     
     if engine != 'namd':
-        uxm.message(f"Engine '{engine}' is not yet implemented for Metadynamics.", "error")
-        return
+        message = f"Engine '{engine}' is not yet implemented for Metadynamics."
+        uxm.message(message, "error")
+        raise click.UsageError(message)
 
     uxm.message(f"Generating Metadynamics configuration for {engine}...", "info")
     

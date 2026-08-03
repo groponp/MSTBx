@@ -3,35 +3,68 @@ import os
 import time
 from mstbx.core.Build.PSFGenSol import BuildSolution, BuildSolutionSMD
 from mstbx.core.Build.PSFGenMemb import BuildMembrane
+from mstbx.core.Utils.ClickHelp import explicit as _explicit
+from mstbx.core.Utils.ClickHelp import grouped_command
 from mstbx.core.Utils.Utils import UnixMessage
 
-# Custom class to group options in help
-class GroupedGroup(click.Command):
-    def format_options(self, ctx, formatter):
-        """Writes options grouped by categories in the help menu."""
-        opts_common = []
-        opts_memb = []
-        opts_smd = []
-        
-        for param in self.get_params(ctx):
-            if param.name in ['psf', 'pdb', 'salt', 'ofile', 'hmr', 'padding', 'pad_x_pos', 'pad_x_neg', 'pad_y_pos', 'pad_y_neg', 'pad_z_pos', 'pad_z_neg', 'env']:
-                opts_common.append(param.get_help_record(ctx))
-            elif param.name in ['mol_outside', 'z_distance']:
-                opts_memb.append(param.get_help_record(ctx))
-            elif param.name in ['atoms_anchor', 'atoms_pull', 'extra_space']:
-                opts_smd.append(param.get_help_record(ctx))
+TOPOPSFGEN_OPTION_GROUPS = {
+    "Environment": ["env"],
+    "Common Options": ["psf", "pdb", "salt", "ofile", "hmr", "padding"],
+    "Solution per-axis padding (trigger: --env solution)": [
+        "pad_x_pos", "pad_x_neg", "pad_y_pos", "pad_y_neg", "pad_z_pos", "pad_z_neg",
+    ],
+    "Membrane Options (trigger: --env membrane)": ["mol_outside", "z_distance"],
+    "SMD Options (trigger: --env smd)": ["atoms_anchor", "atoms_pull", "extra_space"],
+}
 
-        if opts_common:
-            with formatter.section("Common Options"):
-                formatter.write_dl(opts_common)
-        if opts_memb:
-            with formatter.section("Membrane Specific Options (--env membrane)"):
-                formatter.write_dl(opts_memb)
-        if opts_smd:
-            with formatter.section("SMD Specific Options (--env smd)"):
-                formatter.write_dl(opts_smd)
 
-@click.command(cls=GroupedGroup, help="System generation (PSF/PDB) for different environments.")
+def _validate_env_flags(ctx, env, pad_x_pos, pad_x_neg, pad_y_pos, pad_y_neg, pad_z_pos,
+                         pad_z_neg, mol_outside, z_distance, atoms_anchor, atoms_pull, extra_space):
+    """Reject per-env flags passed under the wrong --env: the builder for
+    membrane and SMD systems does not accept per-axis padding at all, and the
+    membrane/SMD-only options are simply never read outside their own env,
+    so passing them elsewhere used to succeed and silently do nothing."""
+    if env != "solution":
+        wrong = [
+            flag for flag, value in [
+                ("--pad-x-pos", pad_x_pos is not None), ("--pad-x-neg", pad_x_neg is not None),
+                ("--pad-y-pos", pad_y_pos is not None), ("--pad-y-neg", pad_y_neg is not None),
+                ("--pad-z-pos", pad_z_pos is not None), ("--pad-z-neg", pad_z_neg is not None),
+            ] if value
+        ]
+        if wrong:
+            raise click.UsageError(
+                f"The following flag(s) only apply with --env solution: {', '.join(wrong)}. "
+                f"They are not accepted by the --env {env} builder."
+            )
+
+    if env != "membrane":
+        wrong = [
+            flag for flag, value in [
+                ("--mol-outside", mol_outside), ("--z-distance", _explicit(ctx, "z_distance")),
+            ] if value
+        ]
+        if wrong:
+            raise click.UsageError(
+                f"The following flag(s) only apply with --env membrane: {', '.join(wrong)}. "
+                f"They have no effect with --env {env}."
+            )
+
+    if env != "smd":
+        wrong = [
+            flag for flag, value in [
+                ("--atoms-anchor", atoms_anchor), ("--atoms-pull", atoms_pull),
+                ("--extra-space", _explicit(ctx, "extra_space")),
+            ] if value
+        ]
+        if wrong:
+            raise click.UsageError(
+                f"The following flag(s) only apply with --env smd: {', '.join(wrong)}. "
+                f"They have no effect with --env {env}."
+            )
+
+
+@click.command(cls=grouped_command(TOPOPSFGEN_OPTION_GROUPS), help="System generation (PSF/PDB) for different environments.")
 @click.option('--env', type=click.Choice(['solution', 'membrane', 'smd']), required=True, help="Environment of the system to build.")
 # Common Options
 @click.option('--psf', type=click.Path(exists=True, dir_okay=False), required=True, help="Input PSF file.")
@@ -57,7 +90,12 @@ def topopsfgen(env, psf, pdb, salt, ofile, hmr, padding, pad_x_pos, pad_x_neg, p
     """Module to build solvated, membrane, or SMD systems."""
     hmrbool = 1 if hmr else 0
     uxm = UnixMessage()
-    
+
+    _validate_env_flags(
+        click.get_current_context(), env, pad_x_pos, pad_x_neg, pad_y_pos, pad_y_neg,
+        pad_z_pos, pad_z_neg, mol_outside, z_distance, atoms_anchor, atoms_pull, extra_space,
+    )
+
     if env == 'solution':
         sol_padding = padding if padding is not None else 18.0
         builder = BuildSolution()
@@ -76,8 +114,9 @@ def topopsfgen(env, psf, pdb, salt, ofile, hmr, padding, pad_x_pos, pad_x_neg, p
 
     elif env == 'smd':
         if not atoms_anchor or not atoms_pull:
-            uxm.message("Error: --atoms-anchor and --atoms-pull are required for SMD.", "error")
-            return
+            message = "--atoms-anchor and --atoms-pull are required for --env smd."
+            uxm.message(message, "error")
+            raise click.UsageError(message)
         builder = BuildSolutionSMD()
         smd_padding = padding if padding is not None else 18.0
         builder.build(psf=psf, pdb=pdb, salt=salt, ofile=ofile, hmr=hmrbool, atomsvec1=atoms_anchor, 

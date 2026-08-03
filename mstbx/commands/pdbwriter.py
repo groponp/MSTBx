@@ -4,6 +4,7 @@ from pathlib import Path
 import tempfile
 from mstbx.core.Build.CGenFFInputs import CGenFFInputConfig, CGenFFInputPreparer
 from mstbx.core.Build.PDBWriter import PDBWriter
+from mstbx.core.Utils.ClickHelp import explicit as _explicit
 from mstbx.core.Utils.ClickHelp import grouped_command
 from mstbx.core.Utils.Utils import UnixMessage
 
@@ -57,11 +58,6 @@ def _write_selected_chains(source, destination, chains):
             f"Found: {', '.join(sorted(found)) or 'none'}."
         )
     Path(destination).write_text("\n".join(output) + "\nEND\n")
-
-
-def _explicit(ctx, name):
-    """True only if the user typed this flag, not if it came from its default."""
-    return ctx.get_parameter_source(name) == click.core.ParameterSource.COMMANDLINE
 
 
 def _validate_flag_combinations(ctx, prepare_cgenff_inputs, ph, ff_out, fix_structure,
@@ -262,9 +258,9 @@ def pdbwriter(input, mol, psf, output, fix_structure, fix_keep_hetatoms, fix_add
         valid, report = FormatValidator.validate(input_file)
         if valid:
             uxm.message(message=f"SUCCESS: {report}", type="info")
-        else:
-            uxm.message(message=f"FAILURE: {report}", type="error")
-        return
+            return
+        uxm.message(message=f"FAILURE: {report}", type="error")
+        raise click.ClickException(report)
 
     if not output:
         uxm.message(message="Error: --output must be provided.", type="error")

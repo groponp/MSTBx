@@ -58,7 +58,9 @@ quit
                 uxm.message(f"Verificación exitosa: {final_atoms} átomos detectados (coincide con el original).", "info")
                 uxm.message(f"Archivos {output}.psf y {output}.pdb generados con éxito en formato X-PLOR.", "info")
             else:
-                uxm.message(f"Error de consistencia: {initial_atoms} átomos iniciales vs {final_atoms} átomos finales.", "error")
+                message = f"Error de consistencia: {initial_atoms} átomos iniciales vs {final_atoms} átomos finales."
+                uxm.message(message, "error")
+                raise click.ClickException(message)
         else:
             uxm.message(f"Archivos {output}.psf y {output}.pdb generados, pero no se pudo verificar el número de átomos.", "warning")
 
@@ -70,3 +72,4 @@ quit
             uxm.message("Revisa 'resetpsf_vmd.log' para detalles del error.", "warning")
         if os.path.exists(tcl_file):
             uxm.message(f"Puedes revisar '{tcl_file}' para debug.", "warning")
+        raise click.ClickException(f"VMD failed while resetting {psf}: {e}") from e

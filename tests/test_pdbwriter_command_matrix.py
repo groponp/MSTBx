@@ -242,3 +242,21 @@ def test_pdbwriter_prepare_cgenff_cli_combination(tmp_path, monkeypatch):
     assert observed["ligand_pH"] == 7.2
     assert observed["pdb_ligand_resname"] == "LIG"
     assert observed["pdb_ligand_chain"] == "B"
+
+
+def test_pdbwriter_check_mol_format_failure_exits_nonzero(tmp_path, monkeypatch):
+    """A validation FAILURE must fail the process, not just log and exit 0
+    (the entire point of --check-mol-format is to be checked by a caller)."""
+    import mstbx.commands.pdbwriter as command
+
+    bad_file = tmp_path / "broken.pdb"
+    bad_file.write_text("not a real pdb\n")
+    monkeypatch.setattr(
+        command.FormatValidator, "validate", staticmethod(lambda path: (False, "missing END record"))
+    )
+
+    result = CliRunner().invoke(pdbwriter, ["--mol", str(bad_file), "--check-mol-format"])
+
+    assert result.exit_code != 0
+    assert "missing END record" in result.output
+    assert "Traceback" not in result.output

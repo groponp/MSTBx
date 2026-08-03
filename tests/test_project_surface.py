@@ -152,7 +152,7 @@ def test_cli_rejects_invalid_gromacs_environment():
         cli,
         ["md-inputs", "--engine", "gromacs", "--env", "membrane"],
     )
-    assert result.exit_code == 0
+    assert result.exit_code != 0
     assert "supports only" in result.output
 
 

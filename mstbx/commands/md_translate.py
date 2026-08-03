@@ -35,8 +35,13 @@ quit
         with open("translate.tcl", "w") as f:
             f.write(tcl_script)
             
-        os.system("vmd -dispdev text -e translate.tcl > /dev/null")
+        exit_code = os.system("vmd -dispdev text -e translate.tcl > /dev/null")
         os.remove("translate.tcl")
-        
+
+        if exit_code != 0:
+            message = f"VMD exited with a non-zero status ({exit_code}) while translating {psf}."
+            uxm.message(message, "error")
+            raise click.ClickException(message)
+
         uxm.message(f"Conversión a {target} (parcial) completada.", "info")
         uxm.message("Nota: La conversión completa de topología requiere TopoTools instalado en VMD.", "warning")

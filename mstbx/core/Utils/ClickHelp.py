@@ -11,6 +11,16 @@ this module does generically for any command.
 import click
 
 
+def explicit(ctx, name):
+    """True only if the user typed this flag, not if it came from its default.
+
+    Needed to reject flag combinations that would otherwise be silently
+    ignored: an option with a ``default=`` looks identical to one the user
+    never mentioned unless checked against its Click parameter source.
+    """
+    return ctx.get_parameter_source(name) == click.core.ParameterSource.COMMANDLINE
+
+
 def grouped_command(groups, other_title="Other Options"):
     """Build a ``click.Command`` subclass whose ``--help`` groups options.
 

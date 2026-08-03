@@ -21,8 +21,9 @@ def smd_inputs(engine, env, psf, pdb, temperature, mdtime, dcdfreq, selpull, sel
     uxm = UnixMessage()
     
     if engine != 'namd':
-        uxm.message(f"Engine '{engine}' is not yet implemented for SMD.", "error")
-        return
+        message = f"Engine '{engine}' is not yet implemented for SMD."
+        uxm.message(message, "error")
+        raise click.UsageError(message)
 
     uxm.message(f"Generating SMD configuration for {engine}...", "info")
     
