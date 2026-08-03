@@ -29,6 +29,8 @@ All notable changes to this project will be documented in this file.
 - Hardened `mkdocking-cmplx` and MOL2 validation against missing `MODEL 1`,
   failed conversions, truncated sections, invalid counts, coordinates, and
   out-of-range bond references.
+- Added a CHARMM-compatible GROMACS protein selection for non-standard
+  protonation names such as `LSN`, `ARGN`, `ASPP`, `GLUP`, and `HSD/HSE/HSP`.
 
 ## [0.8.10-beta] - 2026-06-13
 

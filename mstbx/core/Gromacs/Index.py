@@ -9,6 +9,10 @@ from pathlib import Path
 
 SOLVENT_IONS = "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN"
 SOLUTE = f"not ({SOLVENT_IONS})"
+# CHARMM/pdb2gmx can emit valid protein states that MDAnalysis does not classify
+# as ``protein`` (for example LSN, the CHARMM form of LYSN).
+PROTEIN_RESNAME_ALIASES = "ARGN ARGN1 ARGN2 ARGN3 ASPH ASPP CYS2 GLUH GLUP HISD HIS1 HISE HISH HSD HSE HSP HSPM LYSN LSN"
+PROTEIN_SELECTION = f"(protein or resname {PROTEIN_RESNAME_ALIASES})"
 
 
 @dataclass

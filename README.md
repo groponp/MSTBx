@@ -420,6 +420,12 @@ A complete GROMACS workflow for a protein without a ligand. This path does not u
      --overwrite
    ```
 3. **Generate minimization, NVT, NPT, production, index, restraints, and runner files**:
+   If interactive protonation produced CHARMM names such as `LSN` (the
+   `LYSN` state), do not use `protein` alone in a custom MDAnalysis selection.
+   Use the explicit compatibility selection below:
+   ```bash
+   PROTEIN_SEL='(protein or resname ARGN ARGN1 ARGN2 ARGN3 ASPH ASPP CYS2 GLUH GLUP HISD HIS1 HISE HISH HSD HSE HSP HSPM LYSN LSN)'
+   ```
    ```bash
    mstbx md-inputs --engine gromacs \
      --env solution \
@@ -430,10 +436,10 @@ A complete GROMACS workflow for a protein without a ligand. This path does not u
      --mdtime 1 \
      --xtc-frequency 50 \
      --name-group-index-1 Protein \
-     --select-group-index-1 "protein" \
+     --select-group-index-1 "$PROTEIN_SEL" \
      --name-group-index-2 Water_and_ions \
-     --select-group-index-2 "not protein" \
-     --select-atoms-to-restraint "protein and backbone" \
+     --select-group-index-2 "not ($PROTEIN_SEL)" \
+     --select-atoms-to-restraint "$PROTEIN_SEL and name N CA C O" \
      --gmx gmx
    ```
 4. **Inspect and run**:

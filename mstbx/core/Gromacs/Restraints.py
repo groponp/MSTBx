@@ -6,10 +6,11 @@ import shutil
 from dataclasses import dataclass
 from pathlib import Path
 
+from mstbx.core.Gromacs.Index import PROTEIN_SELECTION
 
 DEFAULT_FORCE = round(5.0 * 4.184 * 100)
-DEFAULT_SELECTION = "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN or resname LIG and not name H*"
-SOLVENT_IONS = {"SOL", "TIP3", "TIP3P", "WAT", "HOH", "NA", "CL", "K", "MG", "CA", "ZN"}
+DEFAULT_SELECTION = f"name N CA C O and {PROTEIN_SELECTION} or resname LIG and not name H*"
+SOLVENT_IONS = {"SOL", "TIP3", "TIP3P", "WAT", "HOH", "NA", "CL", "K", "MG", "CA", "SOD", "CLA", "ZN"}
 
 
 @dataclass
@@ -56,9 +57,9 @@ class GromacsRestraints:
         selected = universe.select_atoms(self.config.selection)
         if not len(selected):
             raise ValueError(f"Empty restraint selection: {self.config.selection}")
-        protein = selected.select_atoms("protein")
-        ligand = selected.select_atoms("not protein and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN")
-        protein_ids = self._local_ids(protein, universe.select_atoms("protein"))
+        protein = selected.select_atoms(PROTEIN_SELECTION)
+        ligand = selected.select_atoms(f"not {PROTEIN_SELECTION} and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA SOD CLA ZN")
+        protein_ids = self._local_ids(protein, universe.select_atoms(PROTEIN_SELECTION))
         ligand_ref = self._ligand_reference(universe, ligand)
         ligand_ids = self._local_ids(ligand, ligand_ref)
         if protein_ids:

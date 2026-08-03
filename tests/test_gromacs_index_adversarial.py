@@ -2,7 +2,8 @@
 
 import pytest
 
-from mstbx.core.Gromacs.Index import GromacsIndex, IndexGroup
+from mstbx.core.Gromacs.Index import GromacsIndex, IndexGroup, PROTEIN_SELECTION
+from mstbx.core.Gromacs.Restraints import DEFAULT_SELECTION
 
 
 class FakeAtoms:
@@ -45,3 +46,19 @@ def test_index_validation_rejects_overlapping_atoms():
 
     with pytest.raises(ValueError, match="overlap"):
         GromacsIndex._validate_coverage(FakeUniverse(3), selected)
+
+
+def test_charmm_lysine_terminal_alias_is_in_protein_selection(tmp_path):
+    """LSN/LYSN states are not MDAnalysis protein residues by default."""
+    import MDAnalysis as mda
+
+    pdb = tmp_path / "lsn.pdb"
+    pdb.write_text(
+        "ATOM      1  N   LSN A   1       1.000   2.000   3.000  1.00 20.00           N  \n"
+        "ATOM      2  CA  LSN A   1       2.000   2.000   3.000  1.00 20.00           C  \nEND\n"
+    )
+    universe = mda.Universe(pdb)
+
+    assert len(universe.select_atoms("protein")) == 0
+    assert len(universe.select_atoms(PROTEIN_SELECTION)) == 2
+    assert len(universe.select_atoms(DEFAULT_SELECTION)) == 2

@@ -79,6 +79,14 @@ the total charge before running `md-inputs`.
 
 ## 4. Generate protocols, natural index groups, and restraints
 
+For standard force-field names, `protein` is sufficient. For interactive
+CHARMM protonation, use the explicit alias list because MDAnalysis does not
+classify `LSN` (the CHARMM form of `LYSN`) as `protein`:
+
+```bash
+PROTEIN_SEL='(protein or resname ARGN ARGN1 ARGN2 ARGN3 ASPH ASPP CYS2 GLUH GLUP HISD HIS1 HISE HISH HSD HSE HSP HSPM LYSN LSN)'
+```
+
 ```bash
 mstbx md-inputs --engine gromacs \
   --env solution \
@@ -89,10 +97,10 @@ mstbx md-inputs --engine gromacs \
   --mdtime 1 \
   --xtc-frequency 50 \
   --name-group-index-1 Protein \
-  --select-group-index-1 "protein" \
+  --select-group-index-1 "$PROTEIN_SEL" \
   --name-group-index-2 Water_and_ions \
-  --select-group-index-2 "not protein" \
-  --select-atoms-to-restraint "protein and backbone" \
+  --select-group-index-2 "not ($PROTEIN_SEL)" \
+  --select-atoms-to-restraint "$PROTEIN_SEL and name N CA C O" \
   --gmx gmx
 ```
 

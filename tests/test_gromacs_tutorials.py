@@ -105,6 +105,8 @@ def test_tutorials_document_missing_atom_repair_without_hydrogen_duplication():
     assert "--pdb2gmx-protonation" in protein
     assert "Interactive protonation" in protein
     assert "--pdb2gmx-protonation" in main
+    assert "LSN" in protein
+    assert "PROTEIN_SEL" in protein
 
 
 def test_docking_tutorial_covers_pose_sources_and_engine_boundaries():
