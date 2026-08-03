@@ -88,6 +88,16 @@ def test_pdbwriter_help_contains_reproducible_examples():
         assert text in result.output
 
 
+def test_mkdocking_help_contains_pdb_and_pdbqt_scenarios():
+    """Docking help documents both supported ligand sources and the boundary."""
+    result = CliRunner().invoke(cli, ["mkdocking-cmplx", "--help"])
+
+    assert result.exit_code == 0
+    assert "--dock" in result.output
+    assert "--ligand-pdb" in result.output
+    assert "topogmx" in result.output
+
+
 def test_help_defaults_are_exposed_for_gromacs_and_openmm():
     """Stable defaults remain visible for reproducible invocation."""
     runner = CliRunner()

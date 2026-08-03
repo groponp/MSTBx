@@ -102,3 +102,17 @@ def test_tutorials_document_missing_atom_repair_without_hydrogen_duplication():
     assert "--fix-keep-hetatoms" in ligand
     assert "--fix-add-hydrogens" in main
     assert "pdb2gmx" in main
+
+
+def test_docking_tutorial_covers_pose_sources_and_engine_boundaries():
+    """The docking tutorial covers PDBQT, PDB, PDBWriter, GROMACS, and NAMD."""
+    readme = (ROOT / "mstbx/testing/mkdocking/README.md").read_text()
+    main = (ROOT / "README.md").read_text()
+
+    for option in ["--dock", "--ligand-pdb", "--select-atoms", "--ssbond", "--segid", "--pH"]:
+        assert option in readme
+    assert "MODEL 1" in readme
+    assert "topogmx" in readme
+    assert "topopsfgen" in readme
+    assert "### 9. Docking Pose to a Protein-Ligand System" in main
+    assert "mstbx/testing/mkdocking/README.md" in main

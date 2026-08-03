@@ -21,6 +21,8 @@ All notable changes to this project will be documented in this file.
   download followed by selection while preserving selected HETATM records.
 - Unified session logging across CLI tools, PDBWriter, and OpenMM with the
   `MSTBX_LOG_FILE` override and working-directory-aware handlers.
+- Added a complete docking-pose tutorial covering PDBQT/PDB inputs, PDBWriter
+  cleanup, and GROMACS/NAMD continuation boundaries.
 
 ## [0.8.10-beta] - 2026-06-13
 

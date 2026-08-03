@@ -139,6 +139,27 @@ def test_mkdocking_and_colabfold_dispatch_without_external_container(tmp_path, m
     assert any(name == "run" for name, _ in FakeContainer.calls)
 
 
+def test_mkdocking_rejects_ambiguous_or_missing_ligand_source(tmp_path):
+    """Docking requires exactly one ligand source."""
+    protein = tmp_path / "protein.pdb"
+    ligand = tmp_path / "ligand.pdb"
+    dock = tmp_path / "pose.pdbqt"
+    for path in [protein, ligand, dock]:
+        path.write_text("END\n")
+
+    runner = CliRunner()
+    missing = runner.invoke(cli, ["mkdocking-cmplx", "--protein", str(protein), "--output", "complex.pdb"])
+    both = runner.invoke(
+        cli,
+        ["mkdocking-cmplx", "--protein", str(protein), "--dock", str(dock), "--ligand-pdb", str(ligand), "--output", "complex.pdb"],
+    )
+
+    assert missing.exit_code != 0
+    assert "Either --dock or --ligand-pdb" in missing.output
+    assert both.exit_code != 0
+    assert "only one ligand source" in both.output
+
+
 def test_resetpsf_and_md_translate_generate_external_scripts(tmp_path, monkeypatch):
     """VMD-backed commands create and clean their temporary TCL scripts."""
     psf, pdb = _inputs(tmp_path)
