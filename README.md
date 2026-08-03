@@ -381,7 +381,8 @@ Navigate directly to each workflow tutorial using the hyperlinks below:
 - [4. Steered Molecular Dynamics (SMD) Pulling](#4-steered-molecular-dynamics-smd-pulling)
 - [5. Glycosylated Protein Simulation (1OAN Dimer)](#5-glycosylated-protein-simulation-1oan-dimer)
 - [6. Automated OpenMM Runner Pipeline (Chignolin)](#6-automated-openmm-runner-pipeline-chignolin)
-- [7. GROMACS CHARMM/CGenFF Layout](#7-gromacs-charmmcgenff-layout)
+- [7. GROMACS Protein-Only](#7-gromacs-protein-only)
+- [8. GROMACS Protein-Ligand with CGenFF](#8-gromacs-protein-ligand-with-cgenff)
 
 ---
 
@@ -549,8 +550,58 @@ A complete step-by-step example using `openmm-run` to execute minimization, mult
 
 ---
 
-### 7. GROMACS CHARMM/CGenFF Workflow
-A complete GROMACS workflow has two distinct input paths: a protein-only path and a protein-ligand path. For the ligand path, MSTBx prepares the files for CGenFF Web, the user obtains the STR manually, and only then does `topogmx` build the solvated system.
+### 7. GROMACS Protein-Only
+A complete GROMACS workflow for a protein without a ligand. This path does not use CGenFF, ligand files, or ligand restraints.
+
+1. **Prepare the protein**:
+   ```bash
+   cd mstbx/testing/gromacs-protein
+   mkdir -p input
+   mstbx pdbwriter \
+     --fix-structure \
+     --pdb-id 1UBQ \
+     --select-chains A \
+     --output input/protein_prepared.pdb
+   ```
+2. **Build, solvate, and ionize the system**:
+   ```bash
+   mstbx topogmx \
+     --protein input/protein_prepared.pdb \
+     --output-dir runs \
+     --box-distance 1.8 \
+     --pdb2gmx-ter \
+     --pdb2gmx-selection $'0\n0\n' \
+     --gmx gmx \
+     --overwrite
+   ```
+3. **Generate minimization, NVT, NPT, production, index, restraints, and runner files**:
+   ```bash
+   mstbx md-inputs --engine gromacs \
+     --env solution \
+     --runs-dir runs \
+     --temperature 310 \
+     --nvt-time 2 \
+     --npt-time 5 \
+     --mdtime 1 \
+     --xtc-frequency 50 \
+     --name-group-index-1 Protein \
+     --select-group-index-1 "not (resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN)" \
+     --name-group-index-2 Water_and_ions \
+     --select-group-index-2 "resname SOL TIP3 TIP3P WAT HOH NA CL K CA MG SOD CLA ZN" \
+     --select-atoms-to-restraint "name N CA C O and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA ZN" \
+     --gmx gmx
+   ```
+4. **Inspect and run**:
+   ```bash
+   find runs -maxdepth 2 -type f | sort
+   cd runs
+   ./run_all.sh
+   ```
+
+The default output has `01build`, `02nvt`, `03npt`, `04md`, `restraints`, `toppar`, and `run_all.sh`. The validation example uses 50,000 EM steps, 2 ns NVT, 5 ns NPT, 1 ns production, a 2 fs timestep, and XTC frames every 50 ps.
+
+### 8. GROMACS Protein-Ligand with CGenFF
+A complete GROMACS workflow for a protein-ligand system. MSTBx prepares the files for CGenFF Web, the user obtains the STR manually, and only then does `topogmx` build the solvated system.
 
 1. **Prepare inputs for CGenFF Web**:
    ```bash

@@ -46,3 +46,14 @@ def test_protein_tutorial_is_explicitly_ligand_free():
     assert "--ligand" not in script
     assert "--ligand-mol2" not in script
     assert "--prepare-cgenff-inputs" not in script
+
+
+def test_main_readme_has_clickable_gromacs_tutorials_seven_and_eight():
+    """The main tutorial index exposes separate protein and ligand links."""
+    readme = (ROOT / "README.md").read_text()
+
+    assert "[7. GROMACS Protein-Only](#7-gromacs-protein-only)" in readme
+    assert "[8. GROMACS Protein-Ligand with CGenFF](#8-gromacs-protein-ligand-with-cgenff)" in readme
+    assert "### 7. GROMACS Protein-Only" in readme
+    assert "### 8. GROMACS Protein-Ligand with CGenFF" in readme
+    assert readme.index("### 7. GROMACS Protein-Only") < readme.index("### 8. GROMACS Protein-Ligand with CGenFF")
