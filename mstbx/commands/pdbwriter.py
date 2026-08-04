@@ -130,22 +130,21 @@ def _validate_flag_combinations(ctx, prepare_cgenff_inputs, ph, ff_out, fix_stru
 
 
 @click.command(
+    # Group titles already show each group's trigger flag in parentheses, and
+    # _validate_flag_combinations() reports the exact rejected combination
+    # with its own message when it actually happens, so the epilog only
+    # needs runnable examples, not a restatement of the validation rules or
+    # the selection syntax (that belongs in the tutorials/reference docs).
     cls=grouped_command(PDBWRITER_OPTION_GROUPS),
     help="Advanced PDB preparation (Fix, Protonate, Edit, SSBOND) and CRD generation.",
-    epilog="""Flags in one group above only take effect together; combining a flag
-with a group other than its own trigger flag (shown in parentheses in the
-group title) is rejected with an error instead of being silently ignored.
-
-Examples:
+    epilog="""Examples:
 
 \b
   mstbx pdbwriter --pdb-id 7A3S --select-atoms "chainID B C and protein" -o bc.pdb
   mstbx pdbwriter -i complex.pdb --select-atoms "protein or resname LIG" -o complex_clean.pdb
   mstbx pdbwriter -i bc.pdb --segid PROB,PROC --ssbond -o bc_charmm.pdb
   mstbx pdbwriter -i protein.pdb --pH 7.4 --ff-out CHARMM -o protein_ph7.pdb
-  mstbx pdbwriter -i system.pdb --write-ext-crd -o system.crd
-
-Selections use MDAnalysis syntax: use chainID (not chain) and name H* for hydrogens.""",
+  mstbx pdbwriter -i system.pdb --write-ext-crd -o system.crd""",
 )
 @click.option('--input', '-i', type=click.Path(exists=True, dir_okay=False), help="Input PDB/MMCIF file.")
 @click.option('--mol', type=click.Path(exists=True, dir_okay=False), help="Input molecule file for validation only (works with --check-mol-format).")
