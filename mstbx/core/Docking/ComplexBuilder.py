@@ -8,7 +8,6 @@ import tempfile
 from pathlib import Path
 
 import MDAnalysis as mda
-from MDAnalysis.core.universe import Merge
 
 from mstbx.core.Utils.Utils import UnixMessage
 from mstbx.core.Utils.Validator import FormatValidator
@@ -84,6 +83,56 @@ class ComplexBuilder:
         """Path of the persisted ligand MOL2, next to the complex output."""
         return self.output_name.with_name(f"{self.output_name.stem}_ligand.mol2")
 
+    @staticmethod
+    def _splice_complex(protein_pdb: Path, ligand_pdb: Path, output: Path) -> None:
+        """Append the ligand as text after the protein's own atom records.
+
+        The protein is never reloaded through MDAnalysis here. `pdb2pqr`
+        --ffout CHARMM writes 4-letter residue names (ASPP, GLUP, CTER, NTER)
+        starting one column early, in the PDB altLoc slot (columns 18-21
+        instead of the strict 18-20), e.g. altLoc='A' resName='SPP' for
+        'ASPP'. A strict fixed-column reader like MDAnalysis truncates the
+        leading letter, and writing that universe back out bakes the
+        corrupted resName (SPP, TER) into the final complex, which CHARMM-GUI
+        then reports as unrecognized/engineered residues. Splicing raw text
+        keeps the protein's original bytes, chains, and CHARMM residue names
+        untouched; only the ligand (resName LIG, 3 letters, no CHARMM
+        4-letter names involved) goes through MDAnalysis.
+        """
+        protein_lines = [
+            line for line in protein_pdb.read_text().splitlines()
+            if line.startswith(("ATOM", "HETATM", "TER", "CRYST1"))
+        ]
+        if not any(line.startswith(("ATOM", "HETATM")) for line in protein_lines):
+            raise ValueError(f"No ATOM/HETATM records found in protein PDB: {protein_pdb}")
+
+        max_serial = 0
+        for line in protein_lines:
+            if line.startswith(("ATOM", "HETATM")):
+                try:
+                    max_serial = max(max_serial, int(line[6:11]))
+                except ValueError:
+                    pass
+
+        if not protein_lines[-1].startswith("TER"):
+            last_atom = next(line for line in reversed(protein_lines) if line.startswith(("ATOM", "HETATM")))
+            max_serial += 1
+            # resName (columns 18-20) is left blank: it is optional in a TER
+            # record, and reading it from the last atom line would hit the
+            # same CHARMM 4-letter-name column overflow described above.
+            # chainID/resSeq are safe to reuse, they are not shifted by it.
+            ter = f"TER   {max_serial:>5d}      {'':3s} {last_atom[21]}{last_atom[22:26]}"
+            protein_lines.append(ter)
+
+        ligand_lines = []
+        for line in ligand_pdb.read_text().splitlines():
+            if not line.startswith(("ATOM", "HETATM")):
+                continue
+            max_serial += 1
+            ligand_lines.append(f"HETATM{max_serial:>5d}" + line[11:])
+
+        output.write_text("\n".join(protein_lines + ligand_lines) + "\nEND\n")
+
     def build(self, ligand_input, ligand_pH=7.4, is_pdbqt=True):
         """Build and validate a protein-ligand complex PDB and ligand MOL2.
 
@@ -119,14 +168,12 @@ class ComplexBuilder:
             if not valid:
                 raise ValueError(f"Open Babel generated invalid MOL2: {report}")
 
-            protein = mda.Universe(self.protein_pdb)
             converted_ligand = mda.Universe(mol2)
-            self.ensure_chain(protein, "A")
             self.ensure_chain(converted_ligand, "L")
             self.prepare_ligand(converted_ligand)
-            complex_universe = Merge(protein.atoms, converted_ligand.atoms)
-            if protein.dimensions is not None:
-                complex_universe.dimensions = protein.dimensions
-            complex_universe.atoms.write(self.output_name)
+            ligand_only = work / "ligand_only.pdb"
+            converted_ligand.atoms.write(ligand_only)
+
+            self._splice_complex(self.protein_pdb, ligand_only, self.output_name)
             shutil.copy2(mol2, ligand_mol2)
         return {"complex": self.output_name, "ligand_mol2": ligand_mol2}

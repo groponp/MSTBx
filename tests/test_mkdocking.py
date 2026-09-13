@@ -86,6 +86,52 @@ def test_mol2_validator_rejects_bad_counts_and_coordinates(tmp_path):
     assert FormatValidator.validate(bad_bond)[0] is False
 
 
+def test_build_preserves_charmm_4letter_resnames_and_original_chain(tmp_path, monkeypatch):
+    """The protein is spliced as text, never reparsed through MDAnalysis.
+
+    pdb2pqr --ffout CHARMM writes 4-letter residue names (ASPP, GLUP, CTER,
+    NTER) starting one column early, in the PDB altLoc slot. A strict
+    fixed-column reader (MDAnalysis) truncates the leading letter (ASPP ->
+    SPP), and re-writing that reparsed universe bakes the corruption into the
+    final complex, which CHARMM-GUI then reports as an unrecognized/
+    engineered residue. This also covers that a real chain ID (here "B") is
+    kept instead of being forced to "A".
+    """
+    protein = tmp_path / "protein.pdb"
+    ligand = tmp_path / "ligand.pdb"
+    output = tmp_path / "complex.pdb"
+    aspp_line = "ATOM      1  CB ASPP B  10      32.124  16.566  62.485  1.00  0.00           C  "
+    protein.write_text(aspp_line + "\n")
+    ligand.write_text(_pdb("HETATM", "C1", "UNK", "X", 9))
+    builder = ComplexBuilder(protein, output)
+
+    monkeypatch.setattr(builder, "pdb_to_mol2", lambda source, destination, ph: destination.write_text(_mol2()))
+    assert builder.build(ligand, is_pdbqt=False)
+
+    complex_text = output.read_text()
+    assert aspp_line in complex_text
+    assert "SPP" not in complex_text.replace(aspp_line, "")
+    assert "\nTER" in complex_text or complex_text.startswith("TER")
+
+
+def test_build_appends_ter_before_ligand_when_protein_lacks_one(tmp_path, monkeypatch):
+    """A protein PDB without a trailing TER still gets one before the ligand."""
+    protein = tmp_path / "protein.pdb"
+    ligand = tmp_path / "ligand.pdb"
+    output = tmp_path / "complex.pdb"
+    protein.write_text(_pdb())
+    ligand.write_text(_pdb("HETATM", "C1", "UNK", "X", 9))
+    builder = ComplexBuilder(protein, output)
+
+    monkeypatch.setattr(builder, "pdb_to_mol2", lambda source, destination, ph: destination.write_text(_mol2()))
+    assert builder.build(ligand, is_pdbqt=False)
+
+    lines = output.read_text().splitlines()
+    ter_index = next(i for i, line in enumerate(lines) if line.startswith("TER"))
+    ligand_index = next(i for i, line in enumerate(lines) if " LIG " in line)
+    assert ter_index < ligand_index
+
+
 def test_extract_pose1_rejects_pdbqt_without_model_one(tmp_path):
     """An empty extraction cannot silently produce a ligand-less complex."""
     source = tmp_path / "poses.pdbqt"
