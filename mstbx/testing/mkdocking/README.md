@@ -15,6 +15,7 @@ Use the case that matches the files you have:
 | The receptor has missing heavy atoms or internal gaps | [Case 1](#case-study-1-receptor-preparation) | Repair before docking and avoid changing the docking receptor afterward. |
 | The complex is ready and you need GROMACS | [Case 5](#case-study-5-gromacs-with-cgenff) | The MOL2/STR boundary is explicit and manual. |
 | The complex is ready and you need NAMD | [Case 6](#case-study-6-namd-with-a-matching-psf) | A matching PSF and CHARMM parameters are required. |
+| The complex and ligand MOL2 go to CHARMM-GUI | [Case 7](#case-study-7-charmm-gui-inputs) | CHARMM-GUI wants standard residue names and does its own protonation step. |
 
 ## Contents
 
@@ -24,6 +25,7 @@ Use the case that matches the files you have:
 - [Case Study 4: PDBWriter Cleanup and Validation](#case-study-4-pdbwriter-cleanup-and-validation)
 - [Case Study 5: GROMACS with CGenFF](#case-study-5-gromacs-with-cgenff)
 - [Case Study 6: NAMD with a Matching PSF](#case-study-6-namd-with-a-matching-psf)
+- [Case Study 7: CHARMM-GUI Inputs](#case-study-7-charmm-gui-inputs)
 - [Validation Checklist](#validation-checklist)
 
 ## Case Study 1: Receptor Preparation
@@ -67,7 +69,7 @@ The command requires exactly one ligand source. Passing both `--dock` and
 `--ligand-pdb`, or neither option, is an error. Besides `complex_pose1.pdb`,
 the command also writes `complex_pose1_ligand.mol2`: a standalone,
 Gasteiger-charged MOL2 of the ligand pose at `--pH`. These two files are the
-inputs CHARMM-GUI needs — the PDB for PDB Reader & Manipulator and the MOL2
+inputs CHARMM-GUI needs: the PDB for PDB Reader & Manipulator and the MOL2
 for Ligand Reader & Modeler. This command does not create a PSF, a GROMACS
 topology, or CGenFF stream-file parameters.
 
@@ -198,6 +200,47 @@ mstbx md-inputs --engine namd \
 Do not reuse a PSF generated before changing chain selection, residue names,
 protonation, or atom order. Validate the PDB/PSF pair before starting dynamics.
 
+## Case Study 7: CHARMM-GUI Inputs
+
+Validated end to end against a real case (PDB 1M17, EGFR kinase domain with
+the erlotinib ligand AQ4, used as a docking pose): do not protonate the
+receptor with `--pH --ff-out CHARMM` before uploading to CHARMM-GUI. That step
+writes CHARMM-specific residue names (`ASPP`, `GLUP`, `HSD`, `HSE`, `HSP`,
+`CTER`, `NTER`), and CHARMM-GUI's own PDB Reader parses standard, strict PDB
+columns for residue names, the same fixed columns any generic PDB reader
+uses. It does not expect those CHARMM names as input; it has its own
+protonation/pKa step ("Check pKa", PROPKA-based) inside its wizard for that.
+Feeding it CHARMM-protonated names gets residues reported as unrecognized
+("Engineered Residues").
+
+Repair the receptor without protonating it:
+
+```bash
+mstbx pdbwriter --pdb-id 1M17 \
+  --select-chains A \
+  --fix-structure \
+  --ssbond \
+  --output receptor_prepared.pdb \
+  --overwrite
+```
+
+Then build the complex the usual way:
+
+```bash
+mstbx mkdocking-cmplx \
+  --protein receptor_prepared.pdb \
+  --ligand-pdb ligand_pose.pdb \
+  --pH 7.4 \
+  --output complex_pose1.pdb
+```
+
+Upload `complex_pose1.pdb` to PDB Reader & Manipulator and
+`complex_pose1_ligand.mol2` to Ligand Reader & Modeler. Pick protonation
+states (histidine tautomers, Asp/Glu neutral states) inside CHARMM-GUI's own
+wizard, not beforehand with `pdbwriter --pH`. `--pH --ff-out CHARMM` is still
+the right tool when the destination is a direct NAMD/psfgen route that never
+goes through CHARMM-GUI (Case Study 6).
+
 ## Validation Checklist
 
 - `mkdocking-cmplx` rejects missing or ambiguous ligand sources.
@@ -206,6 +249,9 @@ protonation, or atom order. Validate the PDB/PSF pair before starting dynamics.
 - `mkdocking-cmplx` always writes `<output>_ligand.mol2` next to the complex
   PDB; verify both with `pdbwriter --check-mol-format` before upload to
   CHARMM-GUI or CGenFF.
+- Do not run `pdbwriter --pH --ff-out CHARMM` on a receptor headed for
+  CHARMM-GUI; it writes CHARMM residue names CHARMM-GUI's PDB Reader does not
+  accept as input (Case Study 7).
 - A GROMACS build requires the `.str` returned by CGenFF and the matching MOL2.
 - A NAMD build requires a matching PSF and ligand parameters; the docking
   command does not infer them.
