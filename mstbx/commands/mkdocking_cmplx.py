@@ -6,14 +6,17 @@ from mstbx.core.Docking.ComplexBuilder import ComplexBuilder
 from mstbx.core.Utils.Utils import UnixMessage
 
 @click.command(
-    help="Build a protein-ligand PDB complex from a docking pose.",
+    help="Build a protein-ligand PDB complex and ligand MOL2 from a docking pose.",
     epilog="""Examples:
   mstbx mkdocking-cmplx --protein receptor.pdb --dock vina_out.pdbqt -o complex.pdb
   mstbx mkdocking-cmplx --protein receptor.pdb --ligand-pdb ligand.pdb -o complex.pdb
   mstbx pdbwriter --input complex.pdb --select-atoms \"protein or resname LIG\" -o complex_clean.pdb
 
-The command writes a PDB complex only. Use topogmx or topopsfgen afterwards to
-create the simulation topology and solvated system.""",
+The command writes the combined PDB (<output>) and a standalone, Gasteiger-
+charged ligand MOL2 (<output stem>_ligand.mol2) next to it. Both are the
+inputs CHARMM-GUI's PDB Reader & Manipulator and Ligand Reader & Modeler
+expect. Use topogmx or topopsfgen afterwards to create the simulation
+topology and solvated system.""",
 )
 @click.option('--protein', '-p', required=True, help="Protein PDB file.")
 @click.option('--dock', '-d', help="PDBQT file from docking (MODEL 1 will be used).")
@@ -51,3 +54,4 @@ def mkdocking_cmplx(protein, dock, ligand_pdb, ph, output):
         uxm.message(message=message, type="error")
         raise click.ClickException(message)
     uxm.message(message=f"Complex successfully created: {output}", type="info")
+    uxm.message(message=f"Ligand MOL2 for CHARMM-GUI written: {built['ligand_mol2']}", type="info")

@@ -113,7 +113,7 @@ def test_mkdocking_and_colabfold_dispatch_without_external_container(tmp_path, m
 
         def build(self, ligand_input, ligand_pH, is_pdbqt):
             FakeBuilder.seen += (ligand_input, ligand_pH, is_pdbqt)
-            return True
+            return {"complex": self.seen[1], "ligand_mol2": Path(str(self.seen[1]) + "_ligand.mol2")}
 
     class FakeContainer:
         calls = []

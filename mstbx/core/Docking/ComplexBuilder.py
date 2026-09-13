@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
@@ -79,14 +80,24 @@ class ComplexBuilder:
         universe.residues.resnames = ["LIG"] * len(universe.residues)
         universe.residues.resids = [1] * len(universe.residues)
 
+    def ligand_mol2_path(self) -> Path:
+        """Path of the persisted ligand MOL2, next to the complex output."""
+        return self.output_name.with_name(f"{self.output_name.stem}_ligand.mol2")
+
     def build(self, ligand_input, ligand_pH=7.4, is_pdbqt=True):
-        """Build and validate a protein-ligand complex PDB."""
+        """Build and validate a protein-ligand complex PDB and ligand MOL2.
+
+        CHARMM-GUI's PDB Reader & Manipulator and Ligand Reader & Modeler need
+        both artifacts: the combined PDB and a standalone, Gasteiger-charged
+        ligand MOL2. Both are written next to `output_name`.
+        """
         if not self.protein_pdb.is_file():
             raise FileNotFoundError(f"Protein PDB not found: {self.protein_pdb}")
         ligand_input = Path(ligand_input).resolve()
         if not ligand_input.is_file():
             raise FileNotFoundError(f"Ligand input not found: {ligand_input}")
         self.output_name.parent.mkdir(parents=True, exist_ok=True)
+        ligand_mol2 = self.ligand_mol2_path()
 
         with tempfile.TemporaryDirectory(prefix=".mkdocking-", dir=self.output_name.parent) as temp:
             work = Path(temp)
@@ -117,4 +128,5 @@ class ComplexBuilder:
             if protein.dimensions is not None:
                 complex_universe.dimensions = protein.dimensions
             complex_universe.atoms.write(self.output_name)
-        return True
+            shutil.copy2(mol2, ligand_mol2)
+        return {"complex": self.output_name, "ligand_mol2": ligand_mol2}

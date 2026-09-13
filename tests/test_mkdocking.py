@@ -32,7 +32,7 @@ def test_extract_pose1_isolates_the_first_docking_model(tmp_path):
 
 
 def test_build_writes_a_valid_complex_and_checks_generated_mol2(tmp_path, monkeypatch):
-    """A successful build creates a PDB after validating the intermediate MOL2."""
+    """A successful build creates a PDB and a persisted, validated ligand MOL2."""
     protein = tmp_path / "protein.pdb"
     ligand = tmp_path / "ligand.pdb"
     output = tmp_path / "nested" / "complex.pdb"
@@ -41,12 +41,19 @@ def test_build_writes_a_valid_complex_and_checks_generated_mol2(tmp_path, monkey
     builder = ComplexBuilder(protein, output)
 
     monkeypatch.setattr(builder, "pdb_to_mol2", lambda source, destination, ph: destination.write_text(_mol2()))
-    assert builder.build(ligand, is_pdbqt=False)
+    result = builder.build(ligand, is_pdbqt=False)
+    assert result
 
     valid, report = FormatValidator.validate(output)
     assert valid, report
     assert "HETATM" in output.read_text()
     assert " LIG " in output.read_text()
+
+    ligand_mol2 = result["ligand_mol2"]
+    assert ligand_mol2 == builder.ligand_mol2_path()
+    assert ligand_mol2.exists()
+    mol2_valid, mol2_report = FormatValidator.validate(ligand_mol2)
+    assert mol2_valid, mol2_report
 
 
 def test_build_rejects_invalid_generated_mol2(tmp_path, monkeypatch):
@@ -62,6 +69,7 @@ def test_build_rejects_invalid_generated_mol2(tmp_path, monkeypatch):
     with pytest.raises(ValueError, match="invalid MOL2"):
         builder.build(ligand, is_pdbqt=False)
     assert not output.exists()
+    assert not builder.ligand_mol2_path().exists()
 
 
 def test_mol2_validator_rejects_bad_counts_and_coordinates(tmp_path):

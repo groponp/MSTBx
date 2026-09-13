@@ -64,9 +64,12 @@ mstbx mkdocking-cmplx \
 ```
 
 The command requires exactly one ligand source. Passing both `--dock` and
-`--ligand-pdb`, or neither option, is an error. This command creates a PDB
-complex only; it does not create a PSF, a GROMACS topology, or force-field
-parameters.
+`--ligand-pdb`, or neither option, is an error. Besides `complex_pose1.pdb`,
+the command also writes `complex_pose1_ligand.mol2`: a standalone,
+Gasteiger-charged MOL2 of the ligand pose at `--pH`. These two files are the
+inputs CHARMM-GUI needs — the PDB for PDB Reader & Manipulator and the MOL2
+for Ligand Reader & Modeler. This command does not create a PSF, a GROMACS
+topology, or CGenFF stream-file parameters.
 
 ## Case Study 3: Existing Ligand PDB
 
@@ -81,8 +84,9 @@ mstbx mkdocking-cmplx \
   --output complex_pose1.pdb
 ```
 
-The ligand is still normalized to `LIG` and chain `L` by the complex builder.
-Inspect the result before generating topology files:
+The ligand is still normalized to `LIG` and chain `L` by the complex builder,
+and `complex_pose1_ligand.mol2` is written next to the complex, same as in
+Case Study 2. Inspect the result before generating topology files:
 
 ```bash
 mstbx pdbwriter --mol complex_pose1.pdb --check-mol-format
@@ -121,7 +125,11 @@ mstbx pdbwriter --input receptor_raw.pdb \
 
 ## Case Study 5: GROMACS with CGenFF
 
-Generate the protein and ligand inputs required by the CGenFF web service:
+`complex_pose1_ligand.mol2` from Case Study 2/3 can be uploaded to CGenFF or
+CHARMM-GUI directly. `pdbwriter --prepare-cgenff-inputs` is still useful when
+the ligand and protein need to be re-split from an already-merged, cleaned-up
+complex (e.g. after `pdbwriter --select-atoms` in Case Study 4) with a
+different pH than the one used at docking time:
 
 ```bash
 mkdir -p cgenff_inputs
@@ -195,6 +203,9 @@ protonation, or atom order. Validate the PDB/PSF pair before starting dynamics.
 - `mkdocking-cmplx` rejects missing or ambiguous ligand sources.
 - A PDBQT without `MODEL 1` must be converted or exported as a single-pose
   file before using the command.
+- `mkdocking-cmplx` always writes `<output>_ligand.mol2` next to the complex
+  PDB; verify both with `pdbwriter --check-mol-format` before upload to
+  CHARMM-GUI or CGenFF.
 - A GROMACS build requires the `.str` returned by CGenFF and the matching MOL2.
 - A NAMD build requires a matching PSF and ligand parameters; the docking
   command does not infer them.
