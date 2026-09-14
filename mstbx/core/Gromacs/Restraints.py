@@ -59,19 +59,95 @@ class GromacsRestraints:
             raise ValueError(f"Empty restraint selection: {self.config.selection}")
         protein = selected.select_atoms(PROTEIN_SELECTION)
         ligand = selected.select_atoms(f"not {PROTEIN_SELECTION} and not resname SOL TIP3 TIP3P WAT HOH NA CL K MG CA SOD CLA ZN")
-        protein_ids = self._local_ids(protein, universe.select_atoms(PROTEIN_SELECTION))
+        protein_count = self._apply_protein(universe, protein)
         ligand_ref = self._ligand_reference(universe, ligand)
         ligand_ids = self._local_ids(ligand, ligand_ref)
-        if protein_ids:
-            posre = self.build / "posre_backbone.itp"
-            posre.write_text(self._block(protein_ids, "POSRES"))
-            shutil.copy2(posre, self.config.runs_dir / "restraints/posre_backbone.itp")
-            self._replace_posre(self._protein_topology(), "posre_backbone.itp")
         if ligand_ids:
             itp = self._ligand_topology()
             itp.write_text(self._without_block(itp.read_text(), "POSRES_LIGAND") + "\n\n" + self._block(ligand_ids, "POSRES_LIGAND"))
             shutil.copy2(itp, self.config.runs_dir / "toppar/ligand.itp")
-        return len(protein_ids), len(ligand_ids)
+        return protein_count, len(ligand_ids)
+
+    def _apply_protein(self, universe, protein_atoms) -> int:
+        """Write one restraint file per protein moleculetype block.
+
+        `pdb2gmx` splits a system into separate `topol_Protein_chain_<X>.itp`
+        files (one moleculetype per original PDB chain letter) whenever there
+        is more than one chain; each needs its own restraint file with LOCAL
+        atom numbering restarting at 1, included into that specific file.
+        Writing one combined, globally-numbered restraint file and patching
+        only one of the chain topologies (the previous behavior) produces
+        out-of-range atom indices in every other chain, which grompp rejects.
+        A single-chain system has no such split file: pdb2gmx writes the
+        moleculetype inline in topol.top, where local numbering already
+        matches global numbering, so that case keeps the old single-window
+        behavior untouched.
+        """
+        windows = self._protein_chain_windows(universe)
+        buckets: list[list[int]] = [[] for _ in windows]
+        for atom in protein_atoms:
+            for i, (_, start, end) in enumerate(windows):
+                if start <= atom.index < end:
+                    buckets[i].append(atom.index - start + 1)
+                    break
+            else:
+                raise ValueError(f"Restrained protein atom {atom.index} falls outside all chain topology windows.")
+        total = 0
+        for (topology, _, _), local_ids in zip(windows, buckets):
+            if not local_ids:
+                continue
+            if topology.name.startswith("topol_Protein_chain_"):
+                name = f"posre_{topology.stem[len('topol_'):]}.itp"
+            else:
+                name = "posre_backbone.itp"
+            posre = self.build / name
+            posre.write_text(self._block(local_ids, "POSRES"))
+            shutil.copy2(posre, self.config.runs_dir / f"restraints/{name}")
+            self._replace_posre(topology, name)
+            total += len(local_ids)
+        return total
+
+    def _protein_chain_windows(self, universe) -> list[tuple[Path, int, int]]:
+        """Return `(topology_file, global_start, global_end)` per protein chain."""
+        chain_files = sorted(self.build.glob("topol_Protein_chain_*.itp"))
+        if not chain_files:
+            return [(self._protein_topology(), 0, len(universe.select_atoms(PROTEIN_SELECTION)))]
+        order: list[str] = []
+        seen: set[str] = set()
+        for line in (self.build / "protein.pdb").read_text().splitlines():
+            if line.startswith(("ATOM", "HETATM")) and len(line) > 21 and line[21] not in seen:
+                seen.add(line[21])
+                order.append(line[21])
+        windows: list[tuple[Path, int, int]] = []
+        offset = 0
+        for chain in order:
+            itp = self.build / f"topol_Protein_chain_{chain}.itp"
+            if not itp.exists():
+                raise ValueError(f"Missing chain topology for chain '{chain}': {itp}")
+            count = self._count_atoms(itp)
+            windows.append((itp, offset, offset + count))
+            offset += count
+        return windows
+
+    @staticmethod
+    def _count_atoms(itp: Path) -> int:
+        """Count entries in an `.itp` file's `[ atoms ]` section.
+
+        Preprocessor directives (`#ifdef`, `#include`, `#endif`) never
+        appear inside a real `[ atoms ]` block (pdb2gmx always emits later
+        sections like `[ bonds ]` first), but are excluded explicitly rather
+        than relying on that ordering, since a directive is never a valid
+        atom entry either way.
+        """
+        in_atoms, count = False, 0
+        for line in itp.read_text().splitlines():
+            stripped = line.split(";", 1)[0].strip()
+            if stripped.startswith("["):
+                in_atoms = stripped.strip("[] ").lower() == "atoms"
+                continue
+            if in_atoms and stripped and not stripped.startswith("#"):
+                count += 1
+        return count
 
     @staticmethod
     def _local_ids(atoms, reference) -> list[int]:
