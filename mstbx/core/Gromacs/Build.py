@@ -142,8 +142,12 @@ class GromacsBuilder:
         mol2 = self.build / self.config.ligand_mol2.name
         normalize_mol2_name(mol2, name)
         self._run([sys.executable, self.config.cgenff_converter, name, mol2.name, self.config.ligand_str.name, self.config.forcefield_dir.name])
-        shutil.copy2(self.build / f"{name}.itp", self.build / "ligand.itp")
-        shutil.copy2(self.build / f"{name}.prm", self.build / "ligand.prm")
+        # cgenff_charmm2gmx_py3.py always lowercases `name` for its own
+        # output filenames (mol_name.lower() + ".itp"/".prm"), regardless of
+        # the case passed on argv. `write_ligand_pdb` below already accounts
+        # for this; the .itp/.prm copies must too.
+        shutil.copy2(self.build / f"{name.lower()}.itp", self.build / "ligand.itp")
+        shutil.copy2(self.build / f"{name.lower()}.prm", self.build / "ligand.prm")
         set_ligand_resname(self.build / "ligand.itp", self.config.ligand_resname)
         write_ligand_pdb(self.build / f"{name.lower()}_ini.pdb", self.build / "ligand.pdb", self.config.ligand_resname)
 
