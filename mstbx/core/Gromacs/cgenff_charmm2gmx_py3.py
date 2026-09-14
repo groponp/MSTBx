@@ -104,7 +104,7 @@ def is_lp(s):
 ## jal
 def is_lp_host_atom(self,name):
 	for ai in range (0,self.nvsites):
-		if (name==self.G.node[ai]['at1']):
+		if (name==self.G.nodes[ai]['at1']):
 			return True
 	return False
 
@@ -128,9 +128,9 @@ def construct_lp(x1,y1,z1,x2,y2,z2,dist):
 def find_vsite(self, atnum):
 	for i in range (0, self.nvsites):
 		# if we find the LP host, find the LP atom index
-		if (self.G.node[i]['at1'] == self.G.node[atnum]['name']):
+		if (self.G.nodes[i]['at1'] == self.G.nodes[atnum]['name']):
 			for j in range (0, self.natoms):
-				if (self.G.node[i]['vsite'] == self.G.node[j]['name']):
+				if (self.G.nodes[i]['vsite'] == self.G.nodes[j]['name']):
 					return j
 
 #-----------------------------------------------------------------------
@@ -713,10 +713,10 @@ class atomgroup:
 		nonplanar_dihedrals=[]
 		cutoff=179.9
 		for var in self.dihedrals:
-			d1=self.G.node[var[0]]['type']
-			d2=self.G.node[var[1]]['type']
-			d3=self.G.node[var[2]]['type']
-			d4=self.G.node[var[3]]['type']
+			d1=self.G.nodes[var[0]]['type']
+			d2=self.G.nodes[var[1]]['type']
+			d3=self.G.nodes[var[2]]['type']
+			d4=self.G.nodes[var[3]]['type']
 			keep=1
 			for angl_param in angl_params:
 				p1=angl_param[0]
@@ -752,15 +752,15 @@ class atomgroup:
 		for atomi in range(0,self.natoms):
 			pairs14.add_node(atomi)
 			f.write("%6d %10s %6s %6s %6s %6d %10.3f %10.3f   ;\n" %
-			   ( atomi+1,self.G.node[atomi]['type'],
-			   self.G.node[atomi]['resid'],self.name,self.G.node[atomi]['name'],atomi+1,
-			   self.G.node[atomi]['charge'],self.G.node[atomi]['mass'] ) )
+			   ( atomi+1,self.G.nodes[atomi]['type'],
+			   self.G.nodes[atomi]['resid'],self.name,self.G.nodes[atomi]['name'],atomi+1,
+			   self.G.nodes[atomi]['charge'],self.G.nodes[atomi]['mass'] ) )
 		f.write("\n")
 		f.write("[ bonds ]\n")
 		f.write(";	ai	  aj funct			  c0			c1			  c2			c3\n")
 		for i,j in self.G.edges():
 			#f.write("%5d %5d	 1\n" % (i+1,j+1) )
-			f.write("%5d %5d	 1 ;  %10s %10s\n" % (i+1,j+1,self.G.node[i]['type'],self.G.node[j]['type']) )
+			f.write("%5d %5d	 1 ;  %10s %10s\n" % (i+1,j+1,self.G.nodes[i]['type'],self.G.nodes[j]['type']) )
 		f.write("\n")
 		f.write("[ pairs ]\n")
 		f.write(";	ai	  aj funct			  c0			c1			  c2			c3\n")
@@ -769,13 +769,13 @@ class atomgroup:
 				pairs14.add_edge(var[0],var[3])
 		for i,j in pairs14.edges():
 			f.write("%5d %5d	 1\n" % (i+1,j+1) )
-			#f.write("%5d %5d	 1 ;  %10s %10s\n" % (i+1,j+1,self.G.node[i]['type'],self.G.node[j]['type']) )
+			#f.write("%5d %5d	 1 ;  %10s %10s\n" % (i+1,j+1,self.G.nodes[i]['type'],self.G.nodes[j]['type']) )
 			## jal - add LP pairs, same as parent atom
 			## Use is_lp_host_atom() to test each index, then find associated vsite
-			if ((is_lp_host_atom(self,self.G.node[i]['name'])==True)):
+			if ((is_lp_host_atom(self,self.G.nodes[i]['name'])==True)):
 				k = find_vsite(self, i)
 				f.write("%5d %5d	 1\n" % (k+1,j+1) )
-			if ((is_lp_host_atom(self,self.G.node[j]['name'])==True)):
+			if ((is_lp_host_atom(self,self.G.nodes[j]['name'])==True)):
 				k = find_vsite(self, j)
 				f.write("%5d %5d	 1\n" % (k+1,i+1) )
 		f.write("\n")
@@ -783,14 +783,14 @@ class atomgroup:
 		f.write(";	ai	  aj	ak funct			c0			  c1			c2			  c3\n")
 		for var in self.angles:
 			f.write("%5d %5d %5d	5 ; %10s %10s %10s\n" % (var[0]+1,var[1]+1,var[2]+1,\
-				self.G.node[var[0]]['type'],self.G.node[var[1]]['type'],self.G.node[var[2]]['type']) )
+				self.G.nodes[var[0]]['type'],self.G.nodes[var[1]]['type'],self.G.nodes[var[2]]['type']) )
 		f.write("\n")
 		f.write("[ dihedrals ]\n")
 		f.write(";	ai	  aj	ak	  al funct			  c0			c1			  c2			c3			  c4			c5\n")
 		nonplanar_dihedrals=self.get_nonplanar_dihedrals(angl_params)
 		for var in nonplanar_dihedrals:
 			f.write("%5d %5d %5d %5d	 9 ; %10s %10s %10s %10s\n" % (var[0]+1,var[1]+1,var[2]+1,var[3]+1,\
-			self.G.node[var[0]]['type'],self.G.node[var[1]]['type'],self.G.node[var[2]]['type'],self.G.node[var[3]]['type']) )
+			self.G.nodes[var[0]]['type'],self.G.nodes[var[1]]['type'],self.G.nodes[var[2]]['type'],self.G.nodes[var[3]]['type']) )
 		f.write("\n")
 		if(self.nimpropers > 0):
 			f.write("[ dihedrals ]\n")
@@ -810,13 +810,13 @@ class atomgroup:
 				at2 = 0
 				# find atom name matches
 				for ai in range (0, self.natoms):
-					if (self.G.node[ai]['name'] == self.G.node[atomi]['vsite']):
+					if (self.G.nodes[ai]['name'] == self.G.nodes[atomi]['vsite']):
 						vsite = ai
-					if (self.G.node[ai]['name'] == self.G.node[atomi]['at1']):
+					if (self.G.nodes[ai]['name'] == self.G.nodes[atomi]['at1']):
 						at1 = ai
-					if (self.G.node[ai]['name'] == self.G.node[atomi]['at2']):
+					if (self.G.nodes[ai]['name'] == self.G.nodes[atomi]['at2']):
 						at2 = ai
-				dist=self.G.node[atomi]['dist']*-1  # invert sign for GROMACS convention
+				dist=self.G.nodes[atomi]['dist']*-1  # invert sign for GROMACS convention
 				f.write("%5d %5d %5d %5d %8.3f\n" % (vsite+1, at1+1, at2+1, func, dist))
 			f.write("\n")
 
@@ -829,17 +829,17 @@ class atomgroup:
 			## exclusions for the host (bonds, angles, pairs)
 			# first, exclude any LP from its host
 			for i in range (0, self.natoms):
-				if ((is_lp_host_atom(self,self.G.node[i]['name'])==True)):
+				if ((is_lp_host_atom(self,self.G.nodes[i]['name'])==True)):
 					# find the LP attached to this host, not necessarily consecutive
 					# in the topology
 					j = find_vsite(self, i)
 					f.write("%5d %5d	 1\n" % (i+1,j+1) )
 			# first neighbors: 1-2
 			for i,j in self.G.edges():
-				if ((is_lp_host_atom(self,self.G.node[i]['name'])==True)):
+				if ((is_lp_host_atom(self,self.G.nodes[i]['name'])==True)):
 					k = find_vsite(self, i)
 					f.write("%5d %5d	 1\n" % (k+1,j+1) )
-				if ((is_lp_host_atom(self,self.G.node[j]['name'])==True)):
+				if ((is_lp_host_atom(self,self.G.nodes[j]['name'])==True)):
 					k = find_vsite(self, j)
 					f.write("%5d %5d	 1\n" % (k+1,i+1) )
 			# second neighbors: 1-3
@@ -847,18 +847,18 @@ class atomgroup:
 				# only need to consider ends of the angle, not middle atom
 				ai = var[0]
 				ak = var[2]
-				if ((is_lp_host_atom(self,self.G.node[ai]['name'])==True)):
+				if ((is_lp_host_atom(self,self.G.nodes[ai]['name'])==True)):
 					l = find_vsite(self, ai)
 					f.write("%5d %5d	 1\n" % (l+1,ak+1) )
-				if ((is_lp_host_atom(self,self.G.node[ak]['name'])==True)):
+				if ((is_lp_host_atom(self,self.G.nodes[ak]['name'])==True)):
 					l = find_vsite(self, ak)
 					f.write("%5d %5d	 1\n" % (l+1,ai+1) )
 			# third neighbors: 1-4
 			for i,j in pairs14.edges():
-				if ((is_lp_host_atom(self,self.G.node[i]['name'])==True)):
+				if ((is_lp_host_atom(self,self.G.nodes[i]['name'])==True)):
 					k = find_vsite(self, i)
 					f.write("%5d %5d	 1\n" % (k+1,j+1) )
-				if ((is_lp_host_atom(self,self.G.node[j]['name'])==True)):
+				if ((is_lp_host_atom(self,self.G.nodes[j]['name'])==True)):
 					k = find_vsite(self, j)
 					f.write("%5d %5d	 1\n" % (k+1,i+1) )
 			f.write("\n")
@@ -914,20 +914,20 @@ class atomgroup:
 					## end of the coordinate section. Here, check the atom to see if it is
 					## the first constructing atom, and if so, we put in a dummy LP entry.
 					atomi = int(entry[0])-1
-					self.G.node[atomi]['x'] = float(entry[2])
-					self.G.node[atomi]['y'] = float(entry[3])
-					self.G.node[atomi]['z'] = float(entry[4])
+					self.G.nodes[atomi]['x'] = float(entry[2])
+					self.G.nodes[atomi]['y'] = float(entry[3])
+					self.G.nodes[atomi]['z'] = float(entry[4])
 					self.coord[atomi][0] = float(entry[2])
 					self.coord[atomi][1] = float(entry[3])
 					self.coord[atomi][2] = float(entry[4])
 					## jal - if we have an atom that is the host for a LP, insert
 					## the LP into the list
-					if (is_lp_host_atom(self,self.G.node[atomi]['name'])):
+					if (is_lp_host_atom(self,self.G.nodes[atomi]['name'])):
 						atomj = find_vsite(self, atomi)
 						# insert dummy entry for LP
-						self.G.node[atomj]['x'] = float(9999.99)
-						self.G.node[atomj]['y'] = float(9999.99)
-						self.G.node[atomj]['z'] = float(9999.99)
+						self.G.nodes[atomj]['x'] = float(9999.99)
+						self.G.nodes[atomj]['y'] = float(9999.99)
+						self.G.nodes[atomj]['z'] = float(9999.99)
 						self.coord[atomj][0] = float(9999.99)
 						self.coord[atomj][1] = float(9999.99)
 						self.coord[atomj][2] = float(9999.99)
@@ -941,31 +941,31 @@ class atomgroup:
 #-----------------------------------------------------------------------
 	def write_pdb(self,f):
 		for atomi in range(0,self.natoms):
-			if(len(self.G.node[atomi]['name']) > 4):
+			if(len(self.G.nodes[atomi]['name']) > 4):
 				print("error in atomgroup.write_pdb(): atom name > 4 characters")
 				exit()
 			## jal - construct LP sites
-			if (is_lp(self.G.node[atomi]['name'])):
+			if (is_lp(self.G.nodes[atomi]['name'])):
 				# DEBUG
-				# print "Found LP in write_pdb: %s\n" % self.G.node[atomi]['name']
+				# print "Found LP in write_pdb: %s\n" % self.G.nodes[atomi]['name']
 				# find constructing atoms, get their coordinates and construction distance*10
 				atn1 = "dum"
 				atn2 = "dum"
 				dist = 0
 				# loop over vsites
 				for ai in range (0,self.nvsites):
-					if (self.G.node[ai]['vsite'] == self.G.node[atomi]['name']):
-						atn1 = self.G.node[ai]['at1']	 # atom name
-						atn2 = self.G.node[ai]['at2']	 # atom name
-						dist = self.G.node[ai]['dist']*10 # Angstrom for PDB, was saved as *0.1 for GMX
+					if (self.G.nodes[ai]['vsite'] == self.G.nodes[atomi]['name']):
+						atn1 = self.G.nodes[ai]['at1']	 # atom name
+						atn2 = self.G.nodes[ai]['at2']	 # atom name
+						dist = self.G.nodes[ai]['dist']*10 # Angstrom for PDB, was saved as *0.1 for GMX
 
 				# get atom indices
 				at1 = 0
 				at2 = 0
 				for ai in range (0, self.natoms):
-					if (self.G.node[ai]['name'] == atn1):
+					if (self.G.nodes[ai]['name'] == atn1):
 						at1 = ai
-					if (self.G.node[ai]['name'] == atn2):
+					if (self.G.nodes[ai]['name'] == atn2):
 						at2 = ai
 
 				# in case of failure
@@ -989,8 +989,8 @@ class atomgroup:
 				self.coord[atomi][1] = ylp
 				self.coord[atomi][2] = zlp
 			f.write("%-6s%5d %-4s %-4s%5s%12.3f%8.3f%8.3f%6.2f%6.2f\n" %
-				("ATOM",atomi+1,self.G.node[atomi]['name'],self.name,self.G.node[atomi]['resid'],self.coord[atomi][0],
-				self.coord[atomi][1],self.coord[atomi][2],1.0,self.G.node[atomi]['beta']))
+				("ATOM",atomi+1,self.G.nodes[atomi]['name'],self.name,self.G.nodes[atomi]['resid'],self.coord[atomi][0],
+				self.coord[atomi][1],self.coord[atomi][2],1.0,self.G.nodes[atomi]['beta']))
 		f.write("END\n")
 
 #=================================================================================================================
