@@ -19,6 +19,35 @@ def _mol2(name="LIG", atom_line="      1 C1 1.0 2.0 3.0 C.3 1 LIG 0.0"):
     )
 
 
+def test_pdb_to_mol2_pins_the_molecule_title_to_lig(tmp_path, monkeypatch):
+    """Open Babel's MOL2 title must be 'LIG', not the source temp file path.
+
+    Without --title, Open Babel falls back to the input file's path as the
+    MOLECULE name. CGenFF Web uses that title as the RESI name in the
+    returned .str, so an unset title produces a RESI like the truncated
+    temp path (e.g. '/tmp/cla') instead of 'LIG', which then cannot match
+    the 'LIG' residue name written into the complex PDB.
+    """
+    protein = tmp_path / "protein.pdb"
+    protein.write_text(_pdb())
+    builder = ComplexBuilder(protein, tmp_path / "complex.pdb")
+
+    captured = {}
+
+    def fake_run(command, **kwargs):
+        captured["command"] = command
+        class Result:
+            returncode = 0
+        return Result()
+
+    monkeypatch.setattr("mstbx.core.Docking.ComplexBuilder.subprocess.run", fake_run)
+    builder.pdb_to_mol2(tmp_path / "ligand.pdb", tmp_path / "ligand.mol2", 7.4)
+
+    command = captured["command"]
+    assert "--title" in command
+    assert command[command.index("--title") + 1] == "LIG"
+
+
 def test_extract_pose1_isolates_the_first_docking_model(tmp_path):
     """The PDBQT parser extracts only MODEL 1, not a later docking pose."""
     source = tmp_path / "poses.pdbqt"

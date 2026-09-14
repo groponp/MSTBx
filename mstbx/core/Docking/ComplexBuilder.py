@@ -55,10 +55,20 @@ class ComplexBuilder:
             raise RuntimeError("Open Babel could not convert the PDBQT pose.")
 
     def pdb_to_mol2(self, source: Path, destination: Path, ph: float) -> None:
-        """Convert a normalized ligand PDB to MOL2 with Gasteiger charges."""
+        """Convert a normalized ligand PDB to MOL2 with Gasteiger charges.
+
+        `--title LIG` pins the MOL2 MOLECULE name to `LIG`. Without it, Open
+        Babel falls back to the source file's path as the title (the ligand
+        PDB lives in a temp working directory, so the title becomes a
+        throwaway path like `/tmp/.../ligand_LIG.pdb`). CGenFF Web uses that
+        MOLECULE title as the RESI name in the returned .str file, so an
+        unset title produces a RESI like `/tmp/cla` (truncated path) instead
+        of `LIG`, which then cannot match the `LIG` residue name written into
+        the complex PDB, breaking `topogmx`/CHARMM-GUI parameter assignment.
+        """
         command = [
             "obabel", "-ipdb", str(source), "-omol2", "-O", str(destination),
-            "--partialcharge", "gasteiger", "-p", str(ph), "-d",
+            "--partialcharge", "gasteiger", "-p", str(ph), "-d", "--title", "LIG",
         ]
         if not self.run_cmd(command):
             raise RuntimeError("Open Babel could not generate the ligand MOL2.")
