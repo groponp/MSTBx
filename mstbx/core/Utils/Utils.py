@@ -76,8 +76,8 @@ class MSTBxLogger:
 
 class UnixMessage:
     """Legacy class updated to use the new Logger system."""
-    def __init__(self):
-        self.logger = MSTBxLogger.setup_logger()
+    def __init__(self, log_file=None):
+        self.logger = MSTBxLogger.setup_logger(log_file=log_file)
 
     def message(self, message, type="info"):
         levels = {

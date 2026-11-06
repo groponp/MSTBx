@@ -20,6 +20,7 @@ COMMANDS = [
     "md-translate",
     "resetpsf",
     "openmm-run",
+    "psfbuilder",
 ]
 
 

@@ -32,7 +32,7 @@ def test_every_registered_command_exposes_help():
     expected = {
         "topopsfgen", "topogmx", "topotleap", "md-inputs", "smd-inputs",
         "metad-inputs", "pdbwriter", "colabfold", "mkdocking-cmplx",
-        "md-translate", "resetpsf", "openmm-run",
+        "md-translate", "resetpsf", "openmm-run", "psfbuilder",
     }
     assert set(cli.commands) == expected
     runner = CliRunner()
