@@ -7,6 +7,7 @@ from mstbx.commands import (
     mkdocking_cmplx,
     openmm_run,
     pdbwriter,
+    psfbuilder,
     resetpsf,
     smd_inputs,
     topogmx,
@@ -33,6 +34,7 @@ cli.add_command(colabfold.colabfold, name="colabfold")
 cli.add_command(mkdocking_cmplx.mkdocking_cmplx, name="mkdocking-cmplx")
 cli.add_command(md_translate.md_translate, name="md-translate")
 cli.add_command(resetpsf.resetpsf, name="resetpsf")
+cli.add_command(psfbuilder.psfbuilder, name="psfbuilder")
 cli.add_command(openmm_run.openmm_run, name="openmm-run")
 
 

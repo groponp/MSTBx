@@ -136,7 +136,7 @@ def _validate_flag_combinations(ctx, prepare_cgenff_inputs, ph, ff_out, fix_stru
     # needs runnable examples, not a restatement of the validation rules or
     # the selection syntax (that belongs in the tutorials/reference docs).
     cls=grouped_command(PDBWRITER_OPTION_GROUPS),
-    help="Advanced PDB preparation (Fix, Protonate, Edit, SSBOND) and CRD generation.",
+    
     epilog="""Examples:
 
 \b
